@@ -5,7 +5,7 @@
     <title>Packlisten Generator</title>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
     <style>
-        /* --- GRUND-LAYOUT (Bildschirm) --- */
+        /* --- GRUND-LAYOUT --- */
         body { background-color: #525659; font-family: Arial, Helvetica, sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
 
         /* --- BEDIENFELD (Cockpit) --- */
@@ -16,20 +16,25 @@
         }
         .form-section { background: white; padding: 15px; border-radius: 6px; border: 1px solid #ddd; }
         .form-section h3 { margin-top: 0; margin-bottom: 15px; color: #333; font-size: 14px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        
         .box-main { border-left: 5px solid #0066cc; background-color: #f4f9ff; }
         .box-inner { border-left: 5px solid #28a745; background-color: #f4fff7; }
+        .box-logger { border-left: 5px solid #cc0000; background-color: #fff4f4; }
+        
         .input-row { display: flex; gap: 15px; align-items: flex-start; flex-wrap: wrap; margin-bottom: 10px; }
         .input-group { display: flex; flex-direction: column; gap: 4px; }
         .control-panel label { font-size: 11px; font-weight: bold; color: #555; }
         .control-panel input, .control-panel textarea { padding: 6px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; font-family: Arial, sans-serif; }
-        .btn-main { background: #0066cc; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: auto;}
-        .btn-inner { background: #28a745; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: auto;}
+        
+        .btn-main { background: #0066cc; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: auto;}
+        .btn-inner { background: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: auto;}
+        .btn-logger { background: #cc0000; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: auto;}
         .btn-pdf { background: #333; color: white; border: none; padding: 15px; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
 
-        /* --- DAS A4 BLATT (Pixelperfekt nach Screenshot) --- */
+        /* --- DAS A4 BLATT (Pixelperfekt) --- */
         .a4-page {
             background-color: white; width: 297mm; min-height: 210mm; 
-            padding: 15mm 15mm 25mm 15mm; 
+            padding: 12mm 15mm 25mm 15mm; /* 15mm Seitenrand links und rechts */
             box-sizing: border-box; box-shadow: 0 5px 15px rgba(0,0,0,0.5); position: relative; color: #000;
         }
 
@@ -54,54 +59,54 @@
         .datum { margin-bottom: 4mm; font-weight: bold; font-size: 8.5pt;}
         .section-title { font-size: 8.5pt; margin-bottom: 1mm; }
         
-        .data-table { width: 100%; border-collapse: collapse; margin-bottom: 6mm; font-size: 7.5pt; table-layout: fixed; }
-        .data-table th, .data-table td { border: 1px solid #000; padding: 3px 4px; text-align: left; vertical-align: top; line-height: 1.2; word-wrap: break-word; overflow-wrap: break-word; }
+        /* HIER IST DER FIX FÜR DAS ÜBERLAUFEN: Exakt 263mm breit! */
+        .data-table { width: 263mm; border-collapse: collapse; margin-bottom: 6mm; font-size: 8pt; table-layout: fixed; box-sizing: border-box; }
+        .data-table th, .data-table td { border: 1px solid #000; padding: 3px 4px; text-align: left; vertical-align: top; line-height: 1.2; overflow-wrap: break-word; word-wrap: break-word; box-sizing: border-box; }
         .data-table th { font-weight: bold; }
 
-        /* EXAKTE SPALTENBREITEN LAUT DEINEM NEUEN LINEAL-PDF */
-        .col-det-1 { width: 35.25mm; }
-        .col-det-2 { width: 32.18mm; }
-        .col-det-3 { width: 31.94mm; }
-        .col-det-4 { width: 34.00mm; }
-        .col-det-5 { width: 26.33mm; }
-        .col-det-6 { width: 31.70mm; }
-        .col-det-7 { width: 35.73mm; }
-        .col-det-8 { width: 21.53mm; }
-        .col-det-9 { width: 17.82mm; }
+        /* DEINE EXAKTEN SPALTENBREITEN IN MILLIMETERN (1cm = 10mm) */
+        .col-1 { width: 35mm; }
+        .col-2 { width: 32mm; }
+        .col-3 { width: 32mm; }
+        .col-4 { width: 35mm; }
+        .col-5 { width: 26mm; }
+        .col-6 { width: 32mm; }
+        .col-7 { width: 35mm; }
+        .col-8 { width: 22mm; }
+        .col-9 { width: 14mm; }
 
-        /* --- DAS NEUE DESIGN FÜR UNTERVERPACKUNGEN (Keine vertikalen Linien!) --- */
-        /* Die oberste Zeile der Unterverpackung (Karton) */
-        .inner-row-top td {
+        /* --- DAS NEUE DESIGN FÜR UNTERVERPACKUNGEN (KEINE VERTIKALEN LINIEN!) --- */
+        .sub-header th { background-color: #f9f9f9; border-top: 2px solid #000; font-size: 7.5pt; }
+        
+        /* Zeile 1 der Unterverpackung */
+        .inner-row-1 td {
             border-top: 1px solid #000;
             border-bottom: none;
-            border-left: none; /* Entfernt die Linien zwischen den Spalten! */
+            border-left: none;  /* Entfernt die Gitterlinien innen! */
             border-right: none;
         }
-        /* Die äußeren Ränder müssen bleiben, damit die Tabelle geschlossen aussieht */
-        .inner-row-top td:first-child { border-left: 1px solid #000; }
-        .inner-row-top td:last-child { border-right: 1px solid #000; }
+        .inner-row-1 td:first-child { border-left: 1px solid #000; } /* Außerkante links */
+        .inner-row-1 td:last-child { border-right: 1px solid #000; }  /* Außerkante rechts */
 
-        /* Die Inhaltszeile der Unterverpackung (Wirkstoff etc.) */
-        .inner-row-content td {
+        /* Zeile 2 der Unterverpackung (Der große Textblock) */
+        .inner-row-2 td {
             border-top: none;
-            border-bottom: 1px solid #000; /* Strich unten als Abschluss */
+            border-bottom: 1px solid #000;
             border-left: none;
             border-right: none;
             padding-bottom: 10px;
         }
-        .inner-row-content td:first-child { border-left: 1px solid #000; }
-        .inner-row-content td:last-child { border-right: 1px solid #000; }
-
-        .flex-content { display: flex; justify-content: space-between; align-items: flex-start; }
+        .inner-row-2 td:first-child { border-left: 1px solid #000; }
+        .inner-row-2 td:last-child { border-right: 1px solid #000; }
 
         /* --- FUSSZEILE --- */
-        .footer-fixed { position: absolute; bottom: 15mm; left: 20mm; right: 15mm; display: flex; justify-content: space-between; font-size: 8pt; line-height: 1.3; }
+        .footer-fixed { position: absolute; bottom: 15mm; left: 15mm; right: 15mm; display: flex; justify-content: space-between; font-size: 8pt; line-height: 1.3; }
 
         /* --- DRUCK-EINSTELLUNGEN --- */
         @media print {
             body { background-color: white; padding: 0; }
             .control-panel { display: none !important; } 
-            .a4-page { box-shadow: none; width: 297mm; border: none; padding: 15mm 15mm 25mm 15mm; }
+            .a4-page { box-shadow: none; width: 297mm; border: none; padding: 12mm 15mm 25mm 15mm; }
             @page { size: A4 landscape; margin: 0; }
         }
     </style>
@@ -143,17 +148,13 @@
 
         <div class="form-section box-main">
             <h3 style="color: #0066cc;">📦 2a. NEUE HAUPTVERPACKUNG ANLEGEN</h3>
+            <p style="font-size: 11px; margin-top: -10px; color: #666;">Inhalt ("Inner-Packages") wird automatisch generiert, sobald Unterverpackungen angelegt werden.</p>
             <div class="input-row">
-                <div class="input-group"><label>Package ID (SSCC):</label><input type="text" id="main-id" placeholder="37640135..." style="width: 140px;"></div>
-                <div class="input-group"><label>Typ:</label><input type="text" id="main-typ" value="Cold chain container" style="width: 120px;"></div>
-                <div class="input-group"><label>Dimensionen:</label><input type="text" id="main-dim" value="120x100x140 cm" style="width: 100px;"></div>
-                <div class="input-group"><label>Temperatur:</label><input type="text" id="main-temp" value="store between +2°C and +8°C" style="width: 160px;"></div>
+                <div class="input-group"><label>Package ID (SSCC):</label><input type="text" id="main-id" placeholder="37640135..." style="width: 150px;"></div>
+                <div class="input-group"><label>Typ:</label><input type="text" id="main-typ" value="Cold chain container" style="width: 140px;"></div>
+                <div class="input-group"><label>Dimensionen:</label><input type="text" id="main-dim" value="120x100x140 cm" style="width: 110px;"></div>
+                <div class="input-group"><label>Temperatur:</label><input type="text" id="main-temp" value="store between +2°C and +8°C" style="width: 180px;"></div>
                 
-                <div class="input-group">
-                    <label style="color:#cc0000;">Temp. Gerät (S/N & Info):</label>
-                    <textarea id="main-log" placeholder="1. 72071008363&#10;mid. of box bottom..." rows="2" style="font-size: 11px; width: 140px;"></textarea>
-                </div>
-
                 <div class="input-group"><label>Net weight:</label><input type="text" id="main-net" placeholder="24.264" style="width: 60px;"></div>
                 <div class="input-group"><label>Gross weight:</label><input type="text" id="main-gross" placeholder="281.290" style="width: 60px;"></div>
                 <button class="btn-main" onclick="addMain()">+ Hauptverpackung speichern</button>
@@ -161,32 +162,44 @@
         </div>
 
         <div class="form-section box-inner">
-            <h3 style="color: #28a745;">↳ 2b. UNTERVERPACKUNG (Karton) ZUR AKTUELLEN HAUPTVERPACKUNG HINZUFÜGEN</h3>
+            <h3 style="color: #28a745;">↳ 2b. UNTERVERPACKUNG (Karton) ZUR LETZTEN HAUPTVERPACKUNG HINZUFÜGEN</h3>
             <div class="input-row" style="align-items: stretch;">
-                <div style="display: flex; flex-direction: column; gap: 10px; width: 150px;">
+                <div style="display: flex; flex-direction: column; gap: 10px; width: 160px;">
                     <div class="input-group"><label>Inner-Package ID:</label><input type="text" id="inner-id" placeholder="2123456..."></div>
                     <div class="input-group"><label>Typ:</label><input type="text" id="inner-typ" value="Karton"></div>
                     <div class="input-group"><label>Dimensionen:</label><input type="text" id="inner-dim" value="0x0x0 cm"></div>
                 </div>
 
-                <div style="display: flex; flex-direction: column; gap: 10px; width: 280px;">
+                <div style="display: flex; flex-direction: column; gap: 10px; width: 300px;">
                     <div class="input-group" style="height: 100%;">
                         <label>Wareninhalt / Details (Mehrzeilig):</label>
                         <textarea id="inner-inhalt" placeholder="Medicament&#10;39032335&#10;1 autoinjector CT-388..." style="height: 100%; min-height: 90px; font-family: monospace;"></textarea>
                     </div>
                 </div>
 
-                <div style="display: flex; flex-direction: column; gap: 10px; width: 120px; justify-content: flex-end;">
+                <div style="display: flex; flex-direction: column; gap: 10px; width: 130px; justify-content: flex-end;">
                     <div class="input-group"><label>Dangerous goods:</label><input type="text" id="inner-gefahr" value="-"></div>
                     <div class="input-group"><label>HS-Code:</label><input type="text" id="inner-hs" value="3004.39"></div>
                     <div class="input-group"><label>Menge (Quantity):</label><input type="text" id="inner-qty" placeholder="60.00 ea"></div>
                 </div>
                 
-                <div style="display: flex; flex-direction: column; gap: 10px; width: 120px; justify-content: flex-end;">
+                <div style="display: flex; flex-direction: column; gap: 10px; width: 130px; justify-content: flex-end;">
                     <div class="input-group"><label>Net weight:</label><input type="text" id="inner-net" placeholder="4.044"></div>
                     <div class="input-group"><label>Gross weight:</label><input type="text" id="inner-gross" placeholder="4.875"></div>
                     <button class="btn-inner" onclick="addInner()">+ Karton hinzufügen</button>
                 </div>
+            </div>
+        </div>
+
+        <div class="form-section box-logger">
+            <h3 style="color: #cc0000;">🌡️ 3. TEMPERATUR-LOGGER HINZUFÜGEN</h3>
+            <p style="font-size: 11px; margin-top: -10px; color: #666;">Wird in die kleine Tabelle ganz unten UND in die "Temperature monitoring"-Spalte der Hauptverpackung eingetragen.</p>
+            <div class="input-row">
+                <div class="input-group"><label>Gehört zu Package ID:</label><input type="text" id="log-pid" placeholder="37640135..." style="width: 150px;"></div>
+                <div class="input-group"><label>Laufende Nr.:</label><input type="text" id="log-nr" value="1." style="width: 60px;"></div>
+                <div class="input-group"><label>Device S/N:</label><input type="text" id="log-sn" placeholder="72071008363" style="width: 130px;"></div>
+                <div class="input-group"><label>Zusatz-Info (Optional):</label><input type="text" id="log-info" placeholder="mid. of box bottom..." style="width: 180px;"></div>
+                <button class="btn-logger" onclick="addLogger()">+ Logger speichern</button>
             </div>
         </div>
 
@@ -233,7 +246,7 @@
         <table class="data-table" style="margin-bottom: 8mm;">
             <thead>
                 <tr>
-                    <th style="width: 22%">Shipping marks</th><th style="width: 22%">UCR No. (GSIN)</th><th style="width: 10%">Total no. of<br>packages</th>
+                    <th style="width: 20%">Shipping marks</th><th style="width: 24%">UCR No. (GSIN)</th><th style="width: 10%">Total no. of<br>packages</th>
                     <th style="width: 12%">Total gross weight</th><th style="width: 12%">Total net weight</th><th style="width: 10%">Total volume</th>
                     <th style="width: 12%">Total no. of temperature<br>monitoring devices *</th>
                 </tr>
@@ -246,7 +259,7 @@
                     <td id="out-total-gross">0.000 kg</td>
                     <td id="out-total-net">0.000 kg</td>
                     <td id="out-total-vol">0.00 m3</td>
-                    <td>2</td>
+                    <td id="out-total-logger">0</td> 
                 </tr>
             </tbody>
         </table>
@@ -255,19 +268,37 @@
         <table class="data-table" id="details-table">
             <thead>
                 <tr>
-                    <th class="col-det-1">Package ID (SSCC)</th>
-                    <th class="col-det-2">Packing type</th>
-                    <th class="col-det-3">Dimensions<br>(LxHxW cm)</th>
-                    <th class="col-det-4">Content</th>
-                    <th class="col-det-5">Temperature<br>conditions</th>
-                    <th class="col-det-6">Temperature<br>monitoring devices *</th>
-                    <th class="col-det-7">Dangerous<br>goods</th>
-                    <th class="col-det-8">Net weight</th>
-                    <th class="col-det-9">Gross weight</th>
+                    <th class="col-1">Package ID (SSCC)</th>
+                    <th class="col-2">Packing type</th>
+                    <th class="col-3">Dimensions<br>(LxHxW cm)</th>
+                    <th class="col-4">Content</th>
+                    <th class="col-5">Temperature<br>conditions</th>
+                    <th class="col-6">Temperature<br>monitoring devices *</th>
+                    <th class="col-7">Dangerous<br>goods</th>
+                    <th class="col-8">Net weight</th>
+                    <th class="col-9">Gross weight</th>
                 </tr>
             </thead>
             <tbody id="details-body">
                 </tbody>
+        </table>
+
+        <div style="font-size: 7.5pt; margin-bottom: 1mm; margin-top: 10mm;">* Details to Temperature Monitoring devices:</div>
+        <table class="data-table" style="width: 160mm; margin-bottom: 4mm;">
+            <thead>
+                <tr>
+                    <th style="width: 40mm;">Package ID</th><th style="width: 30mm;">Device S/N</th><th style="width: 25mm;">Type</th>
+                    <th style="width: 35mm;">Manufacturer</th><th style="width: 10mm;">Origin</th><th style="width: 15mm;">HS-Code</th>
+                    <th colspan="2" style="width: 15mm;">Value</th>
+                </tr>
+            </thead>
+            <tbody id="logger-body"></tbody>
+        </table>
+
+        <div style="font-size: 7.5pt; margin-bottom: 1mm;">* Details to Document References</div>
+        <table class="data-table" style="width: 70mm; margin-bottom: 4mm;">
+            <thead><tr><th>E2E Order</th><th>Clara Document</th></tr></thead>
+            <tbody><tr><td id="out-e2e">...</td><td id="out-clara">...</td></tr></tbody>
         </table>
 
         <div class="footer-fixed">
@@ -281,12 +312,15 @@
 
     <script>
         let mainPackages = [];
+        let loggerData = [];
 
         function updateLive() {
             const fracht = document.getElementById("in-fracht").value;
             document.getElementById("out-fracht").innerText = fracht;
             document.getElementById("out-fracht-table").innerText = fracht;
             document.getElementById("out-datum").innerText = document.getElementById("in-datum").value;
+            document.getElementById("out-e2e").innerText = document.getElementById("in-e2e").value;
+            document.getElementById("out-clara").innerText = document.getElementById("in-clara").value;
             
             ["inv-adresse", "inv-kontakt", "inv-tel", "inv-mail", "cons-adresse", "cons-kontakt", "cons-tel", "cons-mail"].forEach(id => {
                 document.getElementById(`out-${id}`).innerText = document.getElementById(`in-${id}`).value;
@@ -325,24 +359,37 @@
                 if(main.inners.length > 0) {
                     contentString = `${main.inners.length} Inner-Packages<br>` + main.inners.map(inner => inner.id).join('<br>');
                 }
-                let loggerFormat = main.logInfo.replace(/\n/g, "<br>");
+
+                // Sucht alle Logger, die zu dieser Hauptverpackung gehören
+                let matchedLoggers = loggerData.filter(log => log.pid === main.id);
+                let loggerString = matchedLoggers.map(log => `<b>${log.nr} ${log.sn}</b><br><span style="font-size:6.5pt">${log.info}</span>`).join('<br>');
 
                 tbody.innerHTML += `
                     <tr>
-                        <td class="col-det-1">${main.id}</td>
-                        <td class="col-det-2">${main.typ}</td>
-                        <td class="col-det-3">${main.dim}</td>
-                        <td class="col-det-4">${contentString}</td>
-                        <td class="col-det-5">${main.temp}</td>
-                        <td class="col-det-6">${loggerFormat}</td>
-                        <td class="col-det-7">-</td>
-                        <td class="col-det-8">${main.net}</td>
-                        <td class="col-det-9">${main.gross}</td>
+                        <td class="col-1">${main.id}</td>
+                        <td class="col-2">${main.typ}</td>
+                        <td class="col-3">${main.dim}</td>
+                        <td class="col-4">${contentString}</td>
+                        <td class="col-5">${main.temp}</td>
+                        <td class="col-6">${loggerString}</td>
+                        <td class="col-7"></td>
+                        <td class="col-8">${main.net}</td>
+                        <td class="col-9">${main.gross}</td>
                     </tr>
                 `;
 
-                // --- 2. UNTERVERPACKUNGEN (ohne vertikale Linien!) ---
+                // --- 2. UNTERVERPACKUNGEN (KARTONS) ---
                 if(main.inners.length > 0) {
+                    
+                    // Einmaliger grauer Header für die Inner-Packages
+                    tbody.innerHTML += `
+                        <tr class="sub-header">
+                            <th>Inner-Package ID</th><th>Packing type</th><th>Dimensions<br>(LxHxW cm)</th>
+                            <th>Content</th><th>Temperature<br>conditions</th><th>Temperature<br>monitoring devices</th>
+                            <th>Dangerous<br>goods</th><th>Net weight</th><th>Gross weight</th>
+                        </tr>
+                    `;
+
                     main.inners.forEach(inner => {
                         let inhaltArray = inner.inhalt.split('\n');
                         let inhaltErsteZeile = inhaltArray[0] || "";
@@ -350,9 +397,9 @@
                         inhaltRest.shift(); 
                         let formatierterInhaltRest = inhaltRest.join('<br>');
 
-                        // Zeile 1 der Unterverpackung (Karton etc.)
+                        // Zeile 1 der Unterverpackung (Hier fehlen die vertikalen Linien im CSS!)
                         tbody.innerHTML += `
-                            <tr class="inner-row-top">
+                            <tr class="inner-row-1">
                                 <td>${inner.id}</td><td>${inner.typ}</td><td>${inner.dim}</td>
                                 <td>${inhaltErsteZeile}</td>
                                 <td>${main.temp}</td><td>-</td><td>${inner.gefahr}</td>
@@ -360,25 +407,23 @@
                             </tr>
                         `;
                         
-                        // Zeile 2 der Unterverpackung (Details ohne Gitter!)
+                        // Zeile 2 der Unterverpackung (Der große Textblock ohne Linien!)
                         tbody.innerHTML += `
-                            <tr class="inner-row-content">
-                                <td colspan="9">
-                                    <div class="flex-content">
-                                        <div style="width: 40%; margin-left: 2px;">
+                            <tr class="inner-row-2">
+                                <td colspan="7">
+                                    <div style="display: flex; justify-content: space-between;">
+                                        <div style="width: 50%;">
                                             ${formatierterInhaltRest}
                                         </div>
-                                        <div style="width: 30%;">
-                                            <table style="border:none; margin:0; font-size: 7.5pt; width: 100%;">
-                                                <tr><td style="border:none; padding:0; width:50%;">HS-Code:</td><td style="border:none; padding:0;">${inner.hsCode}</td></tr>
-                                                <tr><td style="border:none; padding:0;">Country of origin:</td><td style="border:none; padding:0;">IT</td></tr>
-                                                <tr><td style="border:none; padding:0;">Preferential origin:</td><td style="border:none; padding:0;">None</td></tr>
-                                            </table>
+                                        <div style="width: 45%;">
+                                            HS-Code: ${inner.hsCode}<br>
+                                            Country of origin: IT<br>
+                                            Preferential origin: None
                                         </div>
-                                        <div style="width: 15%;">Quantity<br>${inner.qty}</div>
-                                        <div style="width: 15%;">Net weight<br>${inner.net}</div>
                                     </div>
                                 </td>
+                                <td>Quantity<br>${inner.qty}</td>
+                                <td>Net weight<br>${inner.net}</td>
                             </tr>
                         `;
                     });
@@ -391,16 +436,16 @@
             document.getElementById("out-total-vol").innerText = sumVol.toFixed(2) + " m3";
         }
 
+        // FÜGT EINE HAUPTVERPACKUNG HINZU
         function addMain() {
             let id = document.getElementById("main-id").value;
-            if(id === "") { alert("Bitte eine Package ID für die Hauptverpackung eingeben!"); return; }
+            if(id === "") { alert("Bitte eine Package ID eingeben!"); return; }
 
             mainPackages.push({
                 id: id,
                 typ: document.getElementById("main-typ").value || "-",
                 dim: document.getElementById("main-dim").value || "-",
                 temp: document.getElementById("main-temp").value || "-",
-                logInfo: document.getElementById("main-log").value || "-",
                 net: formatWeight(document.getElementById("main-net").value || "0.000"),
                 gross: formatWeight(document.getElementById("main-gross").value || "0.000"),
                 inners: [] 
@@ -410,8 +455,9 @@
             document.getElementById("main-id").value = ""; 
         }
 
+        // FÜGT EINE UNTERVERPACKUNG HINZU
         function addInner() {
-            if(mainPackages.length === 0) { alert("Bitte erst eine Hauptverpackung anlegen!"); return; }
+            if(mainPackages.length === 0) { alert("Bitte erst eine Hauptverpackung (Box 2a) anlegen!"); return; }
             let id = document.getElementById("inner-id").value;
             if(id === "") { alert("Bitte eine Inner-Package ID eingeben!"); return; }
 
@@ -431,7 +477,34 @@
 
             renderTable();
             document.getElementById("inner-id").value = ""; 
-            document.getElementById("inner-inhalt").value = ""; 
+        }
+
+        // FÜGT EINEN LOGGER HINZU
+        function addLogger() {
+            let pid = document.getElementById("log-pid").value;
+            let sn = document.getElementById("log-sn").value;
+            if(pid === "" || sn === "") { alert("Bitte Package ID und Device S/N eingeben!"); return; }
+
+            loggerData.push({
+                pid: pid,
+                nr: document.getElementById("log-nr").value || "",
+                sn: sn,
+                info: document.getElementById("log-info").value || ""
+            });
+
+            // Tabelle unten aktualisieren
+            const tbody = document.getElementById("logger-body");
+            tbody.innerHTML = "";
+            loggerData.forEach(log => {
+                tbody.innerHTML += `<tr><td>${log.pid}</td><td>${log.sn}</td><td>Elpro Libero CB</td><td>Elpro Buchs AG, CH-Buchs</td><td>CH</td><td>9025.19</td><td style="border-right:none; width:10mm;">CHF</td><td style="border-left:none; text-align:right;">18.50</td></tr>`;
+            });
+            document.getElementById("out-total-logger").innerText = loggerData.length;
+
+            // Haupt-Tabelle neu zeichnen, damit der Logger auch in der Spalte "Temperature monitoring" auftaucht
+            renderTable();
+
+            document.getElementById("log-sn").value = "";
+            document.getElementById("log-info").value = "";
         }
 
         updateLive();
