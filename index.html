@@ -5,6 +5,7 @@
     <title>Packlisten Generator</title>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
     <style>
+        /* --- GRUND-LAYOUT (GRAUER HINTERGRUND) --- */
         body {
             background-color: #525659;
             font-family: Arial, Helvetica, sans-serif;
@@ -13,9 +14,10 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            font-size: 9pt; 
+            font-size: 8pt; 
         }
 
+        /* --- BEDIENFELD FÜR DEN MITARBEITER --- */
         .control-panel {
             background-color: white;
             padding: 15px 25px;
@@ -30,6 +32,7 @@
         }
         .control-panel input { padding: 8px; font-size: 16px; border: 1px solid #ccc; width: 200px; }
 
+        /* --- DAS A4 BLATT --- */
         .a4-page {
             background-color: white;
             width: 297mm;
@@ -41,45 +44,37 @@
         }
 
         /* --- KOPFZEILE --- */
-        .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12mm; }
-        
-        .title-block { width: 50%; } /* Etwas breiter gemacht */
-        .title-block h1 { 
-            font-size: 18pt; 
-            margin: 0 0 2mm 0; 
-            font-weight: normal; 
-            white-space: nowrap; /* Zwingt die Nummer in die gleiche Zeile! */
-        }
-        
-        .barcode-block { width: 30%; text-align: center; } /* Barcode in die Mitte gerückt */
-        
+        .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8mm; }
+        .title-block { width: 45%; }
+        .title-block h1 { font-size: 16pt; margin: 0 0 2mm 0; font-weight: normal; white-space: nowrap; }
+        .barcode-block { width: 35%; text-align: center; }
         .logo-block { width: 20%; text-align: right; color: #0066cc; font-size: 20pt; font-weight: bold; }
         .roche-hexagon { border: 1.5px solid #0066cc; display: inline-block; padding: 2px 15px; }
 
         /* --- ADRESSEN --- */
         .address-container { display: flex; justify-content: flex-start; gap: 70mm; margin-bottom: 2mm; line-height: 1.3; }
         .address-box { width: 75mm; }
-        .address-title { font-weight: bold; margin-bottom: 2mm; font-size: 10pt; }
+        .address-title { font-weight: bold; margin-bottom: 2mm; font-size: 9pt; }
         .address-grid { display: grid; grid-template-columns: 18mm auto; margin-top: 3mm; }
 
         /* --- TABELLEN-DESIGN --- */
-        .datum { margin-bottom: 4mm; }
-        .section-title { font-size: 10pt; margin-bottom: 1mm; }
+        .datum { margin-bottom: 4mm; font-weight: bold; }
+        .section-title { font-size: 9pt; margin-bottom: 1mm; }
         
         .data-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 6mm;
+            margin-bottom: 4mm;
         }
         .data-table th, .data-table td {
             border: 1px solid #000;
             padding: 3px 4px;
             text-align: left;
             vertical-align: top;
+            line-height: 1.2;
         }
         .data-table th { font-weight: bold; }
-
-        .no-border-inner td { border-top: none; border-bottom: none; }
+        .detail-row td { border-top: none; padding-top: 0; padding-bottom: 6px; }
 
         /* --- FUSSZEILE (Ganz unten fixiert) --- */
         .footer {
@@ -93,10 +88,11 @@
             line-height: 1.4;
         }
 
+        /* --- DRUCK-EINSTELLUNGEN --- */
         @media print {
             body { background-color: white; padding: 0; }
-            .control-panel { display: none; }
-            .a4-page { box-shadow: none; width: 100%; height: 100%; }
+            .control-panel { display: none; } /* Versteckt die Eingabe beim Drucken */
+            .a4-page { box-shadow: none; width: 297mm; height: 210mm; page-break-after: always; }
             @page { size: A4 landscape; margin: 0; }
         }
     </style>
@@ -104,15 +100,16 @@
 <body>
 
     <div class="control-panel">
-        <label style="font-size: 14pt;"><b>Eingabe Packlisten-Nummer:</b></label>
-        <input type="text" id="input-fracht" value="4100168224">
+        <label style="font-size: 14pt;"><b>Frachteinheit:</b></label>
+        <input type="text" id="input-fracht" value="4100167438">
     </div>
 
     <div class="a4-page">
+        
         <div class="header">
             <div class="title-block">
-                <h1>Packliste zu Frachteinheit <span id="text-fracht">4100168224</span></h1>
-                <span style="font-size: 10pt;">(Version 2.0)</span>
+                <h1>Packing List to Freight Unit <span id="text-fracht">4100167438</span></h1>
+                <span style="font-size: 9pt;">(Version 1.0)</span>
             </div>
             <div class="barcode-block">
                 <svg id="barcode"></svg>
@@ -124,80 +121,205 @@
 
         <div class="address-container">
             <div class="address-box">
-                <div class="address-title">Rechnungsempfänger</div>
-                Recipharm<br>Wasserburger Arzneimittelwerk GmbH<br>Herderstrasse 2<br>83512 Wasserburg<br>Deutschland
+                <div class="address-title">Invoice recipient</div>
+                DHL Supply Chain Singapore Pte Ltd<br>ARC Healthcare Hub<br>1 Greenwich Drive<br>Singapore 533865<br>Singapore
                 <div class="address-grid">
-                    <div>Kontakt:</div><div>Sabine Baumgartner</div>
-                    <div>Telefon:</div><div>+49080711008155</div>
-                    <div>E-Mail:</div><div>sabine.baumgartner@recipharm.com</div>
+                    <div>Contact:</div><div>Low Pike San</div>
+                    <div>Phone:</div><div>+656562263460</div>
+                    <div>E-Mail:</div><div>dscsg.roche@dhl.com</div>
                 </div>
             </div>
             <div class="address-box">
-                <div class="address-title">Empfänger</div>
-                Recipharm<br>Wasserburger Arzneimittelwerk GmbH<br>Herderstrasse 2<br>83512 Wasserburg<br>Deutschland
+                <div class="address-title">Consignee</div>
+                DHL Supply Chain Singapore Pte Ltd<br>ARC Healthcare Hub<br>1 Greenwich Drive<br>Advanced Regional Centre<br>Singapore 533865<br>Singapore
                 <div class="address-grid">
-                    <div>Kontakt:</div><div>Sabine Baumgartner</div>
-                    <div>Telefon:</div><div>+49080711008155</div>
-                    <div>E-Mail:</div><div>sabine.baumgartner@recipharm.com</div>
+                    <div>Contact:</div><div>Jacky Tang Kok Wai</div>
+                    <div>Phone:</div><div>+656591901106</div>
+                    <div>E-Mail:</div><div>edgsg-dgf-sin-airimportpharma@dhl.com</div>
                 </div>
             </div>
         </div>
 
-        <div class="datum">Datum: 02.03.2026</div>
+        <div class="datum">Date: 19.02.2026</div>
 
-        <div class="section-title">Total Packliste:</div>
+        <div class="section-title">Total packing-list:</div>
         <table class="data-table">
             <thead>
                 <tr>
-                    <th>Markierungen</th>
-                    <th>UCR Nr. (GSIN)</th>
-                    <th>Total Anzahl<br>Packstücke</th>
-                    <th>Total Bruttogewicht</th>
-                    <th>Total Nettogewicht</th>
-                    <th>Total Volumen</th>
-                    <th>Anzahl der Temperatur-<br>überwachungsgeräte*</th>
+                    <th>Shipping marks</th>
+                    <th>UCR No. (GSIN)</th>
+                    <th>Total no. of<br>packages</th>
+                    <th>Total gross weight</th>
+                    <th>Total net weight</th>
+                    <th>Total volume</th>
+                    <th>Total no. of temperature<br>monitoring devices *</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td>Addresse Warenempfänger,<br><span id="text-fracht-table">4100168224</span></td>
-                    <td>(402) 7640135 790168224 2</td>
-                    <td>1</td>
-                    <td>21.000 kg</td>
-                    <td>5.000 kg</td>
-                    <td>0.38 m3</td>
-                    <td>1</td>
+                    <td>Address of consignee,<br><span id="text-fracht-table">4100167438</span></td>
+                    <td>(402) 7640135 790167438 4</td>
+                    <td>2</td>
+                    <td>382.825 kg</td>
+                    <td>44.604 kg</td>
+                    <td>2.47 m3</td>
+                    <td>2</td>
                 </tr>
             </tbody>
         </table>
 
-        <div class="section-title">Details Packliste:</div>
+        <div class="section-title">Detail packing-list:</div>
         <table class="data-table">
             <thead>
                 <tr>
-                    <th style="width: 14%;">Packstück ID (SSCC)</th>
-                    <th style="width: 12%;">Packstück Typ</th>
-                    <th style="width: 11%;">Dimensionen<br>(L x B x H)</th>
-                    <th style="width: 15%;">Wareninhalt</th>
-                    <th style="width: 12%;">Temperatur-<br>bedingungen</th>
-                    <th style="width: 14%;">Temperaturüber-<br>wachungsgeräte *</th>
-                    <th style="width: 8%;">Gefahrgut</th>
-                    <th style="width: 7%;">Nettogewicht</th>
-                    <th style="width: 7%;">Bruttogewicht</th>
+                    <th style="width: 14%;">Package ID (SSCC)</th>
+                    <th style="width: 12%;">Packing type</th>
+                    <th style="width: 11%;">Dimensions<br>(LxHxW cm)</th>
+                    <th style="width: 15%;">Content</th>
+                    <th style="width: 12%;">Temperature<br>conditions</th>
+                    <th style="width: 14%;">Temperature<br>monitoring devices *</th>
+                    <th style="width: 8%;">Dangerous<br>goods</th>
+                    <th style="width: 7%;">Net weight</th>
+                    <th style="width: 7%;">Gross weight</th>
+                </tr>
+            </thead>
+            <tbody id="details-body">
+            </tbody>
+        </table>
+
+        <div style="font-size: 8pt; margin-bottom: 1mm;">* Details to Temperature Monitoring devices:</div>
+        <table class="data-table" style="width: 70%; margin-bottom: 4mm;">
+            <thead>
+                <tr>
+                    <th>Package ID</th>
+                    <th>Device S/N</th>
+                    <th>Type</th>
+                    <th>Manufacturer</th>
+                    <th>Origin</th>
+                    <th>HS-Code</th>
+                    <th colspan="2">Value</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td>376401357901141181</td>
-                    <td>Palette (PREP80)</td>
-                    <td>80x60x80 cm</td>
-                    <td>Organisch chemisches<br>Erzeugnis</td>
-                    <td>lagern zw. +2°C<br>und +8°C</td>
-                    <td>1. 72140335758<br><span style="font-size: 7pt;">on top of the product load_1</span></td>
-                    <td>-</td>
-                    <td>5.000 kg</td>
-                    <td>21.000 kg</td>
+                    <td>376401357901136095</td>
+                    <td>72071008363</td>
+                    <td>Elpro Libero CB</td>
+                    <td>Elpro Buchs AG, CH-Buchs</td>
+                    <td>CH</td>
+                    <td>9025.19</td>
+                    <td style="border-right: none; width: 20px;">CHF</td>
+                    <td style="border-left: none; text-align: right;">18.50</td>
                 </tr>
-                <tr>
-                    <td colspan="7">
-                        Organ
+            </tbody>
+        </table>
+
+        <div class="footer">
+            <div>
+                <b>F. Hoffmann-La Roche Ltd</b><br>
+                Site Logistics<br>
+                Grenzacherstrasse 124<br>
+                Bldg. 041/3.005<br>
+                4070 Basel / Switzerland
+            </div>
+            <div>
+                Tel. +41 61 688 72 27<br>
+                Fax. +41 61 688 69 02<br>
+                E-Mail: basel.site-logistics@roche.com
+            </div>
+            <div style="text-align: right; margin-top: auto;">
+                Page 1/5
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // 1. BARCODE AKTUALISIEREN
+        function generiereBarcode() {
+            var nummer = document.getElementById("input-fracht").value;
+            document.getElementById("text-fracht").innerText = nummer;
+            document.getElementById("text-fracht-table").innerText = nummer;
+            
+            JsBarcode("#barcode", nummer, {
+                format: "CODE128", lineColor: "#000", width: 1.5, height: 35, displayValue: false, margin: 0
+            });
+        }
+        document.getElementById("input-fracht").addEventListener("input", generiereBarcode);
+
+        // 2. DATENBANK FÜR DIE TABELLE (Dynamisch)
+        const packstuecke = [
+            { 
+                id: "376401357901136095", 
+                typ: "Cold chain container<br>(GET432)", 
+                dim: "120x100x140 cm", 
+                inhalt: "212345670069326679<br>212345670069326730<br>212345670069326778", 
+                temp: "store between +2°C and +8°C", 
+                device: "1. 72071008363<br><span style='font-size:6pt'>mid. of box bottom, on top of elements 1</span>", 
+                gefahr: "", 
+                net: "24.264 kg", 
+                gross: "281.290 kg",
+                details: null // Hauptpaket hat keine Details in der 2. Zeile
+            },
+            { 
+                id: "212345670069326679", 
+                typ: "Karton", 
+                dim: "0x0x0 cm", 
+                inhalt: "Medicament", 
+                temp: "store between +2°C and +8°C", 
+                device: "", 
+                gefahr: "", 
+                net: "4.044 kg", 
+                gross: "4.875 kg",
+                details: "<b>39032335</b><br>1 autoinjector CT-388 4mg/0.4ml<br>Mfg. Batch: B2000/01<br>Packaging Batch: WC45726_0001<br>Batch: 1189597<br>Packaging size: BOX WITH 1 AUTOINJECTOR<br>Roformis Number: 779-5068/F08-02<br>Retest date: Jun 30, 2026<br>Goods must be treated according to GDP regulations",
+                menge: "60.00 ea"
+            }
+        ];
+
+        // 3. TABELLE BAUEN
+        function baueTabelle() {
+            const tbody = document.getElementById("details-body");
+            tbody.innerHTML = "";
+
+            packstuecke.forEach(paket => {
+                // Haupt-Zeile
+                let rowHTML = `
+                    <tr>
+                        <td>${paket.id}</td>
+                        <td>${paket.typ}</td>
+                        <td>${paket.dim}</td>
+                        <td>${paket.inhalt}</td>
+                        <td>${paket.temp}</td>
+                        <td>${paket.device}</td>
+                        <td>${paket.gefahr}</td>
+                        <td>${paket.net}</td>
+                        <td>${paket.gross}</td>
+                    </tr>
+                `;
+                
+                // Wenn es ein Unterpaket mit Details ist (wie der Karton), hänge die Info-Zeile darunter
+                if (paket.details) {
+                    rowHTML += `
+                        <tr class="detail-row">
+                            <td colspan="7">
+                                <div style="margin-top: 5px;">${paket.details}</div>
+                                <div style="display: flex; gap: 30px; margin-top: 10px;">
+                                    <div>HS-Code:<br>Country of origin:<br>Preferential origin:</div>
+                                    <div>3004.39<br>IT<br>None</div>
+                                </div>
+                            </td>
+                            <td>Quantity<br>${paket.menge}</td>
+                            <td>Net weight<br>${paket.net}</td>
+                        </tr>
+                    `;
+                }
+                tbody.innerHTML += rowHTML;
+            });
+        }
+
+        // Führe beide Funktionen beim Laden der Seite direkt einmal aus
+        generiereBarcode();
+        baueTabelle();
+    </script>
+</body>
+</html>
