@@ -32,18 +32,16 @@
             border-top: 5px solid #0066cc;
         }
         
-        /* Design für die Formular-Boxen */
         .form-section { background: white; padding: 15px; border-radius: 6px; border: 1px solid #ddd; }
         .form-section h3 { margin-top: 0; margin-bottom: 10px; color: #333; font-size: 14px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
-        .input-row { display: flex; gap: 15px; align-items: flex-start; flex-wrap: wrap; margin-bottom: 10px; }
+        .input-row { display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 10px; }
         .input-group { display: flex; flex-direction: column; gap: 4px; }
         
         .control-panel label { font-size: 11px; font-weight: bold; color: #555; }
-        .control-panel input, .control-panel textarea { padding: 6px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; font-family: Arial, sans-serif; }
+        .control-panel input, .control-panel textarea, .control-panel select { padding: 6px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; font-family: Arial, sans-serif; }
         .control-panel textarea { resize: vertical; }
         
-        /* Buttons */
-        .btn-add { background: #0066cc; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: 18px; }
+        .btn-add { background: #0066cc; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 2px;}
         .btn-add:hover { background: #004c99; }
         .btn-pdf { background: #28a745; color: white; border: none; padding: 15px; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .btn-pdf:hover { background: #218838; }
@@ -99,7 +97,7 @@
         
         <div class="form-section">
             <h3>1. Basis-Daten & Adressen</h3>
-            <div class="input-row">
+            <div class="input-row" style="align-items: flex-start;">
                 <div class="input-group">
                     <label>Frachteinheit (Packlisten-Nr.):</label>
                     <input type="text" id="in-fracht" value="4100167438" oninput="updateLive()" style="width: 200px; font-weight: bold; font-size: 15px;">
@@ -110,11 +108,10 @@
                 </div>
             </div>
             
-            <div class="input-row" style="margin-top: 15px;">
+            <div class="input-row" style="margin-top: 15px; align-items: flex-start;">
                 <div class="input-group" style="width: 45%;">
                     <label>Rechnungsempfänger (Firma & Adresse):</label>
                     <textarea id="in-inv-adresse" rows="4" oninput="updateLive()">DHL Supply Chain Singapore Pte Ltd&#10;ARC Healthcare Hub&#10;1 Greenwich Drive&#10;Singapore 533865&#10;Singapore</textarea>
-                    
                     <div style="display: flex; gap: 10px; margin-top: 5px;">
                         <input type="text" id="in-inv-kontakt" value="Low Pike San" oninput="updateLive()" placeholder="Kontaktperson" style="width: 33%;">
                         <input type="text" id="in-inv-tel" value="+656562263460" oninput="updateLive()" placeholder="Telefon" style="width: 33%;">
@@ -125,7 +122,6 @@
                 <div class="input-group" style="width: 45%;">
                     <label>Empfänger (Firma & Adresse):</label>
                     <textarea id="in-cons-adresse" rows="4" oninput="updateLive()">DHL Supply Chain Singapore Pte Ltd&#10;ARC Healthcare Hub&#10;1 Greenwich Drive&#10;Advanced Regional Centre&#10;Singapore 533865&#10;Singapore</textarea>
-                    
                     <div style="display: flex; gap: 10px; margin-top: 5px;">
                         <input type="text" id="in-cons-kontakt" value="Jacky Tang Kok Wai" oninput="updateLive()" placeholder="Kontaktperson" style="width: 33%;">
                         <input type="text" id="in-cons-tel" value="+656591901106" oninput="updateLive()" placeholder="Telefon" style="width: 33%;">
@@ -138,14 +134,31 @@
         <div class="form-section">
             <h3>2. Packstücke zur Tabelle hinzufügen</h3>
             <div class="input-row">
-                <div class="input-group"><label>Package ID (SSCC)</label><input type="text" id="in-id" placeholder="z.B. 37640135..." style="width: 160px;"></div>
-                <div class="input-group"><label>Typ</label><input type="text" id="in-typ" placeholder="z.B. Karton" style="width: 100px;"></div>
-                <div class="input-group"><label>Dimensionen</label><input type="text" id="in-dim" value="0x0x0 cm" style="width: 90px;"></div>
-                <div class="input-group"><label>Inhalt</label><input type="text" id="in-inhalt" value="Medicament" style="width: 120px;"></div>
-                <div class="input-group"><label>Temperatur</label><input type="text" id="in-temp" value="store between +2°C and +8°C" style="width: 180px;"></div>
-                <div class="input-group"><label>Net weight</label><input type="text" id="in-net" placeholder="4.000 kg" style="width: 80px;"></div>
-                <div class="input-group"><label>Gross weight</label><input type="text" id="in-gross" placeholder="4.800 kg" style="width: 80px;"></div>
-                <button class="btn-add" onclick="paketHinzufuegen()">+ Paket einfügen</button>
+                <div class="input-group"><label>Package ID (SSCC)</label><input type="text" id="in-id" placeholder="z.B. 37640135..." style="width: 130px;"></div>
+                <div class="input-group"><label>Typ</label><input type="text" id="in-typ" value="Karton" style="width: 90px;"></div>
+                <div class="input-group"><label>Dimensionen</label><input type="text" id="in-dim" value="0x0x0 cm" style="width: 75px;"></div>
+                <div class="input-group"><label>Inhalt</label><input type="text" id="in-inhalt" value="Medicament" style="width: 90px;"></div>
+                <div class="input-group"><label>Temperatur</label><input type="text" id="in-temp" value="store between +2°C and +8°C" style="width: 170px;"></div>
+                
+                <div class="input-group">
+                    <label>Dangerous goods</label>
+                    <input type="text" id="in-gefahr" value="-" style="width: 90px;" title="Gib '-' ein oder z.B. eine UN-Nummer">
+                </div>
+                
+                <div class="input-group">
+                    <label>Net weight</label>
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <input type="text" id="in-net" placeholder="4.000" style="width: 55px;"> kg
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Gross weight</label>
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <input type="text" id="in-gross" placeholder="4.800" style="width: 55px;"> kg
+                    </div>
+                </div>
+                
+                <button class="btn-add" onclick="paketHinzufuegen()">+ Einfügen</button>
             </div>
         </div>
 
@@ -253,11 +266,9 @@
     </div>
 
     <script>
-        // DATENBANKEN
         let packstuecke = [];
         let loggerDaten = [];
 
-        // 1. LIVE-UPDATE FUNKTION (Überträgt alle Eingaben in Echtzeit auf das Blatt)
         function updateLive() {
             const fracht = document.getElementById("in-fracht").value;
             document.getElementById("out-fracht").innerText = fracht;
@@ -275,36 +286,53 @@
             document.getElementById("out-cons-tel").innerText = document.getElementById("in-cons-tel").value;
             document.getElementById("out-cons-mail").innerText = document.getElementById("in-cons-mail").value;
 
-            // Barcode zeichnen
             JsBarcode("#barcode", fracht, { format: "CODE128", lineColor: "#000", width: 1.5, height: 35, displayValue: false, margin: 0 });
         }
 
-        // 2. PAKETE TABELLE
         function bauePaketTabelle() {
             const tbody = document.getElementById("details-body");
             tbody.innerHTML = ""; 
             packstuecke.forEach(paket => {
-                tbody.innerHTML += `<tr><td>${paket.id}</td><td>${paket.typ}</td><td>${paket.dim}</td><td>${paket.inhalt}</td><td>${paket.temp}</td><td></td><td></td><td>${paket.net}</td><td>${paket.gross}</td></tr>`;
+                tbody.innerHTML += `<tr><td>${paket.id}</td><td>${paket.typ}</td><td>${paket.dim}</td><td>${paket.inhalt}</td><td>${paket.temp}</td><td></td><td>${paket.gefahr}</td><td>${paket.net}</td><td>${paket.gross}</td></tr>`;
             });
             document.getElementById("out-total-packages").innerText = packstuecke.length;
         }
 
         function paketHinzufuegen() {
             if(document.getElementById("in-id").value === "") { alert("Bitte eine Package ID eingeben!"); return; }
+            
+            // Holt die eingetippte Zahl (z.B. "4.000")
+            let netInput = document.getElementById("in-net").value.trim();
+            let grossInput = document.getElementById("in-gross").value.trim();
+            
+            // Wenn nichts eingegeben wurde, setze auf 0.000
+            if(netInput === "") netInput = "0.000";
+            if(grossInput === "") grossInput = "0.000";
+
+            // Fügt automatisch " kg" an, falls der Nutzer es nicht aus Versehen schon getippt hat
+            if(!netInput.toLowerCase().includes("kg")) netInput += " kg";
+            if(!grossInput.toLowerCase().includes("kg")) grossInput += " kg";
+
             packstuecke.push({
                 id: document.getElementById("in-id").value,
                 typ: document.getElementById("in-typ").value || "-",
                 dim: document.getElementById("in-dim").value || "-",
                 inhalt: document.getElementById("in-inhalt").value || "-",
                 temp: document.getElementById("in-temp").value || "-",
-                net: document.getElementById("in-net").value || "-",
-                gross: document.getElementById("in-gross").value || "-"
+                gefahr: document.getElementById("in-gefahr").value || "-", // NEU: Gefahrgut wird ausgelesen
+                net: netInput, // Das saubere, fertig formatierte Gewicht
+                gross: grossInput
             });
+            
             bauePaketTabelle();
-            document.getElementById("in-id").value = ""; // Feld leeren
+            
+            // Felder wieder für die nächste Eingabe leeren/zurücksetzen
+            document.getElementById("in-id").value = ""; 
+            document.getElementById("in-net").value = "";
+            document.getElementById("in-gross").value = "";
+            document.getElementById("in-gefahr").value = "-"; // Wieder auf das Minus setzen
         }
 
-        // 3. LOGGER TABELLE
         function baueLoggerTabelle() {
             const tbody = document.getElementById("logger-body");
             tbody.innerHTML = "";
@@ -321,10 +349,10 @@
                 sn: document.getElementById("in-log-sn").value
             });
             baueLoggerTabelle();
-            document.getElementById("in-log-sn").value = ""; // SN Feld leeren
+            document.getElementById("in-log-sn").value = ""; 
         }
 
-        // Start (Führt einmal alle Updates aus)
+        // Start
         updateLive();
         bauePaketTabelle();
         baueLoggerTabelle();
