@@ -13,7 +13,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            font-size: 9pt; /* Etwas kleiner für die Tabellen */
+            font-size: 9pt; 
         }
 
         .control-panel {
@@ -37,39 +37,61 @@
             padding: 15mm 15mm;
             box-sizing: border-box;
             box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            position: relative;
+            position: relative; /* Wichtig für die Fußzeile! */
         }
 
-        /* KOPFZEILE */
+        /* --- KOPFZEILE --- */
         .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12mm; }
-        .title-block { width: 40%; }
-        .title-block h1 { font-size: 18pt; margin: 0 0 2mm 0; font-weight: normal; }
-        .barcode-block { width: 40%; text-align: left; padding-left: 10mm; }
+        
+        .title-block { width: 50%; } /* Etwas breiter gemacht */
+        .title-block h1 { 
+            font-size: 18pt; 
+            margin: 0 0 2mm 0; 
+            font-weight: normal; 
+            white-space: nowrap; /* Zwingt die Nummer in die gleiche Zeile! */
+        }
+        
+        .barcode-block { width: 30%; text-align: center; } /* Barcode in die Mitte gerückt */
+        
         .logo-block { width: 20%; text-align: right; color: #0066cc; font-size: 20pt; font-weight: bold; }
         .roche-hexagon { border: 1.5px solid #0066cc; display: inline-block; padding: 2px 15px; }
 
-        /* ADRESSEN */
+        /* --- ADRESSEN --- */
         .address-container { display: flex; justify-content: flex-start; gap: 70mm; margin-bottom: 2mm; line-height: 1.3; }
         .address-box { width: 75mm; }
         .address-title { font-weight: bold; margin-bottom: 2mm; font-size: 10pt; }
         .address-grid { display: grid; grid-template-columns: 18mm auto; margin-top: 3mm; }
 
-        /* NEU: TABELLEN-DESIGN */
+        /* --- TABELLEN-DESIGN --- */
         .datum { margin-bottom: 4mm; }
         .section-title { font-size: 10pt; margin-bottom: 1mm; }
         
-        table {
+        .data-table {
             width: 100%;
-            border-collapse: collapse; /* Zieht feine, einfache Linien */
+            border-collapse: collapse;
             margin-bottom: 6mm;
         }
-        th, td {
+        .data-table th, .data-table td {
             border: 1px solid #000;
             padding: 3px 4px;
             text-align: left;
             vertical-align: top;
         }
-        th { font-weight: bold; }
+        .data-table th { font-weight: bold; }
+
+        .no-border-inner td { border-top: none; border-bottom: none; }
+
+        /* --- FUSSZEILE (Ganz unten fixiert) --- */
+        .footer {
+            position: absolute;
+            bottom: 15mm;
+            left: 15mm;
+            right: 15mm;
+            display: flex;
+            justify-content: space-between;
+            font-size: 8pt;
+            line-height: 1.4;
+        }
 
         @media print {
             body { background-color: white; padding: 0; }
@@ -124,7 +146,7 @@
         <div class="datum">Datum: 02.03.2026</div>
 
         <div class="section-title">Total Packliste:</div>
-        <table>
+        <table class="data-table">
             <thead>
                 <tr>
                     <th>Markierungen</th>
@@ -150,13 +172,13 @@
         </table>
 
         <div class="section-title">Details Packliste:</div>
-        <table>
+        <table class="data-table">
             <thead>
                 <tr>
                     <th style="width: 14%;">Packstück ID (SSCC)</th>
                     <th style="width: 12%;">Packstück Typ</th>
-                    <th style="width: 12%;">Dimensionen<br>(L x B x H)</th>
-                    <th style="width: 14%;">Wareninhalt</th>
+                    <th style="width: 11%;">Dimensionen<br>(L x B x H)</th>
+                    <th style="width: 15%;">Wareninhalt</th>
                     <th style="width: 12%;">Temperatur-<br>bedingungen</th>
                     <th style="width: 14%;">Temperaturüber-<br>wachungsgeräte *</th>
                     <th style="width: 8%;">Gefahrgut</th>
@@ -176,28 +198,6 @@
                     <td>5.000 kg</td>
                     <td>21.000 kg</td>
                 </tr>
-            </tbody>
-        </table>
-
-    </div>
-
-    <script>
-        function generiereBarcode() {
-            var nummer = document.getElementById("input-fracht").value;
-            document.getElementById("text-fracht").innerText = nummer;
-            document.getElementById("text-fracht-table").innerText = nummer; // Aktualisiert auch die Nummer in der Tabelle!
-            
-            JsBarcode("#barcode", nummer, {
-                format: "CODE128",
-                lineColor: "#000",
-                width: 1.8,
-                height: 40,
-                displayValue: false,
-                margin: 0
-            });
-        }
-        document.getElementById("input-fracht").addEventListener("input", generiereBarcode);
-        generiereBarcode();
-    </script>
-</body>
-</html>
+                <tr>
+                    <td colspan="7">
+                        Organ
