@@ -36,8 +36,8 @@
         .a4-page {
             background-color: white;
             width: 297mm;
-            height: 210mm;
-            padding: 15mm 15mm;
+            min-height: 210mm; /* WICHTIG: Erlaubt das Mitwachsen der Seite */
+            padding: 15mm 15mm 45mm 15mm; /* Unten 45mm Platz für die Fußzeile lassen! */
             box-sizing: border-box;
             box-shadow: 0 5px 15px rgba(0,0,0,0.5);
             position: relative; /* Wichtig für die Fußzeile! */
@@ -91,8 +91,8 @@
         /* --- DRUCK-EINSTELLUNGEN --- */
         @media print {
             body { background-color: white; padding: 0; }
-            .control-panel { display: none; } /* Versteckt die Eingabe beim Drucken */
-            .a4-page { box-shadow: none; width: 297mm; height: 210mm; page-break-after: always; }
+            .control-panel { display: none; }
+            .a4-page { box-shadow: none; width: 297mm; min-height: 210mm; page-break-after: always; padding: 15mm 15mm 45mm 15mm; }
             @page { size: A4 landscape; margin: 0; }
         }
     </style>
@@ -259,7 +259,7 @@
                 gefahr: "", 
                 net: "24.264 kg", 
                 gross: "281.290 kg",
-                details: null // Hauptpaket hat keine Details in der 2. Zeile
+                details: null 
             },
             { 
                 id: "212345670069326679", 
@@ -297,7 +297,7 @@
                     </tr>
                 `;
                 
-                // Wenn es ein Unterpaket mit Details ist (wie der Karton), hänge die Info-Zeile darunter
+                // Unter-Zeile mit Details anhängen (falls vorhanden)
                 if (paket.details) {
                     rowHTML += `
                         <tr class="detail-row">
@@ -317,7 +317,7 @@
             });
         }
 
-        // Führe beide Funktionen beim Laden der Seite direkt einmal aus
+        // Führe Funktionen direkt beim Laden aus
         generiereBarcode();
         baueTabelle();
     </script>
