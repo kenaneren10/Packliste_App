@@ -5,13 +5,13 @@
     <title>Packlisten Generator</title>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
     <style>
-        /* --- GRUND-LAYOUT (Bilschirm) --- */
+        /* --- GRUND-LAYOUT (Bildschirm) --- */
         body {
             background-color: #525659; font-family: Arial, Helvetica, sans-serif;
-            margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; font-size: 8pt; 
+            margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; 
         }
 
-        /* --- BEDIENFELD --- */
+        /* --- BEDIENFELD (Cockpit) --- */
         .control-panel {
             background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.4); width: 297mm; box-sizing: border-box;
@@ -28,63 +28,83 @@
         .btn-pdf { background: #28a745; color: white; border: none; padding: 15px; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .btn-pdf:hover { background: #218838; }
 
-        /* --- DAS A4 BLATT (Mit Print-Wiederholungs-Trick) --- */
+        /* --- DAS A4 BLATT (Pixelperfekt) --- */
         .a4-page {
-            background-color: white; width: 297mm; min-height: 210mm; 
-            box-sizing: border-box; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            position: relative; overflow: hidden;
+            background-color: white; 
+            width: 297mm; 
+            min-height: 210mm; 
+            padding: 18mm 15mm 25mm 20mm; /* Exakte Ränder laut Lineal */
+            box-sizing: border-box; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            position: relative; 
+            color: #000;
         }
 
         /* --- VERTIKALER TEXT LINKS --- */
         .vertical-text {
-            position: absolute; left: 6mm; bottom: 30mm;
+            position: absolute; left: 6mm; bottom: 35mm;
             writing-mode: vertical-rl; transform: rotate(180deg);
-            font-size: 7pt; color: #888; letter-spacing: 1px;
+            font-size: 7.5pt; color: #888; letter-spacing: 0.5px;
         }
 
-        /* --- MASTER-TABELLE (Für Kopfzeilen-Wiederholung) --- */
-        .master-table { width: 100%; border-collapse: collapse; }
-        .master-table thead td { padding: 12mm 15mm 0 15mm; } /* Abstand oben auf jedem Blatt */
-        .master-table tbody td { padding: 0 15mm; } /* Seitenränder */
-        .master-table tfoot td { padding-bottom: 35mm; } /* Platzhalter für den Footer */
-
         /* --- KOPFZEILE --- */
-        .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5mm; }
-        .title-block { width: 45%; }
-        .title-block h1 { font-size: 18pt; margin: 0 0 2mm 0; font-weight: normal; white-space: nowrap; }
-        .barcode-block { width: 35%; text-align: center; margin-top: -3mm; }
-        .logo-block { width: 20%; text-align: right; color: #0066cc; font-size: 24pt; font-weight: bold; }
-        .roche-hexagon { border: 1.5px solid #0066cc; display: inline-block; padding: 2px 20px; }
+        .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8mm; }
+        .title-block { width: 50%; }
+        .title-block h1 { font-size: 18pt; margin: 0 0 2mm 0; font-weight: normal; white-space: nowrap; letter-spacing: -0.5px; }
+        .barcode-block { width: 30%; text-align: center; margin-top: -3mm; }
+        .logo-block { width: 20%; text-align: right; color: #0066cc; font-size: 22pt; font-weight: bold; font-family: Arial, sans-serif; }
+        .roche-hexagon { border: 1.5px solid #0066cc; display: inline-block; padding: 2px 18px; }
 
         /* --- ADRESSEN --- */
-        .address-container { display: flex; justify-content: flex-start; gap: 70mm; margin-bottom: 2mm; line-height: 1.2; font-size: 8.5pt;}
-        .address-box { width: 75mm; }
+        .address-container { display: flex; justify-content: flex-start; gap: 60mm; margin-bottom: 2mm; line-height: 1.25; font-size: 8.5pt;}
+        .address-box { width: 85mm; }
         .address-title { font-weight: bold; margin-bottom: 2mm; font-size: 9pt; }
-        .address-grid { display: grid; grid-template-columns: 14mm auto; margin-top: 3mm; }
+        .address-grid { display: grid; grid-template-columns: 15mm auto; margin-top: 3mm; }
 
         /* --- TABELLEN-DESIGN --- */
         .datum { margin-bottom: 4mm; font-weight: bold; font-size: 8.5pt;}
-        .section-title { font-size: 9pt; margin-bottom: 1mm; }
+        .section-title { font-size: 8.5pt; margin-bottom: 1mm; }
         
-        .data-table { width: 100%; border-collapse: collapse; margin-bottom: 6mm; font-size: 8pt;}
-        .data-table th, .data-table td { border: 1.5px solid #000; padding: 2px 3px; text-align: left; vertical-align: top; line-height: 1.1; }
+        .data-table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-bottom: 6mm; 
+            font-size: 8pt;
+            table-layout: fixed; /* ZWINGT die Tabelle in unsere Millimeter-Vorgaben! */
+        }
+        .data-table th, .data-table td { 
+            border: 1px solid #000; 
+            padding: 3px 4px; 
+            text-align: left; 
+            vertical-align: top; 
+            line-height: 1.2; 
+            word-wrap: break-word; /* Bricht zu lange Wörter ab */
+        }
         .data-table th { font-weight: bold; }
 
-        /* Spezial-Design Unterverpackung (Grauer Sub-Header) */
-        .sub-header th { background-color: #f0f0f0; border-top: 2px solid #000; font-size: 7.5pt; }
+        /* Exakte Spaltenbreiten für Tabelle 1 (Total) */
+        .col-tot-1 { width: 22%; } .col-tot-2 { width: 22%; } .col-tot-3 { width: 10%; }
+        .col-tot-4 { width: 12%; } .col-tot-5 { width: 12%; } .col-tot-6 { width: 10%; } .col-tot-7 { width: 12%; }
+
+        /* Exakte Spaltenbreiten für Tabelle 2 (Details) laut deinem Lineal */
+        .col-det-1 { width: 17%; } .col-det-2 { width: 10%; } .col-det-3 { width: 10%; }
+        .col-det-4 { width: 19%; } .col-det-5 { width: 12%; } .col-det-6 { width: 14%; }
+        .col-det-7 { width: 6%; }  .col-det-8 { width: 6%; }  .col-det-9 { width: 6%; }
+
+        /* Spezial-Design Unterverpackung */
+        .sub-header th { background-color: #f2f2f2; border-top: 1.5px solid #000; border-bottom: 1.5px solid #000; font-size: 7.5pt; }
         .inner-row td { border-top: none; }
-        .inner-content-row td { border-top: none; padding-bottom: 10px; }
+        .inner-content-row td { border-top: none; padding-bottom: 15px; }
 
         /* --- FUSSZEILE --- */
-        .footer-fixed { position: absolute; bottom: 12mm; left: 15mm; right: 15mm; display: flex; justify-content: space-between; font-size: 8pt; line-height: 1.3; }
+        .footer-fixed { position: absolute; bottom: 15mm; left: 20mm; right: 15mm; display: flex; justify-content: space-between; font-size: 8pt; line-height: 1.3; }
 
         /* --- DRUCK-EINSTELLUNGEN --- */
         @media print {
             body { background-color: white; padding: 0; }
             .control-panel { display: none !important; } 
-            .a4-page { box-shadow: none; width: 297mm; height: 100%; border: none; }
-            .vertical-text { position: fixed; } /* Fixiert den Text auf jedem Blatt */
-            .footer-fixed { position: fixed; } /* Fixiert den Footer auf jedem Blatt */
+            .a4-page { box-shadow: none; width: 297mm; border: none; padding: 18mm 15mm 25mm 20mm; }
+            tr { page-break-inside: avoid; } /* Verhindert das Durchschneiden von Tabellenzeilen! */
             @page { size: A4 landscape; margin: 0; }
         }
     </style>
@@ -104,7 +124,7 @@
             <div class="input-row" style="margin-top: 10px;">
                 <div class="input-group" style="width: 45%;">
                     <label>Invoice recipient:</label>
-                    <textarea id="in-inv-adresse" rows="3" oninput="updateLive()">DHL Supply Chain Singapore Pte Ltd&#10;ARC Healthcare Hub&#10;Singapore</textarea>
+                    <textarea id="in-inv-adresse" rows="4" oninput="updateLive()">DHL Supply Chain Singapore Pte Ltd&#10;ARC Healthcare Hub&#10;1 Greenwich Drive&#10;Singapore 533865&#10;Singapore</textarea>
                     <div style="display: flex; gap: 5px; margin-top: 5px;">
                         <input type="text" id="in-inv-kontakt" value="Low Pike San" oninput="updateLive()" placeholder="Kontaktperson" style="width: 33%;">
                         <input type="text" id="in-inv-tel" value="+656562263460" oninput="updateLive()" placeholder="Telefon" style="width: 33%;">
@@ -113,7 +133,7 @@
                 </div>
                 <div class="input-group" style="width: 45%;">
                     <label>Consignee:</label>
-                    <textarea id="in-cons-adresse" rows="3" oninput="updateLive()">DHL Supply Chain Singapore Pte Ltd&#10;Advanced Regional Centre&#10;Singapore</textarea>
+                    <textarea id="in-cons-adresse" rows="4" oninput="updateLive()">DHL Supply Chain Singapore Pte Ltd&#10;ARC Healthcare Hub&#10;1 Greenwich Drive&#10;Advanced Regional Centre&#10;Singapore 533865&#10;Singapore</textarea>
                     <div style="display: flex; gap: 5px; margin-top: 5px;">
                         <input type="text" id="in-cons-kontakt" value="Jacky Tang Kok Wai" oninput="updateLive()" placeholder="Kontaktperson" style="width: 33%;">
                         <input type="text" id="in-cons-tel" value="+656591901106" oninput="updateLive()" placeholder="Telefon" style="width: 33%;">
@@ -124,7 +144,7 @@
         </div>
 
         <div class="form-section">
-            <h3>2. Packstücke (Volumen $m^3$ wird automatisch berechnet!)</h3>
+            <h3>2. Packstücke (Volumen wird automatisch berechnet!)</h3>
             <div class="input-row" style="align-items: stretch;">
                 <div style="display: flex; flex-direction: column; gap: 10px; width: 200px;">
                     <div class="input-group">
@@ -177,100 +197,102 @@
         
         <div class="vertical-text">7840135792109TEC0165147V4</div>
 
-        <table class="master-table">
+        <div class="header">
+            <div class="title-block">
+                <h1>Packing List to Freight Unit <span id="out-fracht">4100167438</span></h1>
+                <span style="font-size: 8.5pt;">(Version 1.0)</span>
+            </div>
+            <div class="barcode-block"><svg id="barcode"></svg></div>
+            <div class="logo-block"><div class="roche-hexagon">Roche</div></div>
+        </div>
+
+        <div class="address-container">
+            <div class="address-box">
+                <div class="address-title">Invoice recipient</div>
+                <span id="out-inv-adresse" style="white-space: pre-line;">...</span>
+                <div class="address-grid">
+                    <div>Contact:</div><div id="out-inv-kontakt">...</div>
+                    <div>Phone:</div><div id="out-inv-tel">...</div>
+                    <div>E-Mail:</div><div id="out-inv-mail">...</div>
+                </div>
+            </div>
+            <div class="address-box">
+                <div class="address-title">Consignee</div>
+                <span id="out-cons-adresse" style="white-space: pre-line;">...</span>
+                <div class="address-grid">
+                    <div>Contact:</div><div id="out-cons-kontakt">...</div>
+                    <div>Phone:</div><div id="out-cons-tel">...</div>
+                    <div>E-Mail:</div><div id="out-cons-mail">...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="datum">Date: <span id="out-datum">19.02.2026</span></div>
+
+        <div class="section-title">Total packing-list:</div>
+        <table class="data-table">
             <thead>
                 <tr>
-                    <td>
-                        <div class="header">
-                            <div class="title-block">
-                                <h1>Packing List to Freight Unit <span id="out-fracht">4100167438</span></h1>
-                                <span style="font-size: 8.5pt;">(Version 1.0)</span>
-                            </div>
-                            <div class="barcode-block"><svg id="barcode"></svg></div>
-                            <div class="logo-block"><div class="roche-hexagon">Roche</div></div>
-                        </div>
-                    </td>
+                    <th class="col-tot-1">Shipping marks</th>
+                    <th class="col-tot-2">UCR No. (GSIN)</th>
+                    <th class="col-tot-3">Total no. of<br>packages</th>
+                    <th class="col-tot-4">Total gross weight</th>
+                    <th class="col-tot-5">Total net weight</th>
+                    <th class="col-tot-6">Total volume</th>
+                    <th class="col-tot-7">Total no. of temperature<br>monitoring devices *</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td>
-                        <div class="address-container">
-                            <div class="address-box">
-                                <div class="address-title">Invoice recipient</div>
-                                <span id="out-inv-adresse" style="white-space: pre-line;">...</span>
-                                <div class="address-grid">
-                                    <div>Contact:</div><div id="out-inv-kontakt">...</div>
-                                    <div>Phone:</div><div id="out-inv-tel">...</div>
-                                    <div>E-Mail:</div><div id="out-inv-mail">...</div>
-                                </div>
-                            </div>
-                            <div class="address-box">
-                                <div class="address-title">Consignee</div>
-                                <span id="out-cons-adresse" style="white-space: pre-line;">...</span>
-                                <div class="address-grid">
-                                    <div>Contact:</div><div id="out-cons-kontakt">...</div>
-                                    <div>Phone:</div><div id="out-cons-tel">...</div>
-                                    <div>E-Mail:</div><div id="out-cons-mail">...</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="datum">Date: <span id="out-datum">19.02.2026</span></div>
-
-                        <div class="section-title">Total packing-list:</div>
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th style="width:20%">Shipping marks</th><th style="width:22%">UCR No. (GSIN)</th><th style="width:10%">Total no. of<br>packages</th>
-                                    <th style="width:12%">Total gross weight</th><th style="width:12%">Total net weight</th><th style="width:10%">Total volume</th>
-                                    <th style="width:14%">Total no. of temperature<br>monitoring devices *</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Address of consignee,<br><span id="out-fracht-table">4100167438</span></td>
-                                    <td>(402) 7640135 790167438 4</td>
-                                    <td id="out-total-packages">0</td>
-                                    <td id="out-total-gross">0.000 kg</td>
-                                    <td id="out-total-net">0.000 kg</td>
-                                    <td id="out-total-vol">0.00 m3</td>
-                                    <td id="out-total-logger">0</td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-                        <div class="section-title">Detail packing-list:</div>
-                        <table class="data-table" id="details-table" style="table-layout: fixed;">
-                            <thead>
-                                <tr>
-                                    <th style="width: 18%;">Package ID (SSCC)</th><th style="width: 13%;">Packing type</th>
-                                    <th style="width: 12%;">Dimensions<br>(LxHxW cm)</th><th style="width: 15%;">Content</th>
-                                    <th style="width: 12%;">Temperature<br>conditions</th><th style="width: 12%;">Temperature<br>monitoring devices *</th>
-                                    <th style="width: 6%;">Dangerous<br>goods</th><th style="width: 6%;">Net weight</th><th style="width: 6%;">Gross weight</th>
-                                </tr>
-                            </thead>
-                            <tbody id="details-body"></tbody>
-                        </table>
-
-                        <div style="font-size: 7.5pt; margin-bottom: 1mm;">* Details to Temperature Monitoring devices:</div>
-                        <table class="data-table" style="width: 60%; margin-bottom: 4mm;">
-                            <thead>
-                                <tr><th>Package ID</th><th>Device S/N</th><th>Type</th><th>Manufacturer</th><th>Origin</th><th>HS-Code</th><th colspan="2">Value</th></tr>
-                            </thead>
-                            <tbody id="logger-body"></tbody>
-                        </table>
-
-                        <div style="font-size: 7.5pt; margin-bottom: 1mm;">* Details to Document References</div>
-                        <table class="data-table" style="width: 30%; margin-bottom: 4mm;">
-                            <thead><tr><th>E2E Order</th><th>Clara Document</th></tr></thead>
-                            <tbody><tr><td id="out-e2e">...</td><td id="out-clara">...</td></tr></tbody>
-                        </table>
-
-                    </td>
+                    <td>Address of consignee,<br><span id="out-fracht-table">4100167438</span></td>
+                    <td>(402) 7640135 790167438 4</td>
+                    <td id="out-total-packages">0</td>
+                    <td id="out-total-gross">0.000 kg</td>
+                    <td id="out-total-net">0.000 kg</td>
+                    <td id="out-total-vol">0.00 m3</td>
+                    <td id="out-total-logger">0</td>
                 </tr>
             </tbody>
-            <tfoot><tr><td></td></tr></tfoot>
+        </table>
+
+        <div class="section-title">Detail packing-list:</div>
+        <table class="data-table" id="details-table">
+            <thead>
+                <tr>
+                    <th class="col-det-1">Package ID (SSCC)</th>
+                    <th class="col-det-2">Packing type</th>
+                    <th class="col-det-3">Dimensions<br>(LxHxW cm)</th>
+                    <th class="col-det-4">Content</th>
+                    <th class="col-det-5">Temperature<br>conditions</th>
+                    <th class="col-det-6">Temperature<br>monitoring devices *</th>
+                    <th class="col-det-7">Dangerous<br>goods</th>
+                    <th class="col-det-8">Net weight</th>
+                    <th class="col-det-9">Gross weight</th>
+                </tr>
+            </thead>
+            <tbody id="details-body"></tbody>
+        </table>
+
+        <div style="font-size: 7.5pt; margin-bottom: 1mm;">* Details to Temperature Monitoring devices:</div>
+        <table class="data-table" style="width: 60%; margin-bottom: 4mm;">
+            <thead>
+                <tr>
+                    <th style="width: 25%;">Package ID</th>
+                    <th style="width: 15%;">Device S/N</th>
+                    <th style="width: 15%;">Type</th>
+                    <th style="width: 20%;">Manufacturer</th>
+                    <th style="width: 10%;">Origin</th>
+                    <th style="width: 10%;">HS-Code</th>
+                    <th colspan="2" style="width: 5%;">Value</th>
+                </tr>
+            </thead>
+            <tbody id="logger-body"></tbody>
+        </table>
+
+        <div style="font-size: 7.5pt; margin-bottom: 1mm;">* Details to Document References</div>
+        <table class="data-table" style="width: 30%; margin-bottom: 4mm;">
+            <thead><tr><th>E2E Order</th><th>Clara Document</th></tr></thead>
+            <tbody><tr><td id="out-e2e">...</td><td id="out-clara">...</td></tr></tbody>
         </table>
 
         <div class="footer-fixed">
@@ -318,7 +340,7 @@
             tbody.innerHTML = ""; 
             
             let sumNet = 0, sumGross = 0, sumVol = 0, mainCount = 0;
-            let lastLevel = ""; // Merkt sich, ob das vorherige Paket Main oder Inner war
+            let lastLevel = ""; 
 
             packstuecke.forEach(paket => {
                 // Total-Berechnungen (Nur Main-Packages)
@@ -329,7 +351,6 @@
                     sumVol += berechneVolumen(paket.dim);
                 }
 
-                // Generierung der Zeilen
                 let formatierterInhalt = paket.inhalt.replace(/\n/g, "<br>");
 
                 if(paket.level === "main") {
@@ -343,12 +364,12 @@
                         </tr>
                     `;
                 } else {
-                    // Unterverpackung! Prüfen, ob wir den Sub-Header zeichnen müssen
+                    // Unterverpackung! Grauer Header wird gezeichnet, wenn das vorherige Paket kein Inner-Package war
                     if(lastLevel !== "inner") {
                         tbody.innerHTML += `
                             <tr class="sub-header">
                                 <th>Inner-Package ID</th><th>Packing type</th><th>Dimensions<br>(LxHxW)</th>
-                                <th>Content</th><th>Temperature<br>conditions</th><th>Temperature<br>monitoring devices</th>
+                                <th>Content</th><th>Temperature<br>conditions</th><th>Temperature<br>monitoring</th>
                                 <th>Dangerous<br>goods</th><th>Net weight</th><th>Gross weight</th>
                             </tr>
                         `;
@@ -357,7 +378,8 @@
                     tbody.innerHTML += `
                         <tr class="inner-row">
                             <td>${paket.id}</td><td>${paket.typ}</td><td>${paket.dim}</td>
-                            <td>${paket.inhalt.split('\n')[0]}</td> <td>${paket.temp}</td><td>-</td><td>${paket.gefahr}</td>
+                            <td>${paket.inhalt.split('\n')[0]}</td>
+                            <td>${paket.temp}</td><td>-</td><td>${paket.gefahr}</td>
                             <td>${paket.net}</td><td>${paket.gross}</td>
                         </tr>
                         <tr class="inner-content-row">
@@ -399,7 +421,7 @@
                 temp: document.getElementById("in-temp").value || "-",
                 gefahr: document.getElementById("in-gefahr").value || "-",
                 qty: document.getElementById("in-qty").value || "-",
-                logInfo: "", // Wird über Logger hinzugefügt
+                logInfo: "", 
                 net: netIn, gross: grossIn
             });
             
@@ -427,7 +449,6 @@
             loggerDaten.push({ id: pid, sn: sn });
             baueLoggerTabelle();
             
-            // Fügt die Logger-Info auch automatisch oben in der großen Pakettabelle zum passenden Paket hinzu!
             let paket = packstuecke.find(p => p.id === pid);
             if(paket) {
                 let currentInfo = paket.logInfo ? paket.logInfo + "<br>" : "";
