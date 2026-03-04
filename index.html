@@ -27,20 +27,28 @@
             width: 297mm;
             box-sizing: border-box;
             display: flex;
-            align-items: center;
+            flex-direction: column; /* Elemente untereinander anordnen */
             gap: 15px;
         }
-        .control-panel input { padding: 8px; font-size: 16px; border: 1px solid #ccc; width: 200px; }
+        
+        /* Design für die Eingabefelder und Buttons */
+        .input-row { display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
+        .control-panel input { padding: 8px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px; }
+        .btn-add { background: #0066cc; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-add:hover { background: #004c99; }
+        .btn-pdf { background: #28a745; color: white; border: none; padding: 12px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; font-weight: bold; align-self: flex-start; }
+        .btn-pdf:hover { background: #218838; }
+        .divider { width: 100%; border-top: 1px solid #eee; }
 
         /* --- DAS A4 BLATT --- */
         .a4-page {
             background-color: white;
             width: 297mm;
-            min-height: 210mm; /* WICHTIG: Erlaubt das Mitwachsen der Seite */
-            padding: 15mm 15mm 45mm 15mm; /* Unten 45mm Platz für die Fußzeile lassen! */
+            min-height: 210mm; 
+            padding: 15mm 15mm 45mm 15mm; 
             box-sizing: border-box;
             box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            position: relative; /* Wichtig für die Fußzeile! */
+            position: relative; 
         }
 
         /* --- KOPFZEILE --- */
@@ -61,50 +69,62 @@
         .datum { margin-bottom: 4mm; font-weight: bold; }
         .section-title { font-size: 9pt; margin-bottom: 1mm; }
         
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 4mm;
-        }
-        .data-table th, .data-table td {
-            border: 1px solid #000;
-            padding: 3px 4px;
-            text-align: left;
-            vertical-align: top;
-            line-height: 1.2;
-        }
+        .data-table { width: 100%; border-collapse: collapse; margin-bottom: 4mm; }
+        .data-table th, .data-table td { border: 1px solid #000; padding: 3px 4px; text-align: left; vertical-align: top; line-height: 1.2; }
         .data-table th { font-weight: bold; }
         .detail-row td { border-top: none; padding-top: 0; padding-bottom: 6px; }
 
-        /* --- FUSSZEILE (Ganz unten fixiert) --- */
+        /* --- FUSSZEILE --- */
         .footer {
-            position: absolute;
-            bottom: 15mm;
-            left: 15mm;
-            right: 15mm;
-            display: flex;
-            justify-content: space-between;
-            font-size: 8pt;
-            line-height: 1.4;
+            position: absolute; bottom: 15mm; left: 15mm; right: 15mm;
+            display: flex; justify-content: space-between; font-size: 8pt; line-height: 1.4;
         }
 
-        /* --- DRUCK-EINSTELLUNGEN --- */
+        /* --- DRUCK-EINSTELLUNGEN (Zerschneidet die Seite in echtes A4!) --- */
         @media print {
             body { background-color: white; padding: 0; }
-            .control-panel { display: none; }
-            .a4-page { box-shadow: none; width: 297mm; min-height: 210mm; page-break-after: always; padding: 15mm 15mm 45mm 15mm; }
-            @page { size: A4 landscape; margin: 0; }
+            .control-panel { display: none; } /* Bedienfeld auf dem PDF unsichtbar machen */
+            .a4-page { box-shadow: none; width: 297mm; min-height: 210mm; padding: 15mm 15mm 45mm 15mm; }
+            @page { size: A4 landscape; margin: 0; } /* Zwingt den Drucker in A4 Querformat */
         }
     </style>
 </head>
 <body>
 
     <div class="control-panel">
-        <label style="font-size: 14pt;"><b>Frachteinheit:</b></label>
-        <input type="text" id="input-fracht" value="4100167438">
+        
+        <div class="input-row">
+            <label style="font-size: 14pt;"><b>Frachteinheit:</b></label>
+            <input type="text" id="input-fracht" value="4100167438" style="width: 250px; font-weight: bold;">
+        </div>
+        
+        <div class="divider"></div>
+
+        <div style="font-size: 12pt; font-weight: bold; color: #333;">Paket-Daten eintragen:</div>
+        <div class="input-row">
+            <div>
+                <label>Package ID (SSCC):</label><br>
+                <input type="text" id="in-id" placeholder="z.B. 123456789" style="width: 180px;">
+            </div>
+            <div>
+                <label>Verpackungstyp:</label><br>
+                <input type="text" id="in-typ" placeholder="z.B. Karton" style="width: 120px;">
+            </div>
+            <div>
+                <label>Netto Gewicht:</label><br>
+                <input type="text" id="in-net" placeholder="z.B. 4.000 kg" style="width: 100px;">
+            </div>
+            
+            <button class="btn-add" onclick="paketHinzufuegen()" style="margin-top: 18px;">+ Paket hinzufügen</button>
+        </div>
+
+        <div class="divider"></div>
+
+        <button class="btn-pdf" onclick="window.print()">📄 Als PDF speichern / Drucken</button>
+
     </div>
 
-    <div class="a4-page">
+    <div class="a4-page" id="druckbereich">
         
         <div class="header">
             <div class="title-block">
@@ -148,18 +168,18 @@
                 <tr>
                     <th>Shipping marks</th>
                     <th>UCR No. (GSIN)</th>
-                    <th>Total no. of<br>packages</th>
+                    <th>Total no. of packages</th>
                     <th>Total gross weight</th>
                     <th>Total net weight</th>
                     <th>Total volume</th>
-                    <th>Total no. of temperature<br>monitoring devices *</th>
+                    <th>Total no. of temperature monitoring devices *</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
                     <td>Address of consignee,<br><span id="text-fracht-table">4100167438</span></td>
                     <td>(402) 7640135 790167438 4</td>
-                    <td>2</td>
+                    <td id="total-packages">1</td>
                     <td>382.825 kg</td>
                     <td>44.604 kg</td>
                     <td>2.47 m3</td>
@@ -174,43 +194,16 @@
                 <tr>
                     <th style="width: 14%;">Package ID (SSCC)</th>
                     <th style="width: 12%;">Packing type</th>
-                    <th style="width: 11%;">Dimensions<br>(LxHxW cm)</th>
+                    <th style="width: 11%;">Dimensions (LxHxW cm)</th>
                     <th style="width: 15%;">Content</th>
-                    <th style="width: 12%;">Temperature<br>conditions</th>
-                    <th style="width: 14%;">Temperature<br>monitoring devices *</th>
-                    <th style="width: 8%;">Dangerous<br>goods</th>
+                    <th style="width: 12%;">Temperature conditions</th>
+                    <th style="width: 14%;">Temperature monitoring devices *</th>
+                    <th style="width: 8%;">Dangerous goods</th>
                     <th style="width: 7%;">Net weight</th>
                     <th style="width: 7%;">Gross weight</th>
                 </tr>
             </thead>
             <tbody id="details-body">
-            </tbody>
-        </table>
-
-        <div style="font-size: 8pt; margin-bottom: 1mm;">* Details to Temperature Monitoring devices:</div>
-        <table class="data-table" style="width: 70%; margin-bottom: 4mm;">
-            <thead>
-                <tr>
-                    <th>Package ID</th>
-                    <th>Device S/N</th>
-                    <th>Type</th>
-                    <th>Manufacturer</th>
-                    <th>Origin</th>
-                    <th>HS-Code</th>
-                    <th colspan="2">Value</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>376401357901136095</td>
-                    <td>72071008363</td>
-                    <td>Elpro Libero CB</td>
-                    <td>Elpro Buchs AG, CH-Buchs</td>
-                    <td>CH</td>
-                    <td>9025.19</td>
-                    <td style="border-right: none; width: 20px;">CHF</td>
-                    <td style="border-left: none; text-align: right;">18.50</td>
-                </tr>
             </tbody>
         </table>
 
@@ -228,14 +221,14 @@
                 E-Mail: basel.site-logistics@roche.com
             </div>
             <div style="text-align: right; margin-top: auto;">
-                Page 1/5
+                Page 1/1
             </div>
         </div>
 
     </div>
 
     <script>
-        // 1. BARCODE AKTUALISIEREN
+        // 1. BARCODE
         function generiereBarcode() {
             var nummer = document.getElementById("input-fracht").value;
             document.getElementById("text-fracht").innerText = nummer;
@@ -247,42 +240,28 @@
         }
         document.getElementById("input-fracht").addEventListener("input", generiereBarcode);
 
-        // 2. DATENBANK FÜR DIE TABELLE (Dynamisch)
-        const packstuecke = [
+        // 2. DATENBANK FÜR DIE TABELLE (Startet mit 1 Beispiel-Paket)
+        let packstuecke = [
             { 
                 id: "376401357901136095", 
-                typ: "Cold chain container<br>(GET432)", 
+                typ: "Cold chain container", 
                 dim: "120x100x140 cm", 
-                inhalt: "212345670069326679<br>212345670069326730<br>212345670069326778", 
+                inhalt: "Medical items", 
                 temp: "store between +2°C and +8°C", 
-                device: "1. 72071008363<br><span style='font-size:6pt'>mid. of box bottom, on top of elements 1</span>", 
+                device: "1. 72071008363", 
                 gefahr: "", 
                 net: "24.264 kg", 
                 gross: "281.290 kg",
                 details: null 
-            },
-            { 
-                id: "212345670069326679", 
-                typ: "Karton", 
-                dim: "0x0x0 cm", 
-                inhalt: "Medicament", 
-                temp: "store between +2°C and +8°C", 
-                device: "", 
-                gefahr: "", 
-                net: "4.044 kg", 
-                gross: "4.875 kg",
-                details: "<b>39032335</b><br>1 autoinjector CT-388 4mg/0.4ml<br>Mfg. Batch: B2000/01<br>Packaging Batch: WC45726_0001<br>Batch: 1189597<br>Packaging size: BOX WITH 1 AUTOINJECTOR<br>Roformis Number: 779-5068/F08-02<br>Retest date: Jun 30, 2026<br>Goods must be treated according to GDP regulations",
-                menge: "60.00 ea"
             }
         ];
 
         // 3. TABELLE BAUEN
         function baueTabelle() {
             const tbody = document.getElementById("details-body");
-            tbody.innerHTML = "";
+            tbody.innerHTML = ""; // Macht die Tabelle leer
 
             packstuecke.forEach(paket => {
-                // Haupt-Zeile
                 let rowHTML = `
                     <tr>
                         <td>${paket.id}</td>
@@ -296,28 +275,50 @@
                         <td>${paket.gross}</td>
                     </tr>
                 `;
-                
-                // Unter-Zeile mit Details anhängen (falls vorhanden)
-                if (paket.details) {
-                    rowHTML += `
-                        <tr class="detail-row">
-                            <td colspan="7">
-                                <div style="margin-top: 5px;">${paket.details}</div>
-                                <div style="display: flex; gap: 30px; margin-top: 10px;">
-                                    <div>HS-Code:<br>Country of origin:<br>Preferential origin:</div>
-                                    <div>3004.39<br>IT<br>None</div>
-                                </div>
-                            </td>
-                            <td>Quantity<br>${paket.menge}</td>
-                            <td>Net weight<br>${paket.net}</td>
-                        </tr>
-                    `;
-                }
                 tbody.innerHTML += rowHTML;
             });
+
+            // Aktualisiert die Anzahl der Pakete oben in Tabelle 1
+            document.getElementById("total-packages").innerText = packstuecke.length;
         }
 
-        // Führe Funktionen direkt beim Laden aus
+        // 4. NEUES PAKET HINZUFÜGEN (Wird durch den blauen Button aufgerufen)
+        function paketHinzufuegen() {
+            // Holt die Daten aus den weißen Eingabefeldern
+            const inputId = document.getElementById("in-id").value;
+            const inputTyp = document.getElementById("in-typ").value;
+            const inputNet = document.getElementById("in-net").value;
+
+            // Prüft, ob zumindest eine ID eingegeben wurde
+            if(inputId === "") {
+                alert("Bitte gib zumindest eine Package ID ein!");
+                return;
+            }
+
+            // Speichert das neue Paket in unserer Liste
+            packstuecke.push({
+                id: inputId,
+                typ: inputTyp !== "" ? inputTyp : "Karton", // Nimmt 'Karton' als Standard, wenn nichts eingegeben wurde
+                dim: "0x0x0 cm",
+                inhalt: "Medicament",
+                temp: "store between +2°C and +8°C",
+                device: "",
+                gefahr: "",
+                net: inputNet !== "" ? inputNet : "0.000 kg",
+                gross: inputNet !== "" ? inputNet : "0.000 kg",
+                details: null
+            });
+
+            // Baut die Tabelle neu auf
+            baueTabelle();
+
+            // Macht die Eingabefelder wieder leer für das nächste Paket
+            document.getElementById("in-id").value = "";
+            document.getElementById("in-typ").value = "";
+            document.getElementById("in-net").value = "";
+        }
+
+        // Start
         generiereBarcode();
         baueTabelle();
     </script>
