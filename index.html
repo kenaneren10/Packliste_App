@@ -34,14 +34,13 @@
         
         .form-section { background: white; padding: 15px; border-radius: 6px; border: 1px solid #ddd; }
         .form-section h3 { margin-top: 0; margin-bottom: 10px; color: #333; font-size: 14px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
-        .input-row { display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 10px; }
+        .input-row { display: flex; gap: 15px; align-items: flex-start; flex-wrap: wrap; margin-bottom: 10px; }
         .input-group { display: flex; flex-direction: column; gap: 4px; }
         
         .control-panel label { font-size: 11px; font-weight: bold; color: #555; }
         .control-panel input, .control-panel textarea, .control-panel select { padding: 6px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; font-family: Arial, sans-serif; }
-        .control-panel textarea { resize: vertical; }
         
-        .btn-add { background: #0066cc; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 2px;}
+        .btn-add { background: #0066cc; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: auto; margin-bottom: 2px;}
         .btn-add:hover { background: #004c99; }
         .btn-pdf { background: #28a745; color: white; border: none; padding: 15px; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .btn-pdf:hover { background: #218838; }
@@ -79,6 +78,10 @@
         .data-table th, .data-table td { border: 1px solid #000; padding: 3px 4px; text-align: left; vertical-align: top; line-height: 1.2; }
         .data-table th { font-weight: bold; }
 
+        /* Spezielles Design für Unterverpackungen */
+        .inner-package td { background-color: #fafafa; border-top: 1px dashed #ccc; }
+        .inner-package .id-cell { padding-left: 15px; color: #333; }
+
         /* --- FUSSZEILE --- */
         .footer { position: absolute; bottom: 15mm; left: 15mm; right: 15mm; display: flex; justify-content: space-between; font-size: 8pt; line-height: 1.4; }
 
@@ -97,21 +100,15 @@
         
         <div class="form-section">
             <h3>1. Basis-Daten & Adressen</h3>
-            <div class="input-row" style="align-items: flex-start;">
-                <div class="input-group">
-                    <label>Frachteinheit (Packlisten-Nr.):</label>
-                    <input type="text" id="in-fracht" value="4100167438" oninput="updateLive()" style="width: 200px; font-weight: bold; font-size: 15px;">
-                </div>
-                <div class="input-group">
-                    <label>Datum:</label>
-                    <input type="text" id="in-datum" value="19.02.2026" oninput="updateLive()" style="width: 120px;">
-                </div>
+            <div class="input-row">
+                <div class="input-group"><label>Frachteinheit (Packlisten-Nr.):</label><input type="text" id="in-fracht" value="4100167438" oninput="updateLive()" style="width: 200px; font-weight: bold;"></div>
+                <div class="input-group"><label>Datum:</label><input type="text" id="in-datum" value="19.02.2026" oninput="updateLive()" style="width: 120px;"></div>
             </div>
             
-            <div class="input-row" style="margin-top: 15px; align-items: flex-start;">
+            <div class="input-row" style="margin-top: 15px;">
                 <div class="input-group" style="width: 45%;">
-                    <label>Rechnungsempfänger (Firma & Adresse):</label>
-                    <textarea id="in-inv-adresse" rows="4" oninput="updateLive()">DHL Supply Chain Singapore Pte Ltd&#10;ARC Healthcare Hub&#10;1 Greenwich Drive&#10;Singapore 533865&#10;Singapore</textarea>
+                    <label>Rechnungsempfänger:</label>
+                    <textarea id="in-inv-adresse" rows="3" oninput="updateLive()">DHL Supply Chain Singapore Pte Ltd&#10;ARC Healthcare Hub&#10;Singapore</textarea>
                     <div style="display: flex; gap: 10px; margin-top: 5px;">
                         <input type="text" id="in-inv-kontakt" value="Low Pike San" oninput="updateLive()" placeholder="Kontaktperson" style="width: 33%;">
                         <input type="text" id="in-inv-tel" value="+656562263460" oninput="updateLive()" placeholder="Telefon" style="width: 33%;">
@@ -120,12 +117,12 @@
                 </div>
 
                 <div class="input-group" style="width: 45%;">
-                    <label>Empfänger (Firma & Adresse):</label>
-                    <textarea id="in-cons-adresse" rows="4" oninput="updateLive()">DHL Supply Chain Singapore Pte Ltd&#10;ARC Healthcare Hub&#10;1 Greenwich Drive&#10;Advanced Regional Centre&#10;Singapore 533865&#10;Singapore</textarea>
+                    <label>Warenempfänger:</label>
+                    <textarea id="in-cons-adresse" rows="3" oninput="updateLive()">DHL Supply Chain Singapore Pte Ltd&#10;Advanced Regional Centre&#10;Singapore</textarea>
                     <div style="display: flex; gap: 10px; margin-top: 5px;">
                         <input type="text" id="in-cons-kontakt" value="Jacky Tang Kok Wai" oninput="updateLive()" placeholder="Kontaktperson" style="width: 33%;">
                         <input type="text" id="in-cons-tel" value="+656591901106" oninput="updateLive()" placeholder="Telefon" style="width: 33%;">
-                        <input type="text" id="in-cons-mail" value="edgsg-dgf-sin-airimportpharma@dhl.com" oninput="updateLive()" placeholder="E-Mail" style="width: 33%;">
+                        <input type="text" id="in-cons-mail" value="edgsg@dhl.com" oninput="updateLive()" placeholder="E-Mail" style="width: 33%;">
                     </div>
                 </div>
             </div>
@@ -133,32 +130,45 @@
 
         <div class="form-section">
             <h3>2. Packstücke zur Tabelle hinzufügen</h3>
-            <div class="input-row">
-                <div class="input-group"><label>Package ID (SSCC)</label><input type="text" id="in-id" placeholder="z.B. 37640135..." style="width: 130px;"></div>
-                <div class="input-group"><label>Typ</label><input type="text" id="in-typ" value="Karton" style="width: 90px;"></div>
-                <div class="input-group"><label>Dimensionen</label><input type="text" id="in-dim" value="0x0x0 cm" style="width: 75px;"></div>
-                <div class="input-group"><label>Inhalt</label><input type="text" id="in-inhalt" value="Medicament" style="width: 90px;"></div>
-                <div class="input-group"><label>Temperatur</label><input type="text" id="in-temp" value="store between +2°C and +8°C" style="width: 170px;"></div>
+            <div class="input-row" style="align-items: stretch;">
                 
-                <div class="input-group">
-                    <label>Dangerous goods</label>
-                    <input type="text" id="in-gefahr" value="-" style="width: 90px;" title="Gib '-' ein oder z.B. eine UN-Nummer">
+                <div style="display: flex; flex-direction: column; gap: 10px; width: 200px;">
+                    <div class="input-group">
+                        <label>Ebene / Verpackungs-Art:</label>
+                        <select id="in-level" style="background-color: #e6f2ff; font-weight: bold;">
+                            <option value="main">📦 Hauptverpackung (z.B. Palette)</option>
+                            <option value="inner">↳ Unterverpackung (Inner-Package)</option>
+                        </select>
+                    </div>
+                    <div class="input-group"><label>Package ID (SSCC):</label><input type="text" id="in-id" placeholder="z.B. 37640135..."></div>
+                    <div class="input-group"><label>Verpackungstyp:</label><input type="text" id="in-typ" value="Karton"></div>
                 </div>
-                
-                <div class="input-group">
-                    <label>Net weight</label>
-                    <div style="display: flex; align-items: center; gap: 5px;">
-                        <input type="text" id="in-net" placeholder="4.000" style="width: 55px;"> kg
+
+                <div style="display: flex; flex-direction: column; gap: 10px; width: 250px;">
+                    <div class="input-group" style="height: 100%;">
+                        <label>Wareninhalt (Mehrzeilig möglich!):</label>
+                        <textarea id="in-inhalt" placeholder="Medicament&#10;Batch: 123456&#10;Roformis: 779..." style="height: 100%; min-height: 100px; font-family: monospace;"></textarea>
                     </div>
                 </div>
-                <div class="input-group">
-                    <label>Gross weight</label>
-                    <div style="display: flex; align-items: center; gap: 5px;">
-                        <input type="text" id="in-gross" placeholder="4.800" style="width: 55px;"> kg
-                    </div>
+
+                <div style="display: flex; flex-direction: column; gap: 10px; width: 180px;">
+                    <div class="input-group"><label>Dimensionen (LxBxH):</label><input type="text" id="in-dim" value="0x0x0 cm"></div>
+                    <div class="input-group"><label>Temperatur:</label><input type="text" id="in-temp" value="store between +2°C and +8°C"></div>
+                    <div class="input-group"><label>Dangerous goods (UN-Nr.):</label><input type="text" id="in-gefahr" value="-"></div>
                 </div>
-                
-                <button class="btn-add" onclick="paketHinzufuegen()">+ Einfügen</button>
+
+                <div style="display: flex; flex-direction: column; gap: 10px; width: 120px; justify-content: flex-end;">
+                    <div class="input-group">
+                        <label>Net weight:</label>
+                        <div style="display: flex; align-items: center; gap: 5px;"><input type="text" id="in-net" placeholder="4.000" style="width: 60px;"> kg</div>
+                    </div>
+                    <div class="input-group">
+                        <label>Gross weight:</label>
+                        <div style="display: flex; align-items: center; gap: 5px;"><input type="text" id="in-gross" placeholder="4.800" style="width: 60px;"> kg</div>
+                    </div>
+                    <button class="btn-add" onclick="paketHinzufuegen()">+ Einfügen</button>
+                </div>
+
             </div>
         </div>
 
@@ -182,12 +192,8 @@
                 <h1>Packing List to Freight Unit <span id="out-fracht">4100167438</span></h1>
                 <span style="font-size: 9pt;">(Version 1.0)</span>
             </div>
-            <div class="barcode-block">
-                <svg id="barcode"></svg>
-            </div>
-            <div class="logo-block">
-                <div class="roche-hexagon">Roche</div>
-            </div>
+            <div class="barcode-block"><svg id="barcode"></svg></div>
+            <div class="logo-block"><div class="roche-hexagon">Roche</div></div>
         </div>
 
         <div class="address-container">
@@ -217,9 +223,9 @@
         <table class="data-table">
             <thead>
                 <tr>
-                    <th>Shipping marks</th><th>UCR No. (GSIN)</th><th>Total no. of packages</th>
+                    <th>Shipping marks</th><th>UCR No. (GSIN)</th><th>Total no. of<br>packages</th>
                     <th>Total gross weight</th><th>Total net weight</th><th>Total volume</th>
-                    <th>Total no. of temperature monitoring devices *</th>
+                    <th>Total no. of temperature<br>monitoring devices *</th>
                 </tr>
             </thead>
             <tbody>
@@ -227,7 +233,9 @@
                     <td>Address of consignee,<br><span id="out-fracht-table">4100167438</span></td>
                     <td>(402) 7640135 790167438 4</td>
                     <td id="out-total-packages">0</td>
-                    <td>382.825 kg</td><td>44.604 kg</td><td>2.47 m3</td>
+                    <td id="out-total-gross">0.000 kg</td>
+                    <td id="out-total-net">0.000 kg</td>
+                    <td>2.47 m3</td>
                     <td id="out-total-logger">0</td>
                 </tr>
             </tbody>
@@ -273,7 +281,6 @@
             const fracht = document.getElementById("in-fracht").value;
             document.getElementById("out-fracht").innerText = fracht;
             document.getElementById("out-fracht-table").innerText = fracht;
-            
             document.getElementById("out-datum").innerText = document.getElementById("in-datum").value;
             
             document.getElementById("out-inv-adresse").innerText = document.getElementById("in-inv-adresse").value;
@@ -292,45 +299,78 @@
         function bauePaketTabelle() {
             const tbody = document.getElementById("details-body");
             tbody.innerHTML = ""; 
+            
+            let sumNet = 0;
+            let sumGross = 0;
+            let mainPackagesCount = 0;
+
             packstuecke.forEach(paket => {
-                tbody.innerHTML += `<tr><td>${paket.id}</td><td>${paket.typ}</td><td>${paket.dim}</td><td>${paket.inhalt}</td><td>${paket.temp}</td><td></td><td>${paket.gefahr}</td><td>${paket.net}</td><td>${paket.gross}</td></tr>`;
+                // Berechnet das Total-Gewicht (aber NUR für Hauptverpackungen, um Doppelzählungen zu vermeiden!)
+                if(paket.level === "main") {
+                    mainPackagesCount++;
+                    // Zieht die Zahl aus dem Text (z.B. "4.000 kg" -> 4.000) und rechnet sie zusammen
+                    sumNet += parseFloat(paket.net) || 0;
+                    sumGross += parseFloat(paket.gross) || 0;
+                }
+
+                // Ersetzt Zeilenumbrüche im Textfeld durch HTML-Umbruchzeichen (<br>)
+                let formatierterInhalt = paket.inhalt.replace(/\n/g, "<br>");
+                
+                // Optische Unterscheidung: Unterverpackungen bekommen eine eigene CSS-Klasse und einen Pfeil
+                let rowClass = paket.level === "inner" ? "inner-package" : "";
+                let idText = paket.level === "inner" ? `↳ ${paket.id}` : `<b>${paket.id}</b>`;
+
+                tbody.innerHTML += `
+                    <tr class="${rowClass}">
+                        <td class="id-cell">${idText}</td>
+                        <td>${paket.typ}</td>
+                        <td>${paket.dim}</td>
+                        <td>${formatierterInhalt}</td>
+                        <td>${paket.temp}</td>
+                        <td></td>
+                        <td>${paket.gefahr}</td>
+                        <td>${paket.net}</td>
+                        <td>${paket.gross}</td>
+                    </tr>
+                `;
             });
-            document.getElementById("out-total-packages").innerText = packstuecke.length;
+            
+            // Trägt die zusammengerechneten Summen oben in die Total-Tabelle ein (auf 3 Nachkommastellen genau)
+            document.getElementById("out-total-packages").innerText = mainPackagesCount;
+            document.getElementById("out-total-net").innerText = sumNet.toFixed(3) + " kg";
+            document.getElementById("out-total-gross").innerText = sumGross.toFixed(3) + " kg";
         }
 
         function paketHinzufuegen() {
             if(document.getElementById("in-id").value === "") { alert("Bitte eine Package ID eingeben!"); return; }
             
-            // Holt die eingetippte Zahl (z.B. "4.000")
             let netInput = document.getElementById("in-net").value.trim();
             let grossInput = document.getElementById("in-gross").value.trim();
-            
-            // Wenn nichts eingegeben wurde, setze auf 0.000
             if(netInput === "") netInput = "0.000";
             if(grossInput === "") grossInput = "0.000";
-
-            // Fügt automatisch " kg" an, falls der Nutzer es nicht aus Versehen schon getippt hat
             if(!netInput.toLowerCase().includes("kg")) netInput += " kg";
             if(!grossInput.toLowerCase().includes("kg")) grossInput += " kg";
 
             packstuecke.push({
+                level: document.getElementById("in-level").value, // "main" oder "inner"
                 id: document.getElementById("in-id").value,
                 typ: document.getElementById("in-typ").value || "-",
                 dim: document.getElementById("in-dim").value || "-",
                 inhalt: document.getElementById("in-inhalt").value || "-",
                 temp: document.getElementById("in-temp").value || "-",
-                gefahr: document.getElementById("in-gefahr").value || "-", // NEU: Gefahrgut wird ausgelesen
-                net: netInput, // Das saubere, fertig formatierte Gewicht
+                gefahr: document.getElementById("in-gefahr").value || "-", 
+                net: netInput,
                 gross: grossInput
             });
             
             bauePaketTabelle();
             
-            // Felder wieder für die nächste Eingabe leeren/zurücksetzen
+            // Eingabefelder für das nächste Paket leeren
             document.getElementById("in-id").value = ""; 
+            document.getElementById("in-inhalt").value = ""; 
             document.getElementById("in-net").value = "";
             document.getElementById("in-gross").value = "";
-            document.getElementById("in-gefahr").value = "-"; // Wieder auf das Minus setzen
+            document.getElementById("in-gefahr").value = "-";
         }
 
         function baueLoggerTabelle() {
@@ -352,7 +392,6 @@
             document.getElementById("in-log-sn").value = ""; 
         }
 
-        // Start
         updateLive();
         bauePaketTabelle();
         baueLoggerTabelle();
