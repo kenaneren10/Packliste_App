@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Packlisten Generator</title>
+    <style>
+        /* Der graue Hintergrund für den Mitarbeiter-Bildschirm */
+        body {
+            background-color: #525659;
+            font-family: Arial, Helvetica, sans-serif;
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+            font-size: 10pt; /* Exakte Original-Schriftgröße */
+        }
+
+        /* Unser digitales A4-Blatt (Querformat) */
+        .a4-page {
+            background-color: white;
+            width: 297mm;
+            height: 210mm;
+            padding: 15mm 15mm; /* Exakt ausgemessen! */
+            box-sizing: border-box;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            position: relative;
+        }
+
+        /* --- 1. KOPFZEILE --- */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12mm;
+        }
+
+        .title-block { width: 40%; }
+        .title-block h1 {
+            font-size: 18pt;
+            margin: 0 0 2mm 0;
+            font-weight: normal;
+        }
+
+        .barcode-block { 
+            width: 40%; 
+            text-align: left; 
+            padding-left: 10mm;
+        }
+        
+        /* Das ist nur ein Platzhalter, bis wir das Skript einbauen */
+        .barcode-placeholder {
+            display: inline-block;
+            width: 80mm;
+            height: 15mm;
+            background: Repeating-linear-gradient(90deg, #000, #000 2px, #fff 2px, #fff 4px);
+        }
+
+        .logo-block {
+            width: 20%;
+            text-align: right;
+            color: #0066cc;
+            font-size: 20pt;
+            font-weight: bold;
+        }
+        .roche-hexagon {
+            border: 1.5px solid #0066cc;
+            display: inline-block;
+            padding: 2px 15px;
+        }
+
+        /* --- 2. ADRESSBLÖCKE --- */
+        .address-container {
+            display: flex;
+            justify-content: flex-start;
+            gap: 70mm; /* Der exakte Abstand zwischen den Blöcken */
+            margin-bottom: 8mm;
+            line-height: 1.3;
+        }
+
+        .address-box { width: 75mm; }
+        
+        .address-title {
+            font-weight: bold;
+            margin-bottom: 2mm;
+        }
+        
+        .address-grid {
+            display: grid;
+            grid-template-columns: 18mm auto; /* Spalten für "Kontakt:" und die Info */
+            margin-top: 3mm;
+        }
+
+        /* Druck-Einstellungen */
+        @media print {
+            body { background-color: white; padding: 0; }
+            .a4-page { box-shadow: none; width: 100%; height: 100%; }
+            @page { size: A4 landscape; margin: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="a4-page">
+        
+        <div class="header">
+            <div class="title-block">
+                <h1>Packliste zu Frachteinheit 4100168224</h1>
+                <span style="font-size: 10pt;">(Version 2.0)</span>
+            </div>
+            
+            <div class="barcode-block">
+                <div class="barcode-placeholder"></div>
+            </div>
+            
+            <div class="logo-block">
+                <div class="roche-hexagon">Roche</div>
+            </div>
+        </div>
+
+        <div class="address-container">
+            <div class="address-box">
+                <div class="address-title">Rechnungsempfänger</div>
+                Recipharm<br>
+                Wasserburger Arzneimittelwerk GmbH<br>
+                Herderstrasse 2<br>
+                83512 Wasserburg<br>
+                Deutschland
+                <div class="address-grid">
+                    <div>Kontakt:</div><div>Sabine Baumgartner</div>
+                    <div>Telefon:</div><div>+49080711008155</div>
+                    <div>E-Mail:</div><div>sabine.baumgartner@recipharm.com</div>
+                </div>
+            </div>
+
+            <div class="address-box">
+                <div class="address-title">Empfänger</div>
+                Recipharm<br>
+                Wasserburger Arzneimittelwerk GmbH<br>
+                Herderstrasse 2<br>
+                83512 Wasserburg<br>
+                Deutschland
+                <div class="address-grid">
+                    <div>Kontakt:</div><div>Sabine Baumgartner</div>
+                    <div>Telefon:</div><div>+49080711008155</div>
+                    <div>E-Mail:</div><div>sabine.baumgartner@recipharm.com</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>
