@@ -3,96 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <title>Packlisten Generator</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
     <style>
-        /* Der graue Hintergrund für den Mitarbeiter-Bildschirm */
         body {
             background-color: #525659;
             font-family: Arial, Helvetica, sans-serif;
             margin: 0;
-            padding: 40px;
+            padding: 20px;
             display: flex;
-            justify-content: center;
-            font-size: 10pt; /* Exakte Original-Schriftgröße */
+            flex-direction: column;
+            align-items: center;
+            font-size: 9pt; /* Etwas kleiner für die Tabellen */
         }
 
-        /* Unser digitales A4-Blatt (Querformat) */
+        .control-panel {
+            background-color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            width: 297mm;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .control-panel input { padding: 8px; font-size: 16px; border: 1px solid #ccc; width: 200px; }
+
         .a4-page {
             background-color: white;
             width: 297mm;
             height: 210mm;
-            padding: 15mm 15mm; /* Exakt ausgemessen! */
+            padding: 15mm 15mm;
             box-sizing: border-box;
             box-shadow: 0 5px 15px rgba(0,0,0,0.5);
             position: relative;
         }
 
-        /* --- 1. KOPFZEILE --- */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 12mm;
-        }
-
+        /* KOPFZEILE */
+        .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12mm; }
         .title-block { width: 40%; }
-        .title-block h1 {
-            font-size: 18pt;
-            margin: 0 0 2mm 0;
-            font-weight: normal;
-        }
+        .title-block h1 { font-size: 18pt; margin: 0 0 2mm 0; font-weight: normal; }
+        .barcode-block { width: 40%; text-align: left; padding-left: 10mm; }
+        .logo-block { width: 20%; text-align: right; color: #0066cc; font-size: 20pt; font-weight: bold; }
+        .roche-hexagon { border: 1.5px solid #0066cc; display: inline-block; padding: 2px 15px; }
 
-        .barcode-block { 
-            width: 40%; 
-            text-align: left; 
-            padding-left: 10mm;
-        }
-        
-        /* Das ist nur ein Platzhalter, bis wir das Skript einbauen */
-        .barcode-placeholder {
-            display: inline-block;
-            width: 80mm;
-            height: 15mm;
-            background: Repeating-linear-gradient(90deg, #000, #000 2px, #fff 2px, #fff 4px);
-        }
-
-        .logo-block {
-            width: 20%;
-            text-align: right;
-            color: #0066cc;
-            font-size: 20pt;
-            font-weight: bold;
-        }
-        .roche-hexagon {
-            border: 1.5px solid #0066cc;
-            display: inline-block;
-            padding: 2px 15px;
-        }
-
-        /* --- 2. ADRESSBLÖCKE --- */
-        .address-container {
-            display: flex;
-            justify-content: flex-start;
-            gap: 70mm; /* Der exakte Abstand zwischen den Blöcken */
-            margin-bottom: 8mm;
-            line-height: 1.3;
-        }
-
+        /* ADRESSEN */
+        .address-container { display: flex; justify-content: flex-start; gap: 70mm; margin-bottom: 2mm; line-height: 1.3; }
         .address-box { width: 75mm; }
-        
-        .address-title {
-            font-weight: bold;
-            margin-bottom: 2mm;
-        }
-        
-        .address-grid {
-            display: grid;
-            grid-template-columns: 18mm auto; /* Spalten für "Kontakt:" und die Info */
-            margin-top: 3mm;
-        }
+        .address-title { font-weight: bold; margin-bottom: 2mm; font-size: 10pt; }
+        .address-grid { display: grid; grid-template-columns: 18mm auto; margin-top: 3mm; }
 
-        /* Druck-Einstellungen */
+        /* NEU: TABELLEN-DESIGN */
+        .datum { margin-bottom: 4mm; }
+        .section-title { font-size: 10pt; margin-bottom: 1mm; }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse; /* Zieht feine, einfache Linien */
+            margin-bottom: 6mm;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 3px 4px;
+            text-align: left;
+            vertical-align: top;
+        }
+        th { font-weight: bold; }
+
         @media print {
             body { background-color: white; padding: 0; }
+            .control-panel { display: none; }
             .a4-page { box-shadow: none; width: 100%; height: 100%; }
             @page { size: A4 landscape; margin: 0; }
         }
@@ -100,18 +81,20 @@
 </head>
 <body>
 
+    <div class="control-panel">
+        <label style="font-size: 14pt;"><b>Eingabe Packlisten-Nummer:</b></label>
+        <input type="text" id="input-fracht" value="4100168224">
+    </div>
+
     <div class="a4-page">
-        
         <div class="header">
             <div class="title-block">
-                <h1>Packliste zu Frachteinheit 4100168224</h1>
+                <h1>Packliste zu Frachteinheit <span id="text-fracht">4100168224</span></h1>
                 <span style="font-size: 10pt;">(Version 2.0)</span>
             </div>
-            
             <div class="barcode-block">
-                <div class="barcode-placeholder"></div>
+                <svg id="barcode"></svg>
             </div>
-            
             <div class="logo-block">
                 <div class="roche-hexagon">Roche</div>
             </div>
@@ -120,25 +103,16 @@
         <div class="address-container">
             <div class="address-box">
                 <div class="address-title">Rechnungsempfänger</div>
-                Recipharm<br>
-                Wasserburger Arzneimittelwerk GmbH<br>
-                Herderstrasse 2<br>
-                83512 Wasserburg<br>
-                Deutschland
+                Recipharm<br>Wasserburger Arzneimittelwerk GmbH<br>Herderstrasse 2<br>83512 Wasserburg<br>Deutschland
                 <div class="address-grid">
                     <div>Kontakt:</div><div>Sabine Baumgartner</div>
                     <div>Telefon:</div><div>+49080711008155</div>
                     <div>E-Mail:</div><div>sabine.baumgartner@recipharm.com</div>
                 </div>
             </div>
-
             <div class="address-box">
                 <div class="address-title">Empfänger</div>
-                Recipharm<br>
-                Wasserburger Arzneimittelwerk GmbH<br>
-                Herderstrasse 2<br>
-                83512 Wasserburg<br>
-                Deutschland
+                Recipharm<br>Wasserburger Arzneimittelwerk GmbH<br>Herderstrasse 2<br>83512 Wasserburg<br>Deutschland
                 <div class="address-grid">
                     <div>Kontakt:</div><div>Sabine Baumgartner</div>
                     <div>Telefon:</div><div>+49080711008155</div>
@@ -147,7 +121,83 @@
             </div>
         </div>
 
+        <div class="datum">Datum: 02.03.2026</div>
+
+        <div class="section-title">Total Packliste:</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Markierungen</th>
+                    <th>UCR Nr. (GSIN)</th>
+                    <th>Total Anzahl<br>Packstücke</th>
+                    <th>Total Bruttogewicht</th>
+                    <th>Total Nettogewicht</th>
+                    <th>Total Volumen</th>
+                    <th>Anzahl der Temperatur-<br>überwachungsgeräte*</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Addresse Warenempfänger,<br><span id="text-fracht-table">4100168224</span></td>
+                    <td>(402) 7640135 790168224 2</td>
+                    <td>1</td>
+                    <td>21.000 kg</td>
+                    <td>5.000 kg</td>
+                    <td>0.38 m3</td>
+                    <td>1</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="section-title">Details Packliste:</div>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 14%;">Packstück ID (SSCC)</th>
+                    <th style="width: 12%;">Packstück Typ</th>
+                    <th style="width: 12%;">Dimensionen<br>(L x B x H)</th>
+                    <th style="width: 14%;">Wareninhalt</th>
+                    <th style="width: 12%;">Temperatur-<br>bedingungen</th>
+                    <th style="width: 14%;">Temperaturüber-<br>wachungsgeräte *</th>
+                    <th style="width: 8%;">Gefahrgut</th>
+                    <th style="width: 7%;">Nettogewicht</th>
+                    <th style="width: 7%;">Bruttogewicht</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>376401357901141181</td>
+                    <td>Palette (PREP80)</td>
+                    <td>80x60x80 cm</td>
+                    <td>Organisch chemisches<br>Erzeugnis</td>
+                    <td>lagern zw. +2°C<br>und +8°C</td>
+                    <td>1. 72140335758<br><span style="font-size: 7pt;">on top of the product load_1</span></td>
+                    <td>-</td>
+                    <td>5.000 kg</td>
+                    <td>21.000 kg</td>
+                </tr>
+            </tbody>
+        </table>
+
     </div>
 
+    <script>
+        function generiereBarcode() {
+            var nummer = document.getElementById("input-fracht").value;
+            document.getElementById("text-fracht").innerText = nummer;
+            document.getElementById("text-fracht-table").innerText = nummer; // Aktualisiert auch die Nummer in der Tabelle!
+            
+            JsBarcode("#barcode", nummer, {
+                format: "CODE128",
+                lineColor: "#000",
+                width: 1.8,
+                height: 40,
+                displayValue: false,
+                margin: 0
+            });
+        }
+        document.getElementById("input-fracht").addEventListener("input", generiereBarcode);
+        generiereBarcode();
+    </script>
 </body>
 </html>
