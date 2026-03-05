@@ -32,15 +32,33 @@
         .btn-logger { background: #cc0000; } .btn-logger:hover { background: #990000; }
         .btn-pdf { background: #333; color: white; border: none; padding: 15px; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .btn-pdf:hover { background: #000; }
+        
+        /* DER NEUE OVERLAY-BUTTON */
+        .btn-overlay { background: #ffc107; color: #000; border: 2px solid #e0a800; padding: 15px; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .btn-overlay:hover { background: #e0a800; }
 
         /* --- DAS ECHTE A4 BLATT --- */
         .a4-page {
             background-color: white; 
             width: 297mm; 
-            height: 210mm; /* Knallhart fixiert, kann nicht mehr ausufern! */
+            height: 210mm; 
             padding: 12mm 15mm 15mm 15mm; 
             box-sizing: border-box; box-shadow: 0 5px 15px rgba(0,0,0,0.5); 
             position: relative; color: #000; overflow: hidden; margin-bottom: 20px;
+        }
+
+        /* --- DIE PAUSPAPIER-MAGIE (Wird durch Button aktiviert) --- */
+        .overlay-active::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('overlay.png'); /* Hier lädt er das hochgeladene Bild! */
+            background-size: 297mm 210mm; /* Zwingt das Bild auf exakt A4-Größe */
+            background-position: top left;
+            background-repeat: no-repeat;
+            opacity: 0.45; /* Macht das Bild halb durchsichtig */
+            pointer-events: none; /* Erlaubt das Klicken durch das Bild hindurch */
+            z-index: 1000;
         }
 
         /* --- VERTIKALER TEXT LINKS --- */
@@ -49,14 +67,17 @@
         /* --- KOPFZEILE --- */
         .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8mm; }
         .title-block { width: 50%; }
-        .title-block h1 { font-size: 15pt; margin: 0 0 2mm 0; font-weight: normal; white-space: nowrap; letter-spacing: -0.5px; } /* Überschrift verkleinert */
+        /* Überschrift kleiner gemacht: */
+        .title-block h1 { font-size: 13.5pt; margin: 0 0 2mm 0; font-weight: normal; white-space: nowrap; letter-spacing: -0.5px; } 
         .barcode-block { width: 30%; text-align: center; margin-top: -3mm; }
         .logo-block { width: 20%; text-align: right; color: #0066cc; font-size: 22pt; font-weight: bold; font-family: Arial, sans-serif; }
         .roche-hexagon { border: 1.5px solid #0066cc; display: inline-block; padding: 2px 18px; }
 
-        /* --- ADRESSEN (Perfekt mittig geteilt) --- */
+        /* --- ADRESSEN (Angepasst, Consignee weiter links!) --- */
         .address-container { display: flex; width: 100%; margin-bottom: 2mm; line-height: 1.25; font-size: 8.5pt; }
-        .address-box { width: 50%; box-sizing: border-box; padding-right: 10mm; } /* Genau 50% Breite rückt Empfänger perfekt ein */
+        /* Der erste Kasten ist jetzt fest 115mm breit, danach startet direkt der Consignee */
+        .address-box:first-child { width: 115mm; } 
+        .address-box:last-child { width: 100mm; } 
         .address-title { font-weight: bold; margin-bottom: 2mm; font-size: 9pt; }
         .address-grid { display: grid; grid-template-columns: 15mm auto; margin-top: 3mm; }
 
@@ -68,34 +89,30 @@
         .data-table th, .data-table td { border: 1px solid #000; padding: 3px 4px; text-align: left; vertical-align: top; line-height: 1.2; overflow-wrap: break-word; word-wrap: break-word; }
         .data-table th { font-weight: bold; }
 
-        /* DEINE EXAKTEN SPALTENBREITEN IN MILLIMETERN! */
+        /* EXAKTE SPALTENBREITEN */
         .col-1 { width: 35mm; } .col-2 { width: 32mm; } .col-3 { width: 32mm; }
         .col-4 { width: 35mm; } .col-5 { width: 26mm; } .col-6 { width: 32mm; }
         .col-7 { width: 35mm; } .col-8 { width: 22mm; } .col-9 { width: 14mm; }
 
-        /* --- DAS NEUE DESIGN FÜR UNTERVERPACKUNGEN --- */
+        /* --- UNTERVERPACKUNGEN --- */
         .sub-header th { background-color: #f9f9f9; border-top: 1.5px solid #000; border-bottom: 1.5px solid #000; }
-        
-        /* Zeile 1 der Unterverpackung (Kein dicker Boden, damit es mit Infozeile verschmilzt) */
         .inner-row-1 td { border-bottom: none; }
-
-        /* Zeile 2 der Unterverpackung (Der große Textblock OHNE vertikale Trennlinien) */
         .inner-row-2 td {
             border-top: none;
             border-bottom: 1px solid #000;
-            border-left: 1px solid #000;  /* Nur Außenkante */
-            border-right: 1px solid #000; /* Nur Außenkante */
+            border-left: 1px solid #000; 
+            border-right: 1px solid #000;
             padding-bottom: 8px;
         }
 
         /* --- FUSSZEILE --- */
         .footer-fixed { position: absolute; bottom: 15mm; left: 15mm; right: 15mm; display: flex; justify-content: space-between; font-size: 8pt; line-height: 1.3; }
 
-        /* --- DRUCK-EINSTELLUNGEN --- */
         @media print {
             body { background-color: white; padding: 0; }
             .control-panel { display: none !important; } 
             .a4-page { box-shadow: none; margin-bottom: 0; page-break-after: always; }
+            .overlay-active::after { display: none; } /* Pauspapier wird nie mitgedruckt! */
             @page { size: A4 landscape; margin: 0; }
         }
     </style>
@@ -104,6 +121,8 @@
 
     <div class="control-panel">
         
+        <button class="btn-overlay" onclick="toggleOverlay()">🔍 PAUSPAPIER-MODUS (Original-PDF als Folie ein/ausblenden)</button>
+
         <div class="form-section">
             <h3>1. Basis-Daten & Adressen</h3>
             <div class="input-row">
@@ -137,57 +156,41 @@
 
         <div class="form-section box-main">
             <h3 style="color: #0066cc;">📦 2a. NEUE HAUPTVERPACKUNG ANLEGEN</h3>
-            <p style="font-size: 11px; margin-top: -10px; color: #666;">Inhalt ("Inner-Packages") wird automatisch generiert, sobald Unterverpackungen angelegt werden.</p>
             <div class="input-row">
-                <div class="input-group"><label>Package ID (SSCC):</label><input type="text" id="main-id" placeholder="37640135..." style="width: 150px;"></div>
+                <div class="input-group"><label>Package ID (SSCC):</label><input type="text" id="main-id" value="376401357901136095" style="width: 150px;"></div>
                 <div class="input-group"><label>Typ:</label><input type="text" id="main-typ" value="Cold chain container" style="width: 140px;"></div>
                 <div class="input-group"><label>Dimensionen:</label><input type="text" id="main-dim" value="120x100x140 cm" style="width: 110px;"></div>
                 <div class="input-group"><label>Temperatur:</label><input type="text" id="main-temp" value="store between +2°C and +8°C" style="width: 180px;"></div>
-                <div class="input-group"><label>Net weight:</label><input type="text" id="main-net" placeholder="24.264" style="width: 60px;"></div>
-                <div class="input-group"><label>Gross weight:</label><input type="text" id="main-gross" placeholder="281.290" style="width: 60px;"></div>
+                <div class="input-group"><label>Net weight:</label><input type="text" id="main-net" value="24.264" style="width: 60px;"></div>
+                <div class="input-group"><label>Gross weight:</label><input type="text" id="main-gross" value="281.290" style="width: 60px;"></div>
                 <button class="btn-main" onclick="addMain()">+ Hauptverpackung speichern</button>
             </div>
         </div>
 
         <div class="form-section box-inner">
-            <h3 style="color: #28a745;">↳ 2b. UNTERVERPACKUNG (Karton) ZUR LETZTEN HAUPTVERPACKUNG HINZUFÜGEN</h3>
+            <h3 style="color: #28a745;">↳ 2b. UNTERVERPACKUNG (Karton) HINZUFÜGEN</h3>
             <div class="input-row" style="align-items: stretch;">
                 <div style="display: flex; flex-direction: column; gap: 10px; width: 160px;">
-                    <div class="input-group"><label>Inner-Package ID:</label><input type="text" id="inner-id" placeholder="2123456..."></div>
+                    <div class="input-group"><label>Inner-Package ID:</label><input type="text" id="inner-id" value="212345670069326679"></div>
                     <div class="input-group"><label>Typ:</label><input type="text" id="inner-typ" value="Karton"></div>
                     <div class="input-group"><label>Dimensionen:</label><input type="text" id="inner-dim" value="0x0x0 cm"></div>
                 </div>
-
                 <div style="display: flex; flex-direction: column; gap: 10px; width: 300px;">
                     <div class="input-group" style="height: 100%;">
                         <label>Wareninhalt / Details (Mehrzeilig):</label>
-                        <textarea id="inner-inhalt" placeholder="Medicament&#10;39032335&#10;1 autoinjector CT-388..." style="height: 100%; min-height: 90px; font-family: monospace;"></textarea>
+                        <textarea id="inner-inhalt" style="height: 100%; min-height: 90px; font-family: monospace;">Medicament&#10;39032335&#10;1 autoinjector CT-388 4mg/0.4ml</textarea>
                     </div>
                 </div>
-
                 <div style="display: flex; flex-direction: column; gap: 10px; width: 130px; justify-content: flex-end;">
                     <div class="input-group"><label>Dangerous goods:</label><input type="text" id="inner-gefahr" value="-"></div>
                     <div class="input-group"><label>HS-Code:</label><input type="text" id="inner-hs" value="3004.39"></div>
-                    <div class="input-group"><label>Menge (Quantity):</label><input type="text" id="inner-qty" placeholder="60.00 ea"></div>
+                    <div class="input-group"><label>Menge (Quantity):</label><input type="text" id="inner-qty" value="60.00 ea"></div>
                 </div>
-                
                 <div style="display: flex; flex-direction: column; gap: 10px; width: 130px; justify-content: flex-end;">
-                    <div class="input-group"><label>Net weight:</label><input type="text" id="inner-net" placeholder="4.044"></div>
-                    <div class="input-group"><label>Gross weight:</label><input type="text" id="inner-gross" placeholder="4.875"></div>
+                    <div class="input-group"><label>Net weight:</label><input type="text" id="inner-net" value="4.044"></div>
+                    <div class="input-group"><label>Gross weight:</label><input type="text" id="inner-gross" value="4.875"></div>
                     <button class="btn-inner" onclick="addInner()">+ Karton hinzufügen</button>
                 </div>
-            </div>
-        </div>
-
-        <div class="form-section box-logger">
-            <h3 style="color: #cc0000;">🌡️ 3. TEMPERATUR-LOGGER HINZUFÜGEN</h3>
-            <p style="font-size: 11px; margin-top: -10px; color: #666;">Wird in die kleine Tabelle ganz unten UND in die "Temperature monitoring"-Spalte eingetragen.</p>
-            <div class="input-row">
-                <div class="input-group"><label>Gehört zu Package ID:</label><input type="text" id="log-pid" placeholder="37640135..." style="width: 150px;"></div>
-                <div class="input-group"><label>Laufende Nr.:</label><input type="text" id="log-nr" value="1." style="width: 60px;"></div>
-                <div class="input-group"><label>Device S/N:</label><input type="text" id="log-sn" placeholder="72071008363" style="width: 130px;"></div>
-                <div class="input-group"><label>Zusatz-Info (Optional):</label><input type="text" id="log-info" placeholder="mid. of box bottom..." style="width: 180px;"></div>
-                <button class="btn-logger" onclick="addLogger()">+ Logger speichern</button>
             </div>
         </div>
 
@@ -200,279 +203,120 @@
         let mainPackages = [];
         let loggerData = [];
 
-        // Funktion, um Text sicher ins Dokument zu übernehmen
-        function safeHtml(text) {
-            if(!text) return "";
-            return text.replace(/\n/g, "<br>");
+        function toggleOverlay() {
+            document.querySelectorAll('.a4-page').forEach(page => {
+                page.classList.toggle('overlay-active');
+            });
         }
 
-        // Volumen Rechner
-        function berechneVolumen(dimString) {
-            let match = dimString.match(/(\d+)\s*x\s*(\d+)\s*x\s*(\d+)/i);
-            if(match) { return (parseFloat(match[1]) * parseFloat(match[2]) * parseFloat(match[3])) / 1000000; }
-            return 0;
-        }
+        function safeHtml(text) { return text ? text.replace(/\n/g, "<br>") : ""; }
+        function berechneVolumen(dimString) { let match = dimString.match(/(\d+)\s*x\s*(\d+)\s*x\s*(\d+)/i); if(match) { return (parseFloat(match[1]) * parseFloat(match[2]) * parseFloat(match[3])) / 1000000; } return 0; }
+        function formatWeight(w) { w = w.trim(); if(w === "") return ""; if(!w.toLowerCase().includes("kg")) return w + " kg"; return w; }
 
-        // Gewicht Formatierer
-        function formatWeight(w) {
-            w = w.trim();
-            if(w === "") return "";
-            if(!w.toLowerCase().includes("kg")) return w + " kg";
-            return w;
-        }
-
-        // BAUT EINE VÖLLIG NEUE LEERE A4 SEITE
         function buildEmptyPage(pageNum, isFirstPage) {
-            let addressHtml = "";
-            let totalsHtml = "";
-
+            let addressHtml = ""; let totalsHtml = "";
             if(isFirstPage) {
                 addressHtml = `
                 <div class="address-container">
                     <div class="address-box">
                         <div class="address-title">Invoice recipient</div>
                         <span class="out-inv-adresse" style="white-space: pre-line;">...</span>
-                        <div class="address-grid">
-                            <div>Contact:</div><div class="out-inv-kontakt">...</div>
-                            <div>Phone:</div><div class="out-inv-tel">...</div>
-                            <div>E-Mail:</div><div class="out-inv-mail">...</div>
-                        </div>
+                        <div class="address-grid"><div>Contact:</div><div class="out-inv-kontakt">...</div><div>Phone:</div><div class="out-inv-tel">...</div><div>E-Mail:</div><div class="out-inv-mail">...</div></div>
                     </div>
                     <div class="address-box">
                         <div class="address-title">Consignee</div>
                         <span class="out-cons-adresse" style="white-space: pre-line;">...</span>
-                        <div class="address-grid">
-                            <div>Contact:</div><div class="out-cons-kontakt">...</div>
-                            <div>Phone:</div><div class="out-cons-tel">...</div>
-                            <div>E-Mail:</div><div class="out-cons-mail">...</div>
-                        </div>
+                        <div class="address-grid"><div>Contact:</div><div class="out-cons-kontakt">...</div><div>Phone:</div><div class="out-cons-tel">...</div><div>E-Mail:</div><div class="out-cons-mail">...</div></div>
                     </div>
                 </div>
                 <div class="datum">Date: <span class="out-datum"></span></div>
                 `;
-
                 totalsHtml = `
                 <div class="section-title">Total packing-list:</div>
                 <table class="data-table" style="margin-bottom: 8mm;">
-                    <thead>
-                        <tr>
-                            <th style="width: 20%">Shipping marks</th><th style="width: 24%">UCR No. (GSIN)</th><th style="width: 10%">Total no. of<br>packages</th>
-                            <th style="width: 12%">Total gross weight</th><th style="width: 12%">Total net weight</th><th style="width: 10%">Total volume</th>
-                            <th style="width: 12%">Total no. of temperature<br>monitoring devices *</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Address of consignee,<br><span class="out-fracht-table"></span></td>
-                            <td>(402) 7640135 790167438 4</td>
-                            <td class="out-total-packages">0</td>
-                            <td class="out-total-gross">0.000 kg</td>
-                            <td class="out-total-net">0.000 kg</td>
-                            <td class="out-total-vol">0.00 m3</td>
-                            <td class="out-total-logger">0</td> 
-                        </tr>
-                    </tbody>
+                    <thead><tr><th style="width: 20%">Shipping marks</th><th style="width: 24%">UCR No. (GSIN)</th><th style="width: 10%">Total no. of<br>packages</th><th style="width: 12%">Total gross weight</th><th style="width: 12%">Total net weight</th><th style="width: 10%">Total volume</th><th style="width: 12%">Total no. of temperature<br>monitoring devices *</th></tr></thead>
+                    <tbody><tr><td>Address of consignee,<br><span class="out-fracht-table"></span></td><td>(402) 7640135 790167438 4</td><td class="out-total-packages">0</td><td class="out-total-gross">0.000 kg</td><td class="out-total-net">0.000 kg</td><td class="out-total-vol">0.00 m3</td><td class="out-total-logger">0</td></tr></tbody>
                 </table>
                 `;
             }
-
             return `
             <div class="a4-page" id="page-${pageNum}">
                 <div class="vertical-text">7840135792109TEC0165147V4</div>
                 <div class="header">
-                    <div class="title-block">
-                        <h1>Packing List to Freight Unit <span class="out-fracht"></span></h1>
-                        <span style="font-size: 8.5pt;">(Version 1.0)</span>
-                    </div>
+                    <div class="title-block"><h1>Packing List to Freight Unit <span class="out-fracht"></span></h1><span style="font-size: 8.5pt;">(Version 1.0)</span></div>
                     <div class="barcode-block"><svg class="barcode-svg"></svg></div>
                     <div class="logo-block"><div class="roche-hexagon">Roche</div></div>
                 </div>
-                
-                ${addressHtml}
-                ${totalsHtml}
-
+                ${addressHtml} ${totalsHtml}
                 <div class="section-title">Detail packing-list:</div>
                 <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th class="col-1">Package ID (SSCC)</th><th class="col-2">Packing type</th><th class="col-3">Dimensions<br>(LxHxW cm)</th>
-                            <th class="col-4">Content</th><th class="col-5">Temperature<br>conditions</th><th class="col-6">Temperature<br>monitoring devices *</th>
-                            <th class="col-7">Dangerous<br>goods</th><th class="col-8">Net weight</th><th class="col-9">Gross weight</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th class="col-1">Package ID (SSCC)</th><th class="col-2">Packing type</th><th class="col-3">Dimensions<br>(LxHxW cm)</th><th class="col-4">Content</th><th class="col-5">Temperature<br>conditions</th><th class="col-6">Temperature<br>monitoring devices *</th><th class="col-7">Dangerous<br>goods</th><th class="col-8">Net weight</th><th class="col-9">Gross weight</th></tr></thead>
                     <tbody class="details-body"></tbody>
                 </table>
-                
                 <div class="bottom-info-container"></div>
-
                 <div class="footer-fixed">
                     <div><b>F. Hoffmann-La Roche Ltd</b><br>Site Logistics<br>Grenzacherstrasse 124<br>4070 Basel / Switzerland</div>
                     <div style="margin-left: -50px;">Bldg. 041 / 3.005</div>
                     <div>Tel. +41 61 688 72 27<br>Fax. +41 61 688 69 02<br>E-Mail: basel.site-logistics@roche.com</div>
                     <div style="text-align: right; margin-top: auto;" class="page-number">Page ${pageNum} / {TOTAL_PAGES}</div>
                 </div>
-            </div>
-            `;
+            </div>`;
         }
 
-        // BAUT DEN GANZEN BERICHT MIT AUTO-SEITENUMBRUCH
         function renderDocument() {
             const container = document.getElementById("pdf-output-container");
             container.innerHTML = ""; 
-            
-            let pageNum = 1;
-            container.insertAdjacentHTML('beforeend', buildEmptyPage(pageNum, true));
-            let currentPage = document.getElementById(`page-${pageNum}`);
-            let currentTbody = currentPage.querySelector(".details-body");
-
+            let pageNum = 1; container.insertAdjacentHTML('beforeend', buildEmptyPage(pageNum, true));
+            let currentPage = document.getElementById(`page-${pageNum}`); let currentTbody = currentPage.querySelector(".details-body");
             let sumNet = 0, sumGross = 0, sumVol = 0, mainCount = 0;
 
-            // Funktion zum Hinzufügen von Zeilen. Prüft automatisch, ob die Seite voll ist!
             function appendRowSafe(htmlString) {
                 currentTbody.insertAdjacentHTML('beforeend', htmlString);
-                
-                // Prüft, ob der Inhalt über die festen 210mm der A4 Seite hinauswächst
                 if (currentPage.scrollHeight > currentPage.clientHeight) {
-                    // Nimmt die zuletzt hinzugefügte Zeile wieder raus
-                    let addedNodesCount = document.createElement('tbody');
-                    addedNodesCount.innerHTML = htmlString;
-                    for(let i=0; i < addedNodesCount.children.length; i++) {
-                        currentTbody.lastElementChild.remove();
-                    }
-
-                    // Erstellt eine frische A4 Seite
-                    pageNum++;
-                    container.insertAdjacentHTML('beforeend', buildEmptyPage(pageNum, false));
-                    currentPage = document.getElementById(`page-${pageNum}`);
-                    currentTbody = currentPage.querySelector(".details-body");
-                    
-                    // Fügt die Zeile auf der neuen Seite ein
+                    let addedNodesCount = document.createElement('tbody'); addedNodesCount.innerHTML = htmlString;
+                    for(let i=0; i < addedNodesCount.children.length; i++) { currentTbody.lastElementChild.remove(); }
+                    pageNum++; container.insertAdjacentHTML('beforeend', buildEmptyPage(pageNum, false));
+                    currentPage = document.getElementById(`page-${pageNum}`); currentTbody = currentPage.querySelector(".details-body");
                     currentTbody.insertAdjacentHTML('beforeend', htmlString);
                 }
             }
 
             mainPackages.forEach(main => {
-                mainCount++;
-                sumNet += parseFloat(main.net) || 0;
-                sumGross += parseFloat(main.gross) || 0;
-                sumVol += berechneVolumen(main.dim);
+                mainCount++; sumNet += parseFloat(main.net) || 0; sumGross += parseFloat(main.gross) || 0; sumVol += berechneVolumen(main.dim);
+                let contentString = ""; if(main.inners.length > 0) { contentString = `${main.inners.length} Inner-Packages<br>` + main.inners.map(inner => inner.id).join('<br>'); }
+                let loggerString = loggerData.filter(log => log.pid === main.id).map(log => `<b>${log.nr} ${log.sn}</b><br><span style="font-size:6.5pt">${safeHtml(log.info)}</span>`).join('<br>');
 
-                let contentString = "";
+                appendRowSafe(`<tr><td class="col-1">${main.id}</td><td class="col-2">${main.typ}</td><td class="col-3">${main.dim}</td><td class="col-4">${contentString}</td><td class="col-5">${main.temp}</td><td class="col-6">${loggerString}</td><td class="col-7"></td><td class="col-8">${main.net}</td><td class="col-9">${main.gross}</td></tr>`);
+
                 if(main.inners.length > 0) {
-                    contentString = `${main.inners.length} Inner-Packages<br>` + main.inners.map(inner => inner.id).join('<br>');
-                }
-
-                let matchedLoggers = loggerData.filter(log => log.pid === main.id);
-                let loggerString = matchedLoggers.map(log => `<b>${log.nr} ${log.sn}</b><br><span style="font-size:6.5pt">${safeHtml(log.info)}</span>`).join('<br>');
-
-                // Zeichne Main Row
-                appendRowSafe(`
-                    <tr>
-                        <td class="col-1">${main.id}</td><td class="col-2">${main.typ}</td><td class="col-3">${main.dim}</td>
-                        <td class="col-4">${contentString}</td><td class="col-5">${main.temp}</td><td class="col-6">${loggerString}</td>
-                        <td class="col-7"></td><td class="col-8">${main.net}</td><td class="col-9">${main.gross}</td>
-                    </tr>
-                `);
-
-                // Zeichne Inner Packages
-                if(main.inners.length > 0) {
-                    appendRowSafe(`
-                        <tr class="sub-header">
-                            <th>Inner-Package ID</th><th>Packing type</th><th>Dimensions<br>(LxHxW cm)</th>
-                            <th>Content</th><th>Temperature<br>conditions</th><th>Temperature<br>monitoring devices</th>
-                            <th>Dangerous<br>goods</th><th>Net weight</th><th>Gross weight</th>
-                        </tr>
-                    `);
-
+                    appendRowSafe(`<tr class="sub-header"><th>Inner-Package ID</th><th>Packing type</th><th>Dimensions<br>(LxHxW cm)</th><th>Content</th><th>Temperature<br>conditions</th><th>Temperature<br>monitoring devices</th><th>Dangerous<br>goods</th><th>Net weight</th><th>Gross weight</th></tr>`);
                     main.inners.forEach(inner => {
-                        let inhaltArray = inner.inhalt.split('\n');
-                        let inhaltErsteZeile = inhaltArray[0] || "";
-                        let inhaltRest = [...inhaltArray];
-                        inhaltRest.shift(); 
-                        let formatierterInhaltRest = inhaltRest.join('<br>');
-
-                        // WICHTIG: Die beiden Zeilen des Kartons müssen als ein Block übergeben werden, damit sie nicht getrennt werden!
+                        let inhaltArray = inner.inhalt.split('\n'); let inhaltErsteZeile = inhaltArray[0] || ""; let inhaltRest = [...inhaltArray]; inhaltRest.shift(); 
                         let innerHtml = `
-                            <tr class="inner-row-1">
-                                <td>${inner.id}</td><td>${inner.typ}</td><td>${inner.dim}</td>
-                                <td>${inhaltErsteZeile}</td><td>${main.temp}</td><td>-</td><td>${inner.gefahr}</td>
-                                <td>${inner.net}</td><td>${inner.gross}</td>
-                            </tr>
-                            <tr class="inner-row-2">
-                                <td colspan="9">
-                                    <div style="display: flex; justify-content: space-between;">
-                                        <div style="width: 45%;">${formatierterInhaltRest}</div>
-                                        <div style="width: 25%;">
-                                            <table style="border:none; margin:0; font-size: 7.5pt; width: 100%;">
-                                                <tr><td style="border:none; padding:0; width:50%;">HS-Code:</td><td style="border:none; padding:0;">${inner.hsCode}</td></tr>
-                                                <tr><td style="border:none; padding:0;">Country of origin:</td><td style="border:none; padding:0;">IT</td></tr>
-                                                <tr><td style="border:none; padding:0;">Preferential origin:</td><td style="border:none; padding:0;">None</td></tr>
-                                            </table>
-                                        </div>
-                                        <div style="width: 15%;">Quantity<br>${inner.qty}</div>
-                                        <div style="width: 15%;">Net weight<br>${inner.net}</div>
-                                    </div>
-                                </td>
-                            </tr>
-                        `;
+                            <tr class="inner-row-1"><td>${inner.id}</td><td>${inner.typ}</td><td>${inner.dim}</td><td>${inhaltErsteZeile}</td><td>${main.temp}</td><td>-</td><td>${inner.gefahr}</td><td>${inner.net}</td><td>${inner.gross}</td></tr>
+                            <tr class="inner-row-2"><td colspan="9"><div style="display: flex; justify-content: space-between;"><div style="width: 45%;">${inhaltRest.join('<br>')}</div><div style="width: 25%;"><table style="border:none; margin:0; font-size: 7.5pt; width: 100%;"><tr><td style="border:none; padding:0; width:50%;">HS-Code:</td><td style="border:none; padding:0;">${inner.hsCode}</td></tr><tr><td style="border:none; padding:0;">Country of origin:</td><td style="border:none; padding:0;">IT</td></tr><tr><td style="border:none; padding:0;">Preferential origin:</td><td style="border:none; padding:0;">None</td></tr></table></div><div style="width: 15%;">Quantity<br>${inner.qty}</div><div style="width: 15%;">Net weight<br>${inner.net}</div></div></td></tr>`;
                         appendRowSafe(innerHtml);
                     });
                 }
             });
 
-            // GANZ ZUM SCHLUSS: Die beiden Tabellen (Logger und Referenzen) an das Ende anfügen
-            let loggerRows = loggerData.map(log => `<tr><td>${log.pid}</td><td>${log.sn}</td><td>Elpro Libero CB</td><td>Elpro Buchs AG, CH-Buchs</td><td>CH</td><td>9025.19</td><td style="border-right:none; width:10mm;">CHF</td><td style="border-left:none; text-align:right;">18.50</td></tr>`).join('');
-            let bottomHtml = `
-                <div style="font-size: 7.5pt; margin-bottom: 1mm; margin-top: 10mm;">* Details to Temperature Monitoring devices:</div>
-                <table class="data-table" style="width: 160mm; margin-bottom: 4mm;">
-                    <thead><tr><th style="width: 40mm;">Package ID</th><th style="width: 30mm;">Device S/N</th><th style="width: 25mm;">Type</th><th style="width: 35mm;">Manufacturer</th><th style="width: 10mm;">Origin</th><th style="width: 15mm;">HS-Code</th><th colspan="2" style="width: 15mm;">Value</th></tr></thead>
-                    <tbody>${loggerRows}</tbody>
-                </table>
-                <div style="font-size: 7.5pt; margin-bottom: 1mm;">* Details to Document References</div>
-                <table class="data-table" style="width: 70mm; margin-bottom: 4mm;">
-                    <thead><tr><th>E2E Order</th><th>Clara Document</th></tr></thead>
-                    <tbody><tr><td class="out-e2e"></td><td class="out-clara"></td></tr></tbody>
-                </table>
-            `;
-
-            let bottomContainer = currentPage.querySelector(".bottom-info-container");
-            bottomContainer.innerHTML = bottomHtml;
-
-            // Prüfen ob die Fußzeilen noch auf diese Seite gepasst haben
-            if (currentPage.scrollHeight > currentPage.clientHeight) {
-                bottomContainer.innerHTML = "";
-                pageNum++;
-                container.insertAdjacentHTML('beforeend', buildEmptyPage(pageNum, false));
-                currentPage = document.getElementById(`page-${pageNum}`);
-                currentPage.querySelector(".bottom-info-container").innerHTML = bottomHtml;
-            }
-
-            // NACHBEREITUNG: Füllt alle statischen Daten auf ALLEN generierten Seiten ein
             updateStaticTexts(pageNum, mainCount, sumGross, sumNet, sumVol);
+            
+            // Re-apply overlay state if active
+            if(document.querySelector('.btn-overlay').classList.contains('active-mode')) toggleOverlay();
         }
 
-        // Füllt alle Textfelder (Adressen, Total, Seitenzahlen) auf allen Seiten aus
         function updateStaticTexts(totalPages, mainCount, sumGross, sumNet, sumVol) {
             const fracht = document.getElementById("in-fracht").value;
-            const classesToUpdate = ["inv-adresse", "inv-kontakt", "inv-tel", "inv-mail", "cons-adresse", "cons-kontakt", "cons-tel", "cons-mail", "datum", "e2e", "clara"];
+            const classesToUpdate = ["inv-adresse", "inv-kontakt", "inv-tel", "inv-mail", "cons-adresse", "cons-kontakt", "cons-tel", "cons-mail"];
             
             for (let i = 1; i <= totalPages; i++) {
                 let page = document.getElementById(`page-${i}`);
-                
-                // Seitenzahl
                 page.innerHTML = page.innerHTML.replace(/{TOTAL_PAGES}/g, totalPages);
-                
-                // Kopfzeile & Barcode
                 page.querySelectorAll(".out-fracht").forEach(el => el.innerText = fracht);
                 JsBarcode(page.querySelector(".barcode-svg"), fracht, { format: "CODE128", lineColor: "#000", width: 1.5, height: 35, displayValue: false, margin: 0 });
-                
-                // Einfache Textfelder
-                classesToUpdate.forEach(cls => {
-                    let val = document.getElementById(`in-${cls}`).value;
-                    page.querySelectorAll(`.out-${cls}`).forEach(el => el.innerText = val);
-                });
-
-                // Total Table (Gibt es nur auf Seite 1)
+                classesToUpdate.forEach(cls => { let val = document.getElementById(`in-${cls}`).value; page.querySelectorAll(`.out-${cls}`).forEach(el => el.innerText = val); });
+                page.querySelectorAll(".out-datum").forEach(el => el.innerText = document.getElementById("in-datum").value);
                 if(i === 1) {
                     page.querySelector(".out-fracht-table").innerText = fracht;
                     page.querySelector(".out-total-packages").innerText = mainCount;
@@ -484,45 +328,19 @@
             }
         }
 
-        // --- BUTTON FUNKTIONEN ---
         function addMain() {
-            let id = document.getElementById("main-id").value;
-            if(id === "") { alert("Bitte eine Package ID eingeben!"); return; }
-            mainPackages.push({
-                id: id, typ: document.getElementById("main-typ").value || "-", dim: document.getElementById("main-dim").value || "-",
-                temp: document.getElementById("main-temp").value || "-", net: formatWeight(document.getElementById("main-net").value || "0.000"),
-                gross: formatWeight(document.getElementById("main-gross").value || "0.000"), inners: [] 
-            });
-            renderDocument();
-            document.getElementById("main-id").value = ""; 
+            mainPackages.push({ id: document.getElementById("main-id").value, typ: document.getElementById("main-typ").value, dim: document.getElementById("main-dim").value, temp: document.getElementById("main-temp").value, net: formatWeight(document.getElementById("main-net").value), gross: formatWeight(document.getElementById("main-gross").value), inners: [] });
+            renderDocument(); document.getElementById("main-id").value = ""; 
         }
 
         function addInner() {
-            if(mainPackages.length === 0) { alert("Bitte erst eine Hauptverpackung anlegen!"); return; }
-            let id = document.getElementById("inner-id").value;
-            if(id === "") { alert("Bitte eine Inner-Package ID eingeben!"); return; }
-            mainPackages[mainPackages.length - 1].inners.push({
-                id: id, typ: document.getElementById("inner-typ").value || "Karton", dim: document.getElementById("inner-dim").value || "0x0x0 cm",
-                inhalt: document.getElementById("inner-inhalt").value || "Medicament", gefahr: document.getElementById("inner-gefahr").value || "-",
-                hsCode: document.getElementById("inner-hs").value || "3004.39", qty: document.getElementById("inner-qty").value || "",
-                net: formatWeight(document.getElementById("inner-net").value || "0.000"), gross: formatWeight(document.getElementById("inner-gross").value || "0.000")
-            });
-            renderDocument();
-            document.getElementById("inner-id").value = ""; 
+            if(mainPackages.length === 0) return;
+            mainPackages[mainPackages.length - 1].inners.push({ id: document.getElementById("inner-id").value, typ: document.getElementById("inner-typ").value, dim: document.getElementById("inner-dim").value, inhalt: document.getElementById("inner-inhalt").value, gefahr: document.getElementById("inner-gefahr").value, hsCode: document.getElementById("inner-hs").value, qty: document.getElementById("inner-qty").value, net: formatWeight(document.getElementById("inner-net").value), gross: formatWeight(document.getElementById("inner-gross").value) });
+            renderDocument(); document.getElementById("inner-id").value = ""; 
         }
 
-        function addLogger() {
-            let pid = document.getElementById("log-pid").value;
-            let sn = document.getElementById("log-sn").value;
-            if(pid === "" || sn === "") { alert("Bitte Package ID und Device S/N eingeben!"); return; }
-            loggerData.push({ pid: pid, nr: document.getElementById("log-nr").value || "", sn: sn, info: document.getElementById("log-info").value || "" });
-            renderDocument();
-            document.getElementById("log-sn").value = ""; document.getElementById("log-info").value = "";
-        }
-
-        // --- START ---
         function updateLive() { renderDocument(); }
-        renderDocument(); // Generiert die allererste leere Seite beim Start
+        renderDocument();
     </script>
 </body>
 </html>
