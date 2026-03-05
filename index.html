@@ -27,7 +27,7 @@
         .a4-page {
             background-color: white; 
             width: 297mm; 
-            height: 210mm; /* Fixiert auf A4 Querformat */
+            height: 210mm; 
             padding: 12mm 15mm 15mm 15mm; 
             box-sizing: border-box; box-shadow: 0 5px 15px rgba(0,0,0,0.5); 
             position: relative; color: #000; overflow: hidden; margin-bottom: 20px;
@@ -40,8 +40,7 @@
         .title-block { width: 45%; }
         .title-block h1 { font-size: 12pt; margin: 0 0 2mm 0; font-weight: normal; white-space: nowrap; letter-spacing: -0.2px; } 
         .barcode-block { width: 35%; text-align: left; padding-left: 5mm; margin-top: -1mm;}
-        .logo-block { width: 20%; text-align: right; color: #0066cc; font-size: 20pt; font-weight: bold; font-family: Arial, sans-serif; }
-        .roche-hexagon { border: 1px solid #0066cc; display: inline-block; padding: 0px 12px; }
+        .logo-block { width: 20%; text-align: right; margin-top: -2mm; }
 
         /* --- ADRESSEN --- */
         .address-container { display: flex; width: 100%; margin-bottom: 3mm; line-height: 1.2; font-size: 8pt; }
@@ -217,7 +216,13 @@
                         <span style="font-size: 8.5pt;">(Version Black Week)</span>
                     </div>
                     <div class="barcode-block"><svg class="barcode-svg"></svg></div>
-                    <div class="logo-block"><div class="roche-hexagon">Roche</div></div>
+                    
+                    <div class="logo-block">
+                        <svg viewBox="0 0 130 40" style="height: 12mm; width: auto; float: right;">
+                            <polygon points="12,2 118,2 128,20 118,38 12,38 2,20" fill="none" stroke="#0066cc" stroke-width="1.5"/>
+                            <text x="65" y="22" dominant-baseline="middle" text-anchor="middle" fill="#0066cc" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="24" letter-spacing="0.5">Roche</text>
+                        </svg>
+                    </div>
                 </div>
                 ${addressHtml} ${totalsHtml}
                 <div class="section-title">Detail packing-list:</div>
