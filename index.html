@@ -5,6 +5,12 @@
     <title>Packlisten Generator</title>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
     <style>
+        /* ZWINGT DEN BROWSER, HINTERGRUNDFARBEN ZU DRUCKEN (WICHTIG FÜR DAS GRAU!) */
+        * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
         /* --- GRUND-LAYOUT --- */
         body { background-color: #525659; font-family: Arial, Helvetica, sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
 
@@ -79,9 +85,14 @@
         /* Feine Trennlinie zwischen mehreren Artikeln oder Unterverpackungen */
         td.item-separator { border-bottom: 1px solid #000 !important; }
         
-        .sub-header th { background-color: #f9f9f9; border-top: 1.5px solid #000; border-bottom: 1.5px solid #000; }
+        /* DAS GRAUE FELD FÜR DIE UNTERVERPACKUNG (Jetzt dunkler und mit Druck-Garantie) */
+        .sub-header th { 
+            background-color: #e6e6e6 !important; 
+            border-top: 1.5px solid #000; 
+            border-bottom: 1.5px solid #000; 
+        }
 
-        /* NEU: DIE OPTISCHE EINRÜCKUNG FÜR UNTERVERPACKUNGEN (4mm) */
+        /* DIE OPTISCHE EINRÜCKUNG FÜR UNTERVERPACKUNGEN (4mm) */
         .indent-left { padding-left: 4mm !important; }
 
         .footer-fixed { position: absolute; bottom: 12mm; left: 15mm; right: 15mm; display: flex; justify-content: space-between; font-size: 8pt; line-height: 1.2; }
@@ -324,7 +335,7 @@
                 addNodesSafe([`<tr class="main-row"><td class="col-1 edge-left group-top${bottomClass}">${main.id}</td><td class="col-2 group-top${bottomClass}">${main.typ}</td><td class="col-3 group-top${bottomClass}">${main.dim}</td><td class="col-4 group-top${bottomClass}">${contentStr}</td><td class="col-5 group-top${bottomClass}">${main.temp}</td><td class="col-6 group-top${bottomClass}">${loggerString}</td><td class="col-7 group-top${bottomClass}"></td><td class="col-8 group-top${bottomClass}">${main.net}</td><td class="col-9 edge-right group-top${bottomClass}">${main.gross}</td></tr>`]);
 
                 if (main.type === "inners" && main.contents.length > 0) {
-                    // EBENE 2: Unterverpackungen (mit grauem Header - NEU MIT indent-left)
+                    // EBENE 2: Unterverpackungen (mit grauem Header UND indent-left)
                     addNodesSafe([`<tr class="sub-header"><th class="edge-left indent-left">Inner-Package ID</th><th>Packing type</th><th>Dimensions<br>(LxHxW cm)</th><th>Content</th><th>Temperature<br>conditions</th><th>Temperature<br>monitoring devices *</th><th>Dangerous<br>goods</th><th>Net weight</th><th class="edge-right">Gross weight</th></tr>`]);
                     
                     main.contents.forEach((inner, i) => {
@@ -332,15 +343,12 @@
                         let bClass = isLast ? " group-bottom" : " item-separator";
                         let descLines = inner.item.desc.split('\n'); let descFirst = descLines[0] || ""; let descRest = [...descLines]; descRest.shift(); 
                         
-                        // row1 bekommt indent-left in col-1
                         let row1 = `<tr class="inner-row-1"><td class="edge-left indent-left">${inner.innerId}</td><td>${inner.innerTyp}</td><td>${inner.innerDim}</td><td>${descFirst}</td><td>${main.temp}</td><td>-</td><td>${inner.item.gefahr}</td><td>${inner.item.net}</td><td class="edge-right">${inner.innerGross}</td></tr>`;
-                        // row2 bekommt indent-left für den ganzen colspan
                         let row2 = `<tr class="inner-row-2"><td colspan="9" class="edge-left indent-left edge-right${bClass}"><div style="display: flex; justify-content: space-between;"><div style="width: 45%;">${descRest.join('<br>')}</div><div style="width: 25%;"><table style="border:none; margin:0; font-size: 8pt; width: 100%;"><tr><td style="border:none; padding:0; width:50%;">HS-Code:</td><td style="border:none; padding:0;">${inner.item.hs}</td></tr><tr><td style="border:none; padding:0;">Country of origin:</td><td style="border:none; padding:0;">IT</td></tr><tr><td style="border:none; padding:0;">Preferential origin:</td><td style="border:none; padding:0;">None</td></tr></table></div><div style="width: 15%;">Quantity<br>${inner.item.qty}</div><div style="width: 15%;">Net weight<br>${inner.item.net}</div></div></td></tr>`;
                         addNodesSafe([row1, row2]);
                     });
                 } 
                 else if (main.type === "items" && main.contents.length > 0) {
-                    // EBENE 3: Direkte Artikel (KEIN grauer Header, KEIN indent-left)
                     main.contents.forEach((item, i) => {
                         let isLast = (i === main.contents.length - 1);
                         let bClass = isLast ? " group-bottom" : " item-separator";
