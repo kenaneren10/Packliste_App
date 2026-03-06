@@ -105,7 +105,7 @@
             <div class="input-row" style="margin-top: 10px;">
                 <div class="input-group" style="width: 45%;">
                     <label>Invoice recipient:</label>
-                    <textarea id="in-inv-adresse" rows="3" oninput="updateLive()" placeholder="Firma...&#10;Strasse...&#10;Stadt..."></textarea>
+                    <textarea id="in-inv-adresse" rows="3" oninput="updateLive()" placeholder="Firma...&#10;Straße...&#10;Stadt..."></textarea>
                     <div style="display: flex; gap: 5px; margin-top: 5px;">
                         <input type="text" id="in-inv-kontakt" value="" oninput="updateLive()" placeholder="Kontaktperson" style="width: 33%;">
                         <input type="text" id="in-inv-tel" value="" oninput="updateLive()" placeholder="Telefon" style="width: 33%;">
@@ -114,7 +114,7 @@
                 </div>
                 <div class="input-group" style="width: 45%;">
                     <label>Consignee:</label>
-                    <textarea id="in-cons-adresse" rows="3" oninput="updateLive()" placeholder="Firma...&#10;Strasse...&#10;Stadt..."></textarea>
+                    <textarea id="in-cons-adresse" rows="3" oninput="updateLive()" placeholder="Firma...&#10;Straße...&#10;Stadt..."></textarea>
                     <div style="display: flex; gap: 5px; margin-top: 5px;">
                         <input type="text" id="in-cons-kontakt" value="" oninput="updateLive()" placeholder="Kontaktperson" style="width: 33%;">
                         <input type="text" id="in-cons-tel" value="" oninput="updateLive()" placeholder="Telefon" style="width: 33%;">
@@ -126,14 +126,26 @@
 
         <div class="form-section box-main">
             <h3 style="color: #0066cc;">📦 2a. HAUPTVERPACKUNG</h3>
+            <p style="font-size: 11px; margin-top: -10px; color: #666;">Tippe hier den Inhalt ein ODER lass das Feld leer und füge unten Unterverpackungen hinzu (Inhalt wird dann automatisch generiert).</p>
             <div class="input-row">
                 <div class="input-group"><label>Package ID (SSCC):</label><input type="text" id="main-id" value="" placeholder="z.B. 37640135..." style="width: 150px;"></div>
-                <div class="input-group"><label>Typ:</label><input type="text" id="main-typ" value="" placeholder="Cold chain container..." style="width: 160px;"></div>
+                <div class="input-group"><label>Typ:</label><input type="text" id="main-typ" value="" placeholder="Cold chain container..." style="width: 140px;"></div>
                 <div class="input-group"><label>Dimensionen:</label><input type="text" id="main-dim" value="" placeholder="120x100x140 cm" style="width: 110px;"></div>
                 <div class="input-group"><label>Temperatur:</label><input type="text" id="main-temp" value="" placeholder="store between +2°C..." style="width: 180px;"></div>
-                <div class="input-group"><label>Net weight:</label><input type="text" id="main-net" value="" placeholder="z.B. 24.264" style="width: 60px;"></div>
-                <div class="input-group"><label>Gross weight:</label><input type="text" id="main-gross" value="" placeholder="z.B. 281.290" style="width: 60px;"></div>
-                <button class="btn-main" onclick="addMain()">+ Speichern</button>
+            </div>
+            <div class="input-row" style="align-items: stretch;">
+                <div class="input-group" style="width: 320px;">
+                    <label>Wareninhalt (Optional, Mehrzeilig):</label>
+                    <textarea id="main-inhalt" placeholder="Medicament&#10;Batch: ..." style="height: 100%; min-height: 50px; font-family: monospace;"></textarea>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 10px; justify-content: flex-end;">
+                    <div class="input-group"><label>Dangerous goods:</label><input type="text" id="main-gefahr" value="" placeholder="-" style="width: 100px;"></div>
+                    <div class="input-group"><label>Net weight:</label><input type="text" id="main-net" value="" placeholder="z.B. 24.264" style="width: 100px;"></div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 10px; justify-content: flex-end;">
+                    <div class="input-group"><label>Gross weight:</label><input type="text" id="main-gross" value="" placeholder="z.B. 281.290" style="width: 100px;"></div>
+                    <button class="btn-main" onclick="addMain()" style="width: 100px; padding: 7px;">+ Speichern</button>
+                </div>
             </div>
         </div>
 
@@ -184,7 +196,6 @@
         let mainPackages = [];
         let loggerData = [];
 
-        // Zeigt das Clara Feld an und baut die Tabelle neu
         function toggleClara() {
             let chk = document.getElementById("chk-clara").checked;
             document.getElementById("in-clara").style.display = chk ? "block" : "none";
@@ -200,12 +211,13 @@
             if(isFirstPage) {
                 addressHtml = `
                 <div class="address-container">
-                    <div class="address-box">
+                    <div class="address-box-inv">
                         <div class="address-title">Invoice recipient</div>
                         <span class="out-inv-adresse" style="white-space: pre-line;"></span>
                         <div class="address-grid"><div>Contact:</div><div class="out-inv-kontakt"></div><div>Phone:</div><div class="out-inv-tel"></div><div>E-Mail:</div><div class="out-inv-mail"></div></div>
                     </div>
-                    <div class="address-box">
+                    <div class="address-gap"></div>
+                    <div class="address-box-cons">
                         <div class="address-title">Consignee</div>
                         <span class="out-cons-adresse" style="white-space: pre-line;"></span>
                         <div class="address-grid"><div>Contact:</div><div class="out-cons-kontakt"></div><div>Phone:</div><div class="out-cons-tel"></div><div>E-Mail:</div><div class="out-cons-mail"></div></div>
@@ -215,7 +227,7 @@
                 `;
                 totalsHtml = `
                 <div class="section-title">Total packing-list:</div>
-                <table class="data-table" style="margin-bottom: 5mm;">
+                <table class="data-table totals-table" style="margin-bottom: 5mm;">
                     <thead><tr><th style="width: 25%">Shipping marks</th><th style="width: 20%">UCR No. (GSIN)</th><th style="width: 10%">Total no. of<br>packages</th><th style="width: 11.7%">Total gross weight</th><th style="width: 14.4%">Total net weight</th><th style="width: 15.3%">Total volume</th><th style="width: 14%">Total no. of temperature<br>monitoring devices *</th></tr></thead>
                     <tbody><tr><td>Address of consignee,<br><span class="out-fracht-table"></span></td><td>(402) 7640135 790167438 4</td><td class="out-total-packages">0</td><td class="out-total-gross">0.000 kg</td><td class="out-total-net">0.000 kg</td><td class="out-total-vol">0.00 m3</td><td class="out-total-logger">0</td></tr></tbody>
                 </table>
@@ -267,10 +279,18 @@
 
             mainPackages.forEach(main => {
                 mainCount++; sumNet += parseFloat(main.net) || 0; sumGross += parseFloat(main.gross) || 0; sumVol += berechneVolumen(main.dim);
-                let contentString = ""; if(main.inners.length > 0) { contentString = `${main.inners.length} Inner-Packages<br>` + main.inners.map(inner => inner.id).join('<br>'); }
+                
+                // LOGIK: Überschreibt manuellen Inhalt, falls Unterverpackungen existieren
+                let contentString = ""; 
+                if(main.inners.length > 0) { 
+                    contentString = `${main.inners.length} Inner-Packages<br>` + main.inners.map(inner => inner.id).join('<br>'); 
+                } else {
+                    contentString = safeHtml(main.inhalt);
+                }
+                
                 let loggerString = loggerData.filter(log => log.pid === main.id).map(log => `<b>${log.nr} ${log.sn}</b><br><span style="font-size:6.5pt">${safeHtml(log.info)}</span>`).join('<br>');
 
-                addNodesSafe([`<tr><td class="col-1">${main.id}</td><td class="col-2">${main.typ}</td><td class="col-3">${main.dim}</td><td class="col-4">${contentString}</td><td class="col-5">${main.temp}</td><td class="col-6">${loggerString}</td><td class="col-7"></td><td class="col-8">${main.net}</td><td class="col-9">${main.gross}</td></tr>`]);
+                addNodesSafe([`<tr class="main-row"><td class="col-1">${main.id}</td><td class="col-2">${main.typ}</td><td class="col-3">${main.dim}</td><td class="col-4">${contentString}</td><td class="col-5">${main.temp}</td><td class="col-6">${loggerString}</td><td class="col-7">${main.gefahr}</td><td class="col-8">${main.net}</td><td class="col-9">${main.gross}</td></tr>`]);
 
                 if(main.inners.length > 0) {
                     addNodesSafe([`<tr class="sub-header"><th>Inner-Package ID</th><th>Packing type</th><th>Dimensions<br>(LxHxW cm)</th><th>Content</th><th>Temperature<br>conditions</th><th>Temperature<br>monitoring devices</th><th>Dangerous<br>goods</th><th>Net weight</th><th>Gross weight</th></tr>`]);
@@ -285,7 +305,6 @@
                 }
             });
 
-            // Dynamische Dokumenten-Referenz-Tabelle basierend auf der Checkbox
             let includeClara = document.getElementById("chk-clara").checked;
             let claraTh = includeClara ? `<th>Clara Document</th>` : "";
             let claraTd = includeClara ? `<td class="out-clara"></td>` : "";
@@ -301,7 +320,7 @@
                 <div style="font-size: 7.5pt; margin-bottom: 1mm;">* Details to Document References</div>
                 <table class="data-table" style="width: ${refTableWidth}; margin-bottom: 4mm;">
                     <thead><tr><th>E2E Order</th>${claraTh}</tr></thead>
-                    <tbody><tr><td class="out-e2e"></td>${claraTd}</tr></tbody>
+                    <tbody class="main-row"><tr><td class="out-e2e"></td>${claraTd}</tr></tbody>
                 </table>
             `;
 
@@ -320,19 +339,14 @@
 
         function updateStaticTexts(totalPages, mainCount, sumGross, sumNet, sumVol) {
             const fracht = document.getElementById("in-fracht").value;
-            
-            // Clara Klasse nur aktualisieren, wenn das Häkchen gesetzt ist
             const classesToUpdate = ["inv-adresse", "inv-kontakt", "inv-tel", "inv-mail", "cons-adresse", "cons-kontakt", "cons-tel", "cons-mail", "e2e"];
-            if (document.getElementById("chk-clara").checked) {
-                classesToUpdate.push("clara");
-            }
+            if (document.getElementById("chk-clara").checked) { classesToUpdate.push("clara"); }
             
             for (let i = 1; i <= totalPages; i++) {
                 let page = document.getElementById(`page-${i}`);
                 page.innerHTML = page.innerHTML.replace(/{TOTAL_PAGES}/g, totalPages);
                 page.querySelectorAll(".out-fracht").forEach(el => el.innerText = fracht);
                 
-                // Barcode nur erzeugen, wenn das Feld nicht komplett leer ist, sonst wirft er einen Fehler
                 let barcodeSvg = page.querySelector(".barcode-svg");
                 if (fracht.trim() !== "") {
                     barcodeSvg.style.display = "inline-block";
@@ -357,22 +371,49 @@
         function addMain() {
             let id = document.getElementById("main-id").value;
             if(id === "") { alert("Bitte eine Package ID eingeben!"); return; }
-            mainPackages.push({ id: id, typ: document.getElementById("main-typ").value, dim: document.getElementById("main-dim").value, temp: document.getElementById("main-temp").value, net: formatWeight(document.getElementById("main-net").value), gross: formatWeight(document.getElementById("main-gross").value), inners: [] });
-            renderDocument(); document.getElementById("main-id").value = ""; 
+            mainPackages.push({ 
+                id: id, 
+                typ: document.getElementById("main-typ").value, 
+                dim: document.getElementById("main-dim").value, 
+                temp: document.getElementById("main-temp").value, 
+                inhalt: document.getElementById("main-inhalt").value, 
+                gefahr: document.getElementById("main-gefahr").value || "-",
+                net: formatWeight(document.getElementById("main-net").value), 
+                gross: formatWeight(document.getElementById("main-gross").value), 
+                inners: [] 
+            });
+            renderDocument(); 
+            document.getElementById("main-id").value = ""; 
+            document.getElementById("main-inhalt").value = ""; 
         }
+
         function addInner() {
             if(mainPackages.length === 0) { alert("Bitte lege zuerst eine Hauptverpackung an!"); return; }
             let id = document.getElementById("inner-id").value;
             if(id === "") { alert("Bitte eine Inner-Package ID eingeben!"); return; }
-            mainPackages[mainPackages.length - 1].inners.push({ id: id, typ: document.getElementById("inner-typ").value, dim: document.getElementById("inner-dim").value, inhalt: document.getElementById("inner-inhalt").value, gefahr: document.getElementById("inner-gefahr").value, hsCode: document.getElementById("inner-hs").value, qty: document.getElementById("inner-qty").value, net: formatWeight(document.getElementById("inner-net").value), gross: formatWeight(document.getElementById("inner-gross").value) });
-            renderDocument(); document.getElementById("inner-id").value = ""; 
+            mainPackages[mainPackages.length - 1].inners.push({ 
+                id: id, 
+                typ: document.getElementById("inner-typ").value, 
+                dim: document.getElementById("inner-dim").value, 
+                inhalt: document.getElementById("inner-inhalt").value, 
+                gefahr: document.getElementById("inner-gefahr").value, 
+                hsCode: document.getElementById("inner-hs").value, 
+                qty: document.getElementById("inner-qty").value, 
+                net: formatWeight(document.getElementById("inner-net").value), 
+                gross: formatWeight(document.getElementById("inner-gross").value) 
+            });
+            renderDocument(); 
+            document.getElementById("inner-id").value = ""; 
         }
+
         function addLogger() {
             let pid = document.getElementById("log-pid").value;
             let sn = document.getElementById("log-sn").value;
             if(pid === "" || sn === "") { alert("Bitte Package ID und Device S/N eingeben!"); return; }
             loggerData.push({ pid: pid, nr: document.getElementById("log-nr").value, sn: sn, info: document.getElementById("log-info").value });
-            renderDocument(); document.getElementById("log-sn").value = ""; document.getElementById("log-info").value = "";
+            renderDocument(); 
+            document.getElementById("log-sn").value = ""; 
+            document.getElementById("log-info").value = "";
         }
 
         function updateLive() { renderDocument(); }
