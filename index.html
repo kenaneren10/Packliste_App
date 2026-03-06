@@ -28,7 +28,8 @@
             background-color: white; 
             width: 297mm; 
             height: 210mm; 
-            padding: 12mm 15mm 15mm 15mm; 
+            /* EXAKTE SEITENRÄNDER: Oben 9mm, Rechts 18mm, Unten 9mm, Links 22mm */
+            padding: 9mm 18mm 9mm 22mm; 
             box-sizing: border-box; box-shadow: 0 5px 15px rgba(0,0,0,0.5); 
             position: relative; color: #000; overflow: hidden; margin-bottom: 20px;
         }
@@ -36,22 +37,24 @@
         .vertical-text { position: absolute; left: 6mm; bottom: 35mm; writing-mode: vertical-rl; transform: rotate(180deg); font-size: 7.5pt; color: #888; letter-spacing: 0.5px; }
 
         /* --- KOPFZEILE --- */
-        .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6mm; margin-top: 2mm;}
+        /* Abstand zum Invoice Recipient auf exakt 11mm gesetzt (margin-bottom: 11mm) */
+        .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 11mm; margin-top: 2mm;}
         .title-block { width: 45%; }
-        .title-block h1 { font-size: 12pt; margin: 0 0 2mm 0; font-weight: normal; white-space: nowrap; letter-spacing: -0.2px; } 
+        /* Überschrift: Arial, exakt 14pt, Abstand zur Version exakt 2mm (margin: 0 0 2mm 0) */
+        .title-block h1 { font-family: Arial, Helvetica, sans-serif; font-size: 14pt; margin: 0 0 2mm 0; line-height: 1; font-weight: normal; white-space: nowrap; letter-spacing: -0.2px; } 
         .barcode-block { width: 35%; text-align: left; padding-left: 5mm; margin-top: -1mm;}
         .logo-block { width: 20%; text-align: right; margin-top: -2mm; }
         .logo-block img { height: 12mm; width: auto; float: right; object-fit: contain; }
 
         /* --- ADRESSEN --- */
-        /* Abstand unten auf exakt 10mm gesetzt */
+        /* Abstand Adressblock zum Datum auf exakt 10mm gesetzt */
         .address-container { display: flex; width: 100%; margin-bottom: 10mm; line-height: 1.2; font-size: 8pt; }
         .address-box { width: 50%; box-sizing: border-box; padding-right: 15mm; } 
         .address-title { font-weight: bold; margin-bottom: 2mm; font-size: 8.5pt; }
         .address-grid { display: grid; grid-template-columns: 14mm auto; margin-top: 2mm; }
 
         /* --- TABELLEN-DESIGN --- */
-        /* Datum: Schrift normal (nicht fett), Abstand unten exakt 3mm, Zeilenhöhe 1 für absolute Präzision */
+        /* Datum: Normale Schrift, Abstand zur Total-Tabelle auf exakt 3mm gesetzt */
         .datum { margin-bottom: 3mm; font-weight: normal; font-size: 8pt; line-height: 1;}
         .section-title { font-size: 8pt; margin-bottom: 1mm; font-weight: normal;}
         
@@ -75,6 +78,7 @@
             padding-bottom: 6px;
         }
 
+        /* --- FUSSZEILE --- */
         .footer-fixed { position: absolute; bottom: 12mm; left: 15mm; right: 15mm; display: flex; justify-content: space-between; font-size: 7.5pt; line-height: 1.2; }
 
         @media print {
@@ -228,7 +232,7 @@
                 <div class="header">
                     <div class="title-block">
                         <h1>Packing List to Freight Unit <span class="out-fracht"></span></h1>
-                        <span style="font-size: 8.5pt;">(Version Black Week)</span>
+                        <span style="font-size: 8.5pt; display: block; line-height: 1;">(Version Black Week)</span>
                     </div>
                     <div class="barcode-block"><svg class="barcode-svg"></svg></div>
                     <div class="logo-block"><img src="roche-logo.png" alt="Roche Logo"></div>
@@ -320,8 +324,11 @@
 
         function updateStaticTexts(totalPages, mainCount, sumGross, sumNet, sumVol) {
             const fracht = document.getElementById("in-fracht").value;
+            
             const classesToUpdate = ["inv-adresse", "inv-kontakt", "inv-tel", "inv-mail", "cons-adresse", "cons-kontakt", "cons-tel", "cons-mail", "e2e"];
-            if (document.getElementById("chk-clara").checked) { classesToUpdate.push("clara"); }
+            if (document.getElementById("chk-clara").checked) {
+                classesToUpdate.push("clara");
+            }
             
             for (let i = 1; i <= totalPages; i++) {
                 let page = document.getElementById(`page-${i}`);
