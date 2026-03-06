@@ -28,11 +28,13 @@
             background-color: white; 
             width: 297mm; 
             height: 210mm; 
-            padding: 12mm 15mm 15mm 15mm; 
+            /* EXAKTE SEITENRÄNDER: Oben 9mm, Rechts 18mm, Unten 9mm, Links 22mm */
+            padding: 9mm 18mm 9mm 22mm; 
             box-sizing: border-box; box-shadow: 0 5px 15px rgba(0,0,0,0.5); 
             position: relative; color: #000; overflow: hidden; margin-bottom: 20px;
         }
 
+        /* Vertikaler Text links an der Papierkante (6mm Abstand vom Rand) */
         .vertical-text { position: absolute; left: 6mm; bottom: 35mm; writing-mode: vertical-rl; transform: rotate(180deg); font-size: 7.5pt; color: #888; letter-spacing: 0.5px; }
 
         /* --- KOPFZEILE --- */
@@ -57,7 +59,7 @@
         .data-table th, .data-table td { border: 1px solid #000; padding: 2px 3px; text-align: left; vertical-align: top; line-height: 1.15; overflow-wrap: break-word; word-wrap: break-word; }
         .data-table th { font-weight: bold; }
 
-        /* EXAKTE PROZENTWERTE */
+        /* EXAKTE PROZENTWERTE (Summe = 100% von exakt 257mm) */
         .col-1 { width: 13.2%; } .col-2 { width: 12.1%; } .col-3 { width: 12.0%; }
         .col-4 { width: 12.8%; } .col-5 { width: 9.9%; }  .col-6 { width: 11.9%; }
         .col-7 { width: 13.4%; } .col-8 { width: 8.1%; }  .col-9 { width: 6.6%; }
@@ -73,7 +75,8 @@
             padding-bottom: 6px;
         }
 
-        .footer-fixed { position: absolute; bottom: 12mm; left: 15mm; right: 15mm; display: flex; justify-content: space-between; font-size: 7.5pt; line-height: 1.2; }
+        /* --- FUSSZEILE (Bündig mit den neuen Rändern) --- */
+        .footer-fixed { position: absolute; bottom: 9mm; left: 22mm; right: 18mm; display: flex; justify-content: space-between; font-size: 7.5pt; line-height: 1.2; }
 
         @media print {
             body { background-color: white; padding: 0; }
@@ -213,10 +216,11 @@
                 </div>
                 <div class="datum">Date: <span class="out-datum"></span></div>
                 `;
+                // Totals-Tabelle zu exakt 100% Prozenten umgebaut!
                 totalsHtml = `
                 <div class="section-title">Total packing-list:</div>
                 <table class="data-table" style="margin-bottom: 5mm;">
-                    <thead><tr><th style="width: 25%">Shipping marks</th><th style="width: 20%">UCR No. (GSIN)</th><th style="width: 10%">Total no. of<br>packages</th><th style="width: 11.7%">Total gross weight</th><th style="width: 14.4%">Total net weight</th><th style="width: 15.3%">Total volume</th><th style="width: 14%">Total no. of temperature<br>monitoring devices *</th></tr></thead>
+                    <thead><tr><th style="width: 22%">Shipping marks</th><th style="width: 22%">UCR No. (GSIN)</th><th style="width: 10%">Total no. of<br>packages</th><th style="width: 12%">Total gross weight</th><th style="width: 12%">Total net weight</th><th style="width: 12%">Total volume</th><th style="width: 10%">Total no. of temperature<br>monitoring devices *</th></tr></thead>
                     <tbody><tr><td>Address of consignee,<br><span class="out-fracht-table"></span></td><td>(402) 7640135 790167438 4</td><td class="out-total-packages">0</td><td class="out-total-gross">0.000 kg</td><td class="out-total-net">0.000 kg</td><td class="out-total-vol">0.00 m3</td><td class="out-total-logger">0</td></tr></tbody>
                 </table>
                 `;
@@ -285,13 +289,13 @@
                 }
             });
 
-            // Dynamische Dokumenten-Referenz-Tabelle basierend auf der Checkbox
+            // Referenz-Tabelle ebenfalls auf Prozente umgebaut
             let includeClara = document.getElementById("chk-clara").checked;
             let claraTh = includeClara ? `<th>Clara Document</th>` : "";
             let claraTd = includeClara ? `<td class="out-clara"></td>` : "";
-            let refTableWidth = includeClara ? "70mm" : "35mm";
+            let refTableWidth = includeClara ? "30%" : "15%";
 
-            let loggerRows = loggerData.map(log => `<tr><td>${log.pid}</td><td>${log.sn}</td><td>Elpro Libero CB</td><td>Elpro Buchs AG, CH-Buchs</td><td>CH</td><td>9025.19</td><td style="border-right:none; width:10mm;">CHF</td><td style="border-left:none; text-align:right;">18.50</td></tr>`).join('');
+            let loggerRows = loggerData.map(log => `<tr><td>${log.pid}</td><td>${log.sn}</td><td>Elpro Libero CB</td><td>Elpro Buchs AG, CH-Buchs</td><td>CH</td><td>9025.19</td><td style="border-right:none;">CHF</td><td style="border-left:none; text-align:right;">18.50</td></tr>`).join('');
             let bottomHtml = `
                 <div style="font-size: 7.5pt; margin-bottom: 1mm; margin-top: 5mm;">* Details to Temperature Monitoring devices:</div>
                 <table class="data-table" style="width: 60%; margin-bottom: 4mm;">
@@ -321,7 +325,6 @@
         function updateStaticTexts(totalPages, mainCount, sumGross, sumNet, sumVol) {
             const fracht = document.getElementById("in-fracht").value;
             
-            // Clara Klasse nur aktualisieren, wenn das Häkchen gesetzt ist
             const classesToUpdate = ["inv-adresse", "inv-kontakt", "inv-tel", "inv-mail", "cons-adresse", "cons-kontakt", "cons-tel", "cons-mail", "e2e"];
             if (document.getElementById("chk-clara").checked) {
                 classesToUpdate.push("clara");
@@ -332,7 +335,6 @@
                 page.innerHTML = page.innerHTML.replace(/{TOTAL_PAGES}/g, totalPages);
                 page.querySelectorAll(".out-fracht").forEach(el => el.innerText = fracht);
                 
-                // Barcode nur erzeugen, wenn das Feld nicht komplett leer ist, sonst wirft er einen Fehler
                 let barcodeSvg = page.querySelector(".barcode-svg");
                 if (fracht.trim() !== "") {
                     barcodeSvg.style.display = "inline-block";
