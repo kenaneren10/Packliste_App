@@ -2,13 +2,13 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>Packlisten Generator - Pharmalogistik</title>
+    <title>Packlisten Generator</title>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
     <style>
         /* --- GRUND-LAYOUT --- */
         body { background-color: #525659; font-family: Arial, Helvetica, sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
 
-        /* --- BEDIENFELD (Nicht im Druck) --- */
+        /* --- BEDIENFELD (Cockpit) --- */
         .control-panel { background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); width: 297mm; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px; border-top: 5px solid #0066cc; }
         .form-section { background: white; padding: 15px; border-radius: 6px; border: 1px solid #ddd; }
         .form-section h3 { margin-top: 0; margin-bottom: 15px; color: #333; font-size: 14px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
@@ -18,26 +18,28 @@
         .input-row { display: flex; gap: 15px; align-items: flex-start; flex-wrap: wrap; margin-bottom: 10px; }
         .input-group { display: flex; flex-direction: column; gap: 4px; }
         .control-panel label { font-size: 11px; font-weight: bold; color: #555; }
-        .control-panel input, .control-panel textarea { padding: 6px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; font-family: Arial, sans-serif; }
+        .control-panel input, .control-panel textarea, .control-panel select { padding: 6px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; font-family: Arial, sans-serif; }
         .btn-main, .btn-inner, .btn-logger { color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: auto;}
         .btn-main { background: #0066cc; } .btn-inner { background: #28a745; } .btn-logger { background: #cc0000; }
         .btn-pdf { background: #333; color: white; border: none; padding: 15px; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
 
-        /* --- DAS ECHTE A4 BLATT (Millimetergenau) --- */
+        /* --- DAS ECHTE A4 BLATT --- */
         .a4-page {
             background-color: white; 
             width: 297mm; 
             height: 210mm; 
+            /* EXAKTE SEITENRÄNDER (Unantastbar) */
             padding: 9mm 18mm 9mm 22mm; 
             box-sizing: border-box; box-shadow: 0 5px 15px rgba(0,0,0,0.5); 
             position: relative; color: #000; overflow: hidden; margin-bottom: 20px;
+            /* Global alles auf 8pt Arial setzen */
             font-family: Arial, Helvetica, sans-serif;
             font-size: 8pt;
         }
 
         .vertical-text { position: absolute; left: 6mm; bottom: 35mm; writing-mode: vertical-rl; transform: rotate(180deg); font-size: 8pt; color: #888; letter-spacing: 0.5px; }
 
-        /* --- KOPFZEILE --- */
+        /* --- KOPFZEILE & ABSTÄNDE --- */
         .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 11mm; margin-top: 2mm;}
         .title-block { width: 45%; }
         .title-block h1 { font-family: Arial, Helvetica, sans-serif; font-size: 14pt; margin: 0 0 2mm 0; line-height: 1; font-weight: normal; white-space: nowrap; letter-spacing: -0.2px; } 
@@ -45,32 +47,41 @@
         .logo-block { width: 20%; text-align: right; margin-top: -2mm; }
         .logo-block img { height: 12mm; width: auto; float: right; object-fit: contain; }
 
-        /* --- ADRESSEN (Consignee @ 103mm) --- */
         .address-container { display: flex; width: 100%; margin-bottom: 10mm; line-height: 1.2; font-size: 8pt; }
         .address-box:first-child { width: 81mm; box-sizing: border-box; padding-right: 15mm; } 
         .address-box:last-child { flex: 1; box-sizing: border-box; } 
         .address-title { font-weight: bold; margin-bottom: 2mm; font-size: 8pt; }
         .address-grid { display: grid; grid-template-columns: 14mm auto; margin-top: 2mm; }
 
-        /* --- TABELLEN-DESIGN --- */
         .datum { margin-bottom: 3mm; font-weight: normal; font-size: 8pt; line-height: 1;}
         .section-title { font-size: 8pt; margin-bottom: 1mm; font-weight: normal;}
+        
+        /* --- TABELLEN-DESIGN & DICKER RAHMEN --- */
         .data-table { width: 100%; border-collapse: collapse; margin-bottom: 5mm; font-size: 8pt; table-layout: fixed; }
-        .data-table th, .data-table td { border: 1px solid #000; padding: 2px 3px; text-align: left; vertical-align: top; line-height: 1.15; overflow-wrap: break-word; }
-        .data-table th { font-weight: bold; }
+        
+        /* Grundregel: Keine Ränder für Zellen! (Verhindert innere vertikale Linien) */
+        .data-table th, .data-table td { border: none; padding: 2px 3px; text-align: left; vertical-align: top; line-height: 1.15; overflow-wrap: break-word; word-wrap: break-word; }
+        
+        /* Kopfzeilen (Header) bekommen horizontale Linien */
+        .data-table thead th { border-top: 1.5px solid #000; border-bottom: 1.5px solid #000; font-weight: bold; }
 
-        /* EXAKTE PROZENTWERTE (Summe = 100% von 257mm) */
+        /* EXAKTE PROZENTWERTE FÜR SPALTEN (100% von 257mm) */
         .col-1 { width: 13.2%; } .col-2 { width: 12.1%; } .col-3 { width: 12.0%; }
         .col-4 { width: 12.8%; } .col-5 { width: 9.9%; }  .col-6 { width: 11.9%; }
         .col-7 { width: 13.4%; } .col-8 { width: 8.1%; }  .col-9 { width: 6.6%; }
 
-        /* --- ARTIKEL-ZEILEN --- */
-        .sub-header th { background-color: #f2f2f2; border-top: 1px solid #000; border-bottom: 1px solid #000; }
-        .inner-row-1 td { border-bottom: none !important; }
-        .inner-row-2 td { border-top: none !important; border-bottom: 1px solid #000 !important; padding-bottom: 6px; }
+        /* --- DIE NEUEN DICKEN RAHMEN-KLASSEN --- */
+        /* Diese Klassen zeichnen die dicke "Box" um die Ebene 1 Konstrukte, OHNE innere Gitter! */
+        td.group-top, th.group-top { border-top: 2.5px solid #000 !important; }
+        td.group-bottom, th.group-bottom { border-bottom: 2.5px solid #000 !important; }
+        td.edge-left, th.edge-left { border-left: 2.5px solid #000 !important; }
+        td.edge-right, th.edge-right { border-right: 2.5px solid #000 !important; }
+        
+        /* Leichte Trennlinie zwischen mehreren Artikeln/Unterverpackungen */
+        .item-separator td { border-bottom: 1px solid #000; }
+        .sub-header th { background-color: #f9f9f9; border-top: 1.5px solid #000; border-bottom: 1.5px solid #000; }
 
-        /* --- FUSSZEILE --- */
-        .footer-fixed { position: absolute; bottom: 12mm; left: 22mm; right: 18mm; display: flex; justify-content: space-between; font-size: 8pt; line-height: 1.2; }
+        .footer-fixed { position: absolute; bottom: 12mm; left: 15mm; right: 15mm; display: flex; justify-content: space-between; font-size: 8pt; line-height: 1.2; }
 
         @media print {
             body { background-color: white; padding: 0; }
@@ -83,82 +94,115 @@
 <body>
 
     <div class="control-panel">
+
         <div class="form-section">
             <h3>1. Basis-Daten</h3>
             <div class="input-row">
                 <div class="input-group"><label>Frachteinheit:</label><input type="text" id="in-fracht" placeholder="z.B. 4100167438" oninput="updateLive()" style="width: 150px; font-weight: bold;"></div>
-                <div class="input-group"><label>Datum:</label><input type="text" id="in-datum" placeholder="19.02.2026" oninput="updateLive()" style="width: 90px;"></div>
-                <div class="input-group"><label>E2E Order:</label><input type="text" id="in-e2e" placeholder="2101352626" oninput="updateLive()" style="width: 100px;"></div>
+                <div class="input-group"><label>Datum:</label><input type="text" id="in-datum" placeholder="z.B. 19.02.2026" oninput="updateLive()" style="width: 90px;"></div>
+                <div class="input-group"><label>E2E Order:</label><input type="text" id="in-e2e" placeholder="z.B. 2101352626" oninput="updateLive()" style="width: 100px;"></div>
                 <div class="input-group">
                     <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; color: #0066cc;">
-                        <input type="checkbox" id="chk-clara" onchange="toggleClara()"> Clara Document
+                        <input type="checkbox" id="chk-clara" onchange="toggleClara()" style="margin: 0;"> Clara Document
                     </label>
-                    <input type="text" id="in-clara" placeholder="9681683266" style="width: 100px; display: none;" oninput="updateLive()">
+                    <input type="text" id="in-clara" placeholder="z.B. 9681683266" style="width: 100px; display: none;" oninput="updateLive()">
                 </div>
             </div>
-            <div class="input-row">
-                <div class="input-group" style="width: 48%;">
+            
+            <div class="input-row" style="margin-top: 10px;">
+                <div class="input-group" style="width: 45%;">
                     <label>Invoice recipient:</label>
-                    <textarea id="in-inv-adresse" rows="3" oninput="updateLive()"></textarea>
+                    <textarea id="in-inv-adresse" rows="3" oninput="updateLive()" placeholder="Firma...&#10;Strasse...&#10;Stadt..."></textarea>
                     <div style="display: flex; gap: 5px; margin-top: 5px;">
-                        <input type="text" id="in-inv-kontakt" placeholder="Kontakt" oninput="updateLive()" style="width: 33%;">
-                        <input type="text" id="in-inv-tel" placeholder="Tel" oninput="updateLive()" style="width: 33%;">
-                        <input type="text" id="in-inv-mail" placeholder="Mail" oninput="updateLive()" style="width: 33%;">
+                        <input type="text" id="in-inv-kontakt" oninput="updateLive()" placeholder="Kontaktperson" style="width: 33%;">
+                        <input type="text" id="in-inv-tel" oninput="updateLive()" placeholder="Telefon" style="width: 33%;">
+                        <input type="text" id="in-inv-mail" oninput="updateLive()" placeholder="E-Mail" style="width: 33%;">
                     </div>
                 </div>
-                <div class="input-group" style="width: 48%;">
+                <div class="input-group" style="width: 45%;">
                     <label>Consignee:</label>
-                    <textarea id="in-cons-adresse" rows="3" oninput="updateLive()"></textarea>
+                    <textarea id="in-cons-adresse" rows="3" oninput="updateLive()" placeholder="Firma...&#10;Strasse...&#10;Stadt..."></textarea>
                     <div style="display: flex; gap: 5px; margin-top: 5px;">
-                        <input type="text" id="in-cons-kontakt" placeholder="Kontakt" oninput="updateLive()" style="width: 33%;">
-                        <input type="text" id="in-cons-tel" placeholder="Tel" oninput="updateLive()" style="width: 33%;">
-                        <input type="text" id="in-cons-mail" placeholder="Mail" oninput="updateLive()" style="width: 33%;">
+                        <input type="text" id="in-cons-kontakt" oninput="updateLive()" placeholder="Kontaktperson" style="width: 33%;">
+                        <input type="text" id="in-cons-tel" oninput="updateLive()" placeholder="Telefon" style="width: 33%;">
+                        <input type="text" id="in-cons-mail" oninput="updateLive()" placeholder="E-Mail" style="width: 33%;">
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="form-section box-main">
-            <h3 style="color: #0066cc;">📦 2a. HAUPTVERPACKUNG</h3>
+            <h3 style="color: #0066cc;">📦 Ebene 1: HAUPTVERPACKUNG (SSCC) ANLEGEN</h3>
             <div class="input-row">
-                <div class="input-group"><label>Package ID (SSCC):</label><input type="text" id="main-id" style="width: 150px;"></div>
-                <div class="input-group"><label>Typ:</label><input type="text" id="main-typ" style="width: 150px;"></div>
+                <div class="input-group"><label>Package ID (SSCC):</label><input type="text" id="main-id" placeholder="z.B. 37640135..." style="width: 150px;"></div>
+                <div class="input-group"><label>Typ:</label><input type="text" id="main-typ" placeholder="Karton (KRTEXT)" style="width: 150px;"></div>
                 <div class="input-group"><label>Dimensionen:</label><input type="text" id="main-dim" placeholder="120x100x140 cm" style="width: 110px;"></div>
-                <div class="input-group"><label>Temperatur:</label><input type="text" id="main-temp" value="store between +2°C to +8°C" style="width: 160px;"></div>
-                <div class="input-group"><label>Netto (Box):</label><input type="text" id="main-net" style="width: 60px;"></div>
-                <div class="input-group"><label>Brutto (Box):</label><input type="text" id="main-gross" style="width: 60px;"></div>
-                <button class="btn-main" onclick="addMain()">+ Box anlegen</button>
+                <div class="input-group"><label>Temperatur:</label><input type="text" id="main-temp" placeholder="store between +2°C..." style="width: 180px;"></div>
+            </div>
+            <div class="input-row" style="align-items: center;">
+                <div class="input-group" style="width: 320px;">
+                    <label>Wareninhalt (Optional für Hauptzeile):</label>
+                    <input type="text" id="main-inhalt" placeholder="Kurzbeschreibung oder leer lassen">
+                </div>
+                <div class="input-group"><label>Net weight:</label><input type="text" id="main-net" placeholder="z.B. 24.264" style="width: 90px;"></div>
+                <div class="input-group"><label>Gross weight:</label><input type="text" id="main-gross" placeholder="z.B. 281.290" style="width: 90px;"></div>
+                <button class="btn-main" onclick="addMain()" style="margin-left:auto;">+ Hauptverpackung speichern</button>
             </div>
         </div>
 
         <div class="form-section box-inner">
-            <h3 style="color: #28a745;">↳ 2b. ARTIKEL / INHALT (gehört zur letzten Box)</h3>
-            <div class="input-row">
-                <div class="input-group" style="width: 300px;">
-                    <label>Bezeichnung & Charge:</label>
-                    <textarea id="art-inhalt" rows="3" placeholder="Medicament name&#10;Batch: ..."></textarea>
+            <h3 style="color: #28a745;">↳ Ebene 2 & 3: INHALT HINZUFÜGEN</h3>
+            
+            <div class="input-row" style="margin-bottom: 15px; border-bottom: 1px solid #ddd; padding-bottom: 10px;">
+                <div class="input-group">
+                    <label>In welche Hauptverpackung soll das?</label>
+                    <select id="select-main" style="width: 250px;"></select>
                 </div>
-                <div class="input-group"><label>HS-Code:</label><input type="text" id="art-hs" value="3004.39" style="width: 80px;"></div>
-                <div class="input-group"><label>Menge:</label><input type="text" id="art-qty" placeholder="100 ea" style="width: 70px;"></div>
-                <div class="input-group"><label>Netto:</label><input type="text" id="art-net" style="width: 60px;"></div>
-                <div class="input-group"><label>Brutto:</label><input type="text" id="art-gross" style="width: 60px;"></div>
-                <div class="input-group"><label>Gefahr:</label><input type="text" id="art-gefahr" value="-" style="width: 50px;"></div>
-                <button class="btn-inner" onclick="addArticle()">+ Artikel hinzufügen</button>
+                <div class="input-group" style="justify-content: flex-end; margin-left: 20px;">
+                    <label>Struktur-Typ wählen:</label>
+                    <div style="display: flex; gap: 15px; align-items: center; height: 30px;">
+                        <label><input type="radio" name="ctype" value="items" checked onchange="toggleCType()"> Direkt Artikel (Bild 1 & 2)</label>
+                        <label><input type="radio" name="ctype" value="inners" onchange="toggleCType()"> Unterverpackung + Artikel (Bild 3)</label>
+                    </div>
+                </div>
+            </div>
+
+            <div id="level2-fields" class="input-row" style="display:none; background:#eefaf0; padding:10px; border-radius:4px;">
+                <div class="input-group"><label>Inner-Package ID (SSCC):</label><input type="text" id="in-l2-id" placeholder="z.B. 2123456..."></div>
+                <div class="input-group"><label>Typ (Unterverp.):</label><input type="text" id="in-l2-typ" placeholder="Karton"></div>
+                <div class="input-group"><label>Dimensionen:</label><input type="text" id="in-l2-dim" placeholder="0x0x0 cm"></div>
+                <div class="input-group"><label>Gross weight (Unterverp.):</label><input type="text" id="in-l2-gross" placeholder="z.B. 4.875"></div>
+            </div>
+
+            <div class="input-row" style="align-items: stretch; margin-top: 10px;">
+                <div class="input-group" style="width: 350px;">
+                    <label>Artikel-Beschreibung (Ebene 3, Mehrzeilig):</label>
+                    <textarea id="in-l3-desc" placeholder="Medicament&#10;Batch: ..." style="height: 100px; font-family: monospace;"></textarea>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 10px; width: 140px; justify-content: flex-end;">
+                    <div class="input-group"><label>Dangerous goods:</label><input type="text" id="in-l3-gefahr" placeholder="-"></div>
+                    <div class="input-group"><label>HS-Code:</label><input type="text" id="in-l3-hs" placeholder="3004.39"></div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 10px; width: 140px; justify-content: flex-end;">
+                    <div class="input-group"><label>Menge (Quantity):</label><input type="text" id="in-l3-qty" placeholder="30.00 st"></div>
+                    <div class="input-group"><label>Net weight (Artikel):</label><input type="text" id="in-l3-net" placeholder="z.B. 3.000"></div>
+                    <button class="btn-inner" onclick="addContent()">+ Inhalt hinzufügen</button>
+                </div>
             </div>
         </div>
 
         <div class="form-section box-logger">
             <h3 style="color: #cc0000;">🌡️ 3. TEMPERATUR-LOGGER</h3>
             <div class="input-row">
-                <div class="input-group"><label>Package ID:</label><input type="text" id="log-pid" style="width: 150px;"></div>
-                <div class="input-group"><label>Nr.:</label><input type="text" id="log-nr" value="1." style="width: 30px;"></div>
-                <div class="input-group"><label>S/N:</label><input type="text" id="log-sn" style="width: 120px;"></div>
-                <div class="input-group"><label>Info:</label><input type="text" id="log-info" value="middle of box" style="width: 150px;"></div>
+                <div class="input-group"><label>Package ID:</label><input type="text" id="log-pid" placeholder="z.B. 37640135..." style="width: 150px;"></div>
+                <div class="input-group"><label>Laufende Nr.:</label><input type="text" id="log-nr" placeholder="1." style="width: 40px;"></div>
+                <div class="input-group"><label>Device S/N:</label><input type="text" id="log-sn" placeholder="72071008363" style="width: 120px;"></div>
+                <div class="input-group"><label>Zusatz-Info:</label><input type="text" id="log-info" placeholder="mid. of box..." style="width: 160px;"></div>
                 <button class="btn-logger" onclick="addLogger()">+ Logger</button>
             </div>
         </div>
 
-        <button class="btn-pdf" onclick="window.print()">📄 Packliste drucken</button>
+        <button class="btn-pdf" onclick="window.print()">📄 Packliste fertigstellen & als PDF drucken</button>
     </div>
 
     <div id="pdf-output-container"></div>
@@ -168,169 +212,279 @@
         let loggerData = [];
 
         function toggleClara() {
-            let chk = document.getElementById("chk-clara").checked;
-            document.getElementById("in-clara").style.display = chk ? "block" : "none";
+            document.getElementById("in-clara").style.display = document.getElementById("chk-clara").checked ? "block" : "none";
             renderDocument();
         }
 
-        function formatWeight(w) { 
-            if(!w) return ""; 
-            w = w.trim().replace(",", ".");
-            return isNaN(w) ? w : parseFloat(w).toFixed(3) + " kg";
+        function toggleCType() {
+            let isInner = document.querySelector('input[name="ctype"]:checked').value === "inners";
+            document.getElementById("level2-fields").style.display = isInner ? "flex" : "none";
         }
 
-        function berechneVolumen(dimString) { 
-            let match = dimString.match(/(\d+)\s*x\s*(\d+)\s*x\s*(\d+)/i); 
-            if(match) return (parseFloat(match[1]) * parseFloat(match[2]) * parseFloat(match[3])) / 1000000; 
-            return 0; 
-        }
-
-        function addMain() {
-            const id = document.getElementById("main-id").value;
-            if(!id) return alert("Package ID fehlt!");
-            mainPackages.push({
-                id: id, typ: document.getElementById("main-typ").value,
-                dim: document.getElementById("main-dim").value, temp: document.getElementById("main-temp").value,
-                net: formatWeight(document.getElementById("main-net").value), 
-                gross: formatWeight(document.getElementById("main-gross").value),
-                articles: []
+        function updateMainSelect() {
+            let sel = document.getElementById("select-main");
+            sel.innerHTML = "";
+            mainPackages.forEach((pkg, idx) => {
+                let opt = document.createElement("option");
+                opt.value = idx;
+                opt.text = pkg.id + " (" + pkg.typ + ")";
+                sel.appendChild(opt);
             });
-            renderDocument();
-            document.getElementById("main-id").value = "";
         }
 
-        function addArticle() {
-            if(mainPackages.length === 0) return alert("Zuerst Hauptverpackung anlegen!");
-            let lastMain = mainPackages[mainPackages.length - 1];
-            lastMain.articles.push({
-                inhalt: document.getElementById("art-inhalt").value,
-                hs: document.getElementById("art-hs").value,
-                qty: document.getElementById("art-qty").value,
-                net: formatWeight(document.getElementById("art-net").value),
-                gross: formatWeight(document.getElementById("art-gross").value),
-                gefahr: document.getElementById("art-gefahr").value
-            });
-            renderDocument();
-            document.getElementById("art-inhalt").value = "";
-        }
-
-        function addLogger() {
-            loggerData.push({
-                pid: document.getElementById("log-pid").value,
-                nr: document.getElementById("log-nr").value,
-                sn: document.getElementById("log-sn").value,
-                info: document.getElementById("log-info").value
-            });
-            renderDocument();
-        }
+        function safeHtml(text) { return text ? text.replace(/\n/g, "<br>") : ""; }
+        function berechneVolumen(dimString) { let match = dimString.match(/(\d+)\s*x\s*(\d+)\s*x\s*(\d+)/i); if(match) { return (parseFloat(match[1]) * parseFloat(match[2]) * parseFloat(match[3])) / 1000000; } return 0; }
+        function formatWeight(w) { w = w.trim(); if(w === "") return ""; if(!w.toLowerCase().includes("kg")) return w + " kg"; return w; }
 
         function buildEmptyPage(pageNum, isFirstPage) {
-            let addressHtml = isFirstPage ? `
+            let addressHtml = ""; let totalsHtml = "";
+            if(isFirstPage) {
+                addressHtml = `
                 <div class="address-container">
-                    <div class="address-box"><div class="address-title">Invoice recipient</div><span class="out-inv-adresse"></span><div class="address-grid"><div>Contact:</div><div class="out-inv-kontakt"></div><div>Phone:</div><div class="out-inv-tel"></div><div>E-Mail:</div><div class="out-inv-mail"></div></div></div>
-                    <div class="address-box"><div class="address-title">Consignee</div><span class="out-cons-adresse"></span><div class="address-grid"><div>Contact:</div><div class="out-cons-kontakt"></div><div>Phone:</div><div class="out-cons-tel"></div><div>E-Mail:</div><div class="out-cons-mail"></div></div></div>
+                    <div class="address-box">
+                        <div class="address-title">Invoice recipient</div>
+                        <span class="out-inv-adresse" style="white-space: pre-line;"></span>
+                        <div class="address-grid"><div>Contact:</div><div class="out-inv-kontakt"></div><div>Phone:</div><div class="out-inv-tel"></div><div>E-Mail:</div><div class="out-inv-mail"></div></div>
+                    </div>
+                    <div class="address-box">
+                        <div class="address-title">Consignee</div>
+                        <span class="out-cons-adresse" style="white-space: pre-line;"></span>
+                        <div class="address-grid"><div>Contact:</div><div class="out-cons-kontakt"></div><div>Phone:</div><div class="out-cons-tel"></div><div>E-Mail:</div><div class="out-cons-mail"></div></div>
+                    </div>
                 </div>
                 <div class="datum">Date: <span class="out-datum"></span></div>
+                `;
+                totalsHtml = `
                 <div class="section-title">Total packing-list:</div>
-                <table class="data-table">
-                    <thead><tr><th style="width: 25%">Shipping marks</th><th style="width: 20%">UCR No. (GSIN)</th><th style="width: 10%">Total packages</th><th style="width: 11.7%">Total gross</th><th style="width: 14.4%">Total net</th><th style="width: 15.3%">Total volume</th><th style="width: 14%">Loggers</th></tr></thead>
-                    <tbody><tr><td>Address of consignee, <span class="out-fracht-table"></span></td><td>(402) 7640135 790167438 4</td><td class="out-total-packages"></td><td class="out-total-gross"></td><td class="out-total-net"></td><td class="out-total-vol"></td><td class="out-total-logger"></td></tr></tbody>
-                </table>` : '';
-
+                <table class="data-table" style="margin-bottom: 5mm;">
+                    <thead><tr><th style="width: 22%">Shipping marks</th><th style="width: 22%">UCR No. (GSIN)</th><th style="width: 10%">Total no. of<br>packages</th><th style="width: 12%">Total gross weight</th><th style="width: 12%">Total net weight</th><th style="width: 12%">Total volume</th><th style="width: 10%">Total no. of temperature<br>monitoring devices *</th></tr></thead>
+                    <tbody><tr><td>Address of consignee,<br><span class="out-fracht-table"></span></td><td>(402) 7640135 790167438 4</td><td class="out-total-packages">0</td><td class="out-total-gross">0.000 kg</td><td class="out-total-net">0.000 kg</td><td class="out-total-vol">0.00 m3</td><td class="out-total-logger">0</td></tr></tbody>
+                </table>
+                `;
+            }
             return `
             <div class="a4-page" id="page-${pageNum}">
                 <div class="vertical-text">7840135792109TEC0165147V4</div>
                 <div class="header">
-                    <div class="title-block"><h1>Packing List to Freight Unit <span class="out-fracht"></span></h1><span style="font-size: 8pt;">(Version Black Week)</span></div>
+                    <div class="title-block">
+                        <h1>Packing List to Freight Unit <span class="out-fracht"></span></h1>
+                        <span style="font-size: 8pt; display: block; line-height: 1;">(Version Black Week)</span>
+                    </div>
                     <div class="barcode-block"><svg class="barcode-svg"></svg></div>
-                    <div class="logo-block"><img src="https://upload.wikimedia.org/wikipedia/commons/f/f5/Roche_Logo.svg" alt="Logo"></div>
+                    <div class="logo-block"><img src="roche-logo.png" alt="Roche Logo"></div>
                 </div>
-                ${addressHtml}
+                ${addressHtml} ${totalsHtml}
                 <div class="section-title">Detail packing-list:</div>
                 <table class="data-table">
-                    <thead><tr><th class="col-1">Package ID</th><th class="col-2">Type</th><th class="col-3">Dimensions</th><th class="col-4">Content</th><th class="col-5">Temperature</th><th class="col-6">Devices *</th><th class="col-7">Dangerous</th><th class="col-8">Net weight</th><th class="col-9">Gross weight</th></tr></thead>
+                    <thead><tr><th class="col-1">Package ID (SSCC)</th><th class="col-2">Packing type</th><th class="col-3">Dimensions<br>(LxHxW cm)</th><th class="col-4">Content</th><th class="col-5">Temperature<br>conditions</th><th class="col-6">Temperature<br>monitoring devices *</th><th class="col-7">Dangerous<br>goods</th><th class="col-8">Net weight</th><th class="col-9">Gross weight</th></tr></thead>
                     <tbody class="details-body"></tbody>
                 </table>
                 <div class="bottom-info-container"></div>
                 <div class="footer-fixed">
-                    <div><b>F. Hoffmann-La Roche Ltd</b><br>Site Logistics, 4070 Basel</div>
-                    <div>Bldg. 041 / 3.005</div>
-                    <div>E-Mail: basel.site-logistics@roche.com</div>
-                    <div style="text-align: right;">Page ${pageNum} / {TOTAL_PAGES}</div>
+                    <div><b>F. Hoffmann-La Roche Ltd</b><br>Site Logistics<br>Grenzacherstrasse 124<br>4070 Basel / Switzerland</div>
+                    <div style="margin-left: -50px;">Bldg. 041 / 3.005</div>
+                    <div>Tel. +41 61 688 72 27<br>Fax. +41 61 688 69 02<br>E-Mail: basel.site-logistics@roche.com</div>
+                    <div style="text-align: right; margin-top: auto;" class="page-number">Page ${pageNum} / {TOTAL_PAGES}</div>
                 </div>
             </div>`;
         }
 
         function renderDocument() {
             const container = document.getElementById("pdf-output-container");
-            container.innerHTML = ""; pageNum = 1;
-            container.insertAdjacentHTML('beforeend', buildEmptyPage(pageNum, true));
-            
-            let currentPage = document.getElementById(`page-${pageNum}`);
-            let currentTbody = currentPage.querySelector(".details-body");
-            let sumNet = 0, sumGross = 0, sumVol = 0;
+            container.innerHTML = ""; 
+            let pageNum = 1; container.insertAdjacentHTML('beforeend', buildEmptyPage(pageNum, true));
+            let currentPage = document.getElementById(`page-${pageNum}`); let currentTbody = currentPage.querySelector(".details-body");
+            let sumNet = 0, sumGross = 0, sumVol = 0, mainCount = 0;
 
-            mainPackages.forEach(main => {
-                sumNet += parseFloat(main.net) || 0; sumGross += parseFloat(main.gross) || 0; sumVol += berechneVolumen(main.dim);
-                let logStr = loggerData.filter(l => l.pid === main.id).map(l => `${l.nr} ${l.sn}`).join('<br>');
-                
-                // Hauptzeile
-                let mainRow = `<tr><td>${main.id}</td><td>${main.typ}</td><td>${main.dim}</td><td>${main.articles.length > 0 ? main.articles.length + ' Items' : 'Empty'}</td><td>${main.temp}</td><td>${logStr}</td><td></td><td>${main.net}</td><td>${main.gross}</td></tr>`;
-                addNodesSafe(mainRow);
-
-                // Artikelzeilen
-                if(main.articles.length > 0) {
-                    addNodesSafe(`<tr class="sub-header"><th colspan="3">Article Detail</th><th>Content / Batch</th><th colspan="2">HS-Code / Qty</th><th>Gefahr</th><th>Net</th><th>Gross</th></tr>`);
-                    main.articles.forEach(art => {
-                        let rows = `<tr class="inner-row-1"><td colspan="3" style="border-right:none"></td><td style="border-left:none">${art.inhalt.split('\n')[0]}</td><td colspan="2">${art.hs}</td><td>${art.gefahr}</td><td>${art.net}</td><td>${art.gross}</td></tr>`;
-                        let rows2 = `<tr class="inner-row-2"><td colspan="3"></td><td>${art.inhalt.split('\n').slice(1).join('<br>')}</td><td colspan="2">Qty: ${art.qty}</td><td></td><td></td><td></td></tr>`;
-                        addNodesSafe(rows); addNodesSafe(rows2);
-                    });
-                }
-            });
-
-            function addNodesSafe(html) {
-                currentTbody.insertAdjacentHTML('beforeend', html);
-                if (currentPage.scrollHeight > currentPage.clientHeight) {
-                    currentTbody.lastElementChild.remove();
-                    pageNum++;
-                    container.insertAdjacentHTML('beforeend', buildEmptyPage(pageNum, false));
-                    currentPage = document.getElementById(`page-${pageNum}`);
-                    currentTbody = currentPage.querySelector(".details-body");
-                    currentTbody.insertAdjacentHTML('beforeend', html);
+            function addNodesSafe(htmlArray) {
+                htmlArray.forEach(html => currentTbody.insertAdjacentHTML('beforeend', html));
+                if (currentPage.scrollHeight > currentPage.clientHeight + 2) {
+                    for(let i=0; i<htmlArray.length; i++) { currentTbody.lastElementChild.remove(); }
+                    pageNum++; container.insertAdjacentHTML('beforeend', buildEmptyPage(pageNum, false));
+                    currentPage = document.getElementById(`page-${pageNum}`); currentTbody = currentPage.querySelector(".details-body");
+                    htmlArray.forEach(html => currentTbody.insertAdjacentHTML('beforeend', html));
                 }
             }
 
-            updateGlobalTexts(pageNum, sumNet, sumGross, sumVol);
-        }
-
-        function updateGlobalTexts(total, net, gross, vol) {
-            const fracht = document.getElementById("in-fracht").value;
-            const datum = document.getElementById("in-datum").value;
-            
-            document.querySelectorAll(".a4-page").forEach((page, idx) => {
-                page.innerHTML = page.innerHTML.replace(/{TOTAL_PAGES}/g, total);
-                page.querySelectorAll(".out-fracht").forEach(el => el.innerText = fracht);
-                page.querySelectorAll(".out-datum").forEach(el => el.innerText = datum);
+            mainPackages.forEach((main, index) => {
+                mainCount++; sumNet += parseFloat(main.net) || 0; sumGross += parseFloat(main.gross) || 0; sumVol += berechneVolumen(main.dim);
                 
-                // Barcode
-                let svg = page.querySelector(".barcode-svg");
-                if(fracht) JsBarcode(svg, fracht, { format: "CODE128", width: 1.4, height: 28, displayValue: false });
+                let contentStr = safeHtml(main.inhalt); 
+                if (main.type === "inners" && main.contents.length > 0) { 
+                    contentStr = `${main.contents.length} Inner-Packages<br>` + main.contents.map(c => c.innerId).join('<br>'); 
+                }
+                
+                let loggerString = loggerData.filter(log => log.pid === main.id).map(log => `<b>${log.nr} ${log.sn}</b><br><span style="font-size:8pt">${safeHtml(log.info)}</span>`).join('<br>');
 
-                // Adresse & Totals (nur Seite 1)
-                if(idx === 0) {
-                    page.querySelector(".out-inv-adresse").innerText = document.getElementById("in-inv-adresse").value;
-                    page.querySelector(".out-cons-adresse").innerText = document.getElementById("in-cons-adresse").value;
-                    page.querySelector(".out-total-packages").innerText = mainPackages.length;
-                    page.querySelector(".out-total-net").innerText = net.toFixed(3) + " kg";
-                    page.querySelector(".out-total-gross").innerText = gross.toFixed(3) + " kg";
-                    page.querySelector(".out-total-vol").innerText = vol.toFixed(2) + " m3";
-                    page.querySelector(".out-total-logger").innerText = loggerData.length;
+                // DAS IST DIE MAGIE FÜR DEN DICKEN RAHMEN: 
+                // Erste Zeile bekommt immer "group-top". Die linke/rechte Zelle bekommt "edge-left"/"edge-right".
+                // Wenn die Box komplett leer ist, bekommt sie auch direkt "group-bottom", damit der Rahmen zugeht.
+                let bottomClass = (main.contents.length === 0) ? " group-bottom" : "";
+                
+                addNodesSafe([`<tr class="main-row"><td class="col-1 edge-left group-top${bottomClass}">${main.id}</td><td class="col-2 group-top${bottomClass}">${main.typ}</td><td class="col-3 group-top${bottomClass}">${main.dim}</td><td class="col-4 group-top${bottomClass}">${contentStr}</td><td class="col-5 group-top${bottomClass}">${main.temp}</td><td class="col-6 group-top${bottomClass}">${loggerString}</td><td class="col-7 group-top${bottomClass}"></td><td class="col-8 group-top${bottomClass}">${main.net}</td><td class="col-9 edge-right group-top${bottomClass}">${main.gross}</td></tr>`]);
+
+                if (main.type === "inners" && main.contents.length > 0) {
+                    // ZEICHNET: Unterverpackungen (mit grauem Header)
+                    addNodesSafe([`<tr class="sub-header"><th class="edge-left">Inner-Package ID</th><th>Packing type</th><th>Dimensions<br>(LxHxW cm)</th><th>Content</th><th>Temperature<br>conditions</th><th>Temperature<br>monitoring devices *</th><th>Dangerous<br>goods</th><th>Net weight</th><th class="edge-right">Gross weight</th></tr>`]);
+                    
+                    main.contents.forEach((inner, i) => {
+                        let isLast = (i === main.contents.length - 1);
+                        let bClass = isLast ? " group-bottom" : " item-separator";
+                        let descLines = inner.item.desc.split('\n'); let descFirst = descLines[0] || ""; let descRest = [...descLines]; descRest.shift(); 
+                        
+                        let row1 = `<tr class="inner-row-1"><td class="edge-left">${inner.innerId}</td><td>${inner.innerTyp}</td><td>${inner.innerDim}</td><td>${descFirst}</td><td>${main.temp}</td><td>-</td><td>${inner.item.gefahr}</td><td>${inner.item.net}</td><td class="edge-right">${inner.innerGross}</td></tr>`;
+                        let row2 = `<tr class="inner-row-2"><td colspan="9" class="edge-left edge-right${bClass}"><div style="display: flex; justify-content: space-between;"><div style="width: 45%;">${descRest.join('<br>')}</div><div style="width: 25%;"><table style="border:none; margin:0; font-size: 8pt; width: 100%;"><tr><td style="border:none; padding:0; width:50%;">HS-Code:</td><td style="border:none; padding:0;">${inner.item.hs}</td></tr><tr><td style="border:none; padding:0;">Country of origin:</td><td style="border:none; padding:0;">IT</td></tr><tr><td style="border:none; padding:0;">Preferential origin:</td><td style="border:none; padding:0;">None</td></tr></table></div><div style="width: 15%;">Quantity<br>${inner.item.qty}</div><div style="width: 15%;">Net weight<br>${inner.item.net}</div></div></td></tr>`;
+                        addNodesSafe([row1, row2]);
+                    });
+                } 
+                else if (main.type === "items" && main.contents.length > 0) {
+                    // ZEICHNET: Direkte Artikel (KEIN grauer Header)
+                    main.contents.forEach((item, i) => {
+                        let isLast = (i === main.contents.length - 1);
+                        let bClass = isLast ? " group-bottom" : " item-separator";
+                        let descLines = item.desc.split('\n').join('<br>');
+                        
+                        let row = `<tr class="item-row"><td colspan="9" class="edge-left edge-right${bClass}"><div style="display: flex; justify-content: space-between; padding-top: 4px;"><div style="width: 45%;">${descLines}</div><div style="width: 25%;"><table style="border:none; margin:0; font-size: 8pt; width: 100%;"><tr><td style="border:none; padding:0; width:50%;">HS-Code:</td><td style="border:none; padding:0;">${item.hs}</td></tr><tr><td style="border:none; padding:0;">Country of origin:</td><td style="border:none; padding:0;">IT</td></tr><tr><td style="border:none; padding:0;">Preferential origin:</td><td style="border:none; padding:0;">None</td></tr></table></div><div style="width: 15%;">Menge<br>${item.qty}</div><div style="width: 15%;">Net weight<br>${item.net}</div></div></td></tr>`;
+                        addNodesSafe([row]);
+                    });
+                }
+                
+                // Abstandshalter zwischen zwei SSCC-Blöcken (damit die dicken Rahmen nicht kollidieren)
+                if(index < mainPackages.length - 1) {
+                    addNodesSafe([`<tr style="height: 3mm;"><td colspan="9" style="border:none;"></td></tr>`]);
                 }
             });
+
+            let includeClara = document.getElementById("chk-clara").checked;
+            let claraTh = includeClara ? `<th>Clara Document</th>` : "";
+            let claraTd = includeClara ? `<td class="out-clara"></td>` : "";
+            let refTableWidth = includeClara ? "70mm" : "35mm";
+
+            let loggerRows = loggerData.map(log => `<tr><td>${log.pid}</td><td>${log.sn}</td><td>Elpro Libero CB</td><td>Elpro Buchs AG, CH-Buchs</td><td>CH</td><td>9025.19</td><td style="border-right:none; width:10mm;">CHF</td><td style="border-left:none; text-align:right;">18.50</td></tr>`).join('');
+            let bottomHtml = `
+                <div style="font-size: 8pt; margin-bottom: 1mm; margin-top: 5mm;">* Details to Temperature Monitoring devices:</div>
+                <table class="data-table" style="width: 60%; margin-bottom: 4mm;">
+                    <thead><tr><th style="width: 25%;">Package ID</th><th style="width: 15%;">Device S/N</th><th style="width: 15%;">Type</th><th style="width: 20%;">Manufacturer</th><th style="width: 10%;">Origin</th><th style="width: 10%;">HS-Code</th><th colspan="2" style="width: 5%;">Value</th></tr></thead>
+                    <tbody>${loggerRows}</tbody>
+                </table>
+                <div style="font-size: 8pt; margin-bottom: 1mm;">* Details to Document References</div>
+                <table class="data-table" style="width: ${refTableWidth}; margin-bottom: 4mm;">
+                    <thead><tr><th>E2E Order</th>${claraTh}</tr></thead>
+                    <tbody><tr><td class="out-e2e"></td>${claraTd}</tr></tbody>
+                </table>
+            `;
+
+            let bottomContainer = currentPage.querySelector(".bottom-info-container");
+            bottomContainer.innerHTML = bottomHtml;
+
+            if (currentPage.scrollHeight > currentPage.clientHeight + 2) {
+                bottomContainer.innerHTML = ""; pageNum++;
+                container.insertAdjacentHTML('beforeend', buildEmptyPage(pageNum, false));
+                currentPage = document.getElementById(`page-${pageNum}`);
+                currentPage.querySelector(".bottom-info-container").innerHTML = bottomHtml;
+            }
+
+            updateStaticTexts(pageNum, mainCount, sumGross, sumNet, sumVol);
+        }
+
+        function updateStaticTexts(totalPages, mainCount, sumGross, sumNet, sumVol) {
+            const fracht = document.getElementById("in-fracht").value;
+            const classesToUpdate = ["inv-adresse", "inv-kontakt", "inv-tel", "inv-mail", "cons-adresse", "cons-kontakt", "cons-tel", "cons-mail", "e2e"];
+            if (document.getElementById("chk-clara").checked) { classesToUpdate.push("clara"); }
+            
+            for (let i = 1; i <= totalPages; i++) {
+                let page = document.getElementById(`page-${i}`);
+                page.innerHTML = page.innerHTML.replace(/{TOTAL_PAGES}/g, totalPages);
+                page.querySelectorAll(".out-fracht").forEach(el => el.innerText = fracht);
+                
+                let barcodeSvg = page.querySelector(".barcode-svg");
+                if (fracht.trim() !== "") {
+                    barcodeSvg.style.display = "inline-block";
+                    JsBarcode(barcodeSvg, fracht, { format: "CODE128", lineColor: "#000", width: 1.4, height: 28, displayValue: false, margin: 0 });
+                } else {
+                    barcodeSvg.style.display = "none";
+                }
+                
+                classesToUpdate.forEach(cls => { let val = document.getElementById(`in-${cls}`).value; page.querySelectorAll(`.out-${cls}`).forEach(el => el.innerText = val); });
+                page.querySelectorAll(".out-datum").forEach(el => el.innerText = document.getElementById("in-datum").value);
+                if(i === 1) {
+                    page.querySelector(".out-fracht-table").innerText = fracht;
+                    page.querySelector(".out-total-packages").innerText = mainCount;
+                    page.querySelector(".out-total-gross").innerText = sumGross > 0 ? sumGross.toFixed(3) + " kg" : "0.000 kg";
+                    page.querySelector(".out-total-net").innerText = sumNet > 0 ? sumNet.toFixed(3) + " kg" : "0.000 kg";
+                    page.querySelector(".out-total-vol").innerText = sumVol > 0 ? sumVol.toFixed(2) + " m3" : "0.00 m3";
+                    page.querySelector(".out-total-logger").innerText = loggerData.length;
+                }
+            }
+        }
+
+        function addMain() {
+            let id = document.getElementById("main-id").value;
+            if(id === "") { alert("Bitte eine Package ID eingeben!"); return; }
+            mainPackages.push({ 
+                id: id, typ: document.getElementById("main-typ").value, dim: document.getElementById("main-dim").value, 
+                temp: document.getElementById("main-temp").value, inhalt: document.getElementById("main-inhalt").value, 
+                net: formatWeight(document.getElementById("main-net").value), gross: formatWeight(document.getElementById("main-gross").value), 
+                type: null, contents: [] 
+            });
+            updateMainSelect();
+            renderDocument(); document.getElementById("main-id").value = ""; document.getElementById("main-inhalt").value = ""; 
+        }
+
+        function addContent() {
+            let sel = document.getElementById("select-main");
+            if(sel.options.length === 0) { alert("Bitte lege zuerst in Box 2a eine Hauptverpackung an!"); return; }
+            
+            let pkg = mainPackages[sel.value];
+            let ctype = document.querySelector('input[name="ctype"]:checked').value;
+            
+            // Sicherheits-Sperre: Man darf nicht Mischen (Roche-Logik)
+            if(pkg.type !== null && pkg.type !== ctype) {
+                alert("Diese Hauptverpackung hat bereits '" + (pkg.type === "items" ? "Direkt Artikel" : "Unterverpackungen") + "'. Du darfst die Struktur innerhalb einer SSCC nicht mischen!");
+                return;
+            }
+            
+            pkg.type = ctype;
+            
+            let itemData = {
+                desc: document.getElementById("in-l3-desc").value,
+                hs: document.getElementById("in-l3-hs").value,
+                qty: document.getElementById("in-l3-qty").value,
+                net: formatWeight(document.getElementById("in-l3-net").value),
+                gefahr: document.getElementById("in-l3-gefahr").value || "-"
+            };
+
+            if (ctype === "items") {
+                if(itemData.desc === "") { alert("Bitte eine Artikel-Beschreibung eingeben!"); return; }
+                pkg.contents.push(itemData);
+            } else {
+                let innerId = document.getElementById("in-l2-id").value;
+                if(innerId === "") { alert("Bitte eine Inner-Package ID eingeben!"); return; }
+                pkg.contents.push({
+                    innerId: innerId,
+                    innerTyp: document.getElementById("in-l2-typ").value,
+                    innerDim: document.getElementById("in-l2-dim").value,
+                    innerGross: formatWeight(document.getElementById("in-l2-gross").value),
+                    item: itemData
+                });
+            }
+            
+            renderDocument(); 
+            // Formular für den nächsten Klick leeren
+            document.getElementById("in-l2-id").value = "";
+            document.getElementById("in-l3-desc").value = "";
+        }
+
+        function addLogger() {
+            let pid = document.getElementById("log-pid").value;
+            let sn = document.getElementById("log-sn").value;
+            if(pid === "" || sn === "") { alert("Bitte Package ID und Device S/N eingeben!"); return; }
+            loggerData.push({ pid: pid, nr: document.getElementById("log-nr").value, sn: sn, info: document.getElementById("log-info").value });
+            renderDocument(); document.getElementById("log-sn").value = ""; document.getElementById("log-info").value = "";
         }
 
         function updateLive() { renderDocument(); }
+        renderDocument();
     </script>
 </body>
 </html>
