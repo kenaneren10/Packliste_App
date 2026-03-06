@@ -38,9 +38,11 @@
         .vertical-text { position: absolute; left: 6mm; bottom: 35mm; writing-mode: vertical-rl; transform: rotate(180deg); font-size: 7.5pt; color: #888; letter-spacing: 0.5px; }
 
         /* --- KOPFZEILE --- */
-        .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6mm; margin-top: 2mm;}
+        /* Abstand zum Invoice Recipient auf exakt 11mm gesetzt (margin-bottom: 11mm) */
+        .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 11mm; margin-top: 2mm;}
         .title-block { width: 45%; }
-        .title-block h1 { font-size: 12pt; margin: 0 0 2mm 0; font-weight: normal; white-space: nowrap; letter-spacing: -0.2px; } 
+        /* Abstand zur Version auf exakt 2mm gesetzt (margin: 0 0 2mm 0) und Zeilenhöhe auf 1 gesetzt für absolute Präzision */
+        .title-block h1 { font-size: 12pt; margin: 0 0 2mm 0; line-height: 1; font-weight: normal; white-space: nowrap; letter-spacing: -0.2px; } 
         .barcode-block { width: 35%; text-align: left; padding-left: 5mm; margin-top: -1mm;}
         .logo-block { width: 20%; text-align: right; margin-top: -2mm; }
         .logo-block img { height: 12mm; width: auto; float: right; object-fit: contain; }
@@ -55,6 +57,7 @@
         .datum { margin-bottom: 3mm; font-weight: bold; font-size: 8pt;}
         .section-title { font-size: 8pt; margin-bottom: 1mm; font-weight: normal;}
         
+        /* Tabelle ist 100% vom verfügbaren Platz (exakt 257mm) */
         .data-table { width: 100%; border-collapse: collapse; margin-bottom: 5mm; font-size: 7pt; table-layout: fixed; }
         .data-table th, .data-table td { border: 1px solid #000; padding: 2px 3px; text-align: left; vertical-align: top; line-height: 1.15; overflow-wrap: break-word; word-wrap: break-word; }
         .data-table th { font-weight: bold; }
@@ -187,7 +190,6 @@
         let mainPackages = [];
         let loggerData = [];
 
-        // Zeigt das Clara Feld an und baut die Tabelle neu
         function toggleClara() {
             let chk = document.getElementById("chk-clara").checked;
             document.getElementById("in-clara").style.display = chk ? "block" : "none";
@@ -216,11 +218,10 @@
                 </div>
                 <div class="datum">Date: <span class="out-datum"></span></div>
                 `;
-                // Totals-Tabelle zu exakt 100% Prozenten umgebaut!
                 totalsHtml = `
                 <div class="section-title">Total packing-list:</div>
                 <table class="data-table" style="margin-bottom: 5mm;">
-                    <thead><tr><th style="width: 22%">Shipping marks</th><th style="width: 22%">UCR No. (GSIN)</th><th style="width: 10%">Total no. of<br>packages</th><th style="width: 12%">Total gross weight</th><th style="width: 12%">Total net weight</th><th style="width: 12%">Total volume</th><th style="width: 10%">Total no. of temperature<br>monitoring devices *</th></tr></thead>
+                    <thead><tr><th style="width: 25%">Shipping marks</th><th style="width: 20%">UCR No. (GSIN)</th><th style="width: 10%">Total no. of<br>packages</th><th style="width: 11.7%">Total gross weight</th><th style="width: 14.4%">Total net weight</th><th style="width: 15.3%">Total volume</th><th style="width: 14%">Total no. of temperature<br>monitoring devices *</th></tr></thead>
                     <tbody><tr><td>Address of consignee,<br><span class="out-fracht-table"></span></td><td>(402) 7640135 790167438 4</td><td class="out-total-packages">0</td><td class="out-total-gross">0.000 kg</td><td class="out-total-net">0.000 kg</td><td class="out-total-vol">0.00 m3</td><td class="out-total-logger">0</td></tr></tbody>
                 </table>
                 `;
@@ -231,7 +232,7 @@
                 <div class="header">
                     <div class="title-block">
                         <h1>Packing List to Freight Unit <span class="out-fracht"></span></h1>
-                        <span style="font-size: 8.5pt;">(Version Black Week)</span>
+                        <span style="font-size: 8.5pt; display: block; line-height: 1;">(Version Black Week)</span>
                     </div>
                     <div class="barcode-block"><svg class="barcode-svg"></svg></div>
                     <div class="logo-block"><img src="roche-logo.png" alt="Roche Logo"></div>
@@ -289,13 +290,12 @@
                 }
             });
 
-            // Referenz-Tabelle ebenfalls auf Prozente umgebaut
             let includeClara = document.getElementById("chk-clara").checked;
             let claraTh = includeClara ? `<th>Clara Document</th>` : "";
             let claraTd = includeClara ? `<td class="out-clara"></td>` : "";
-            let refTableWidth = includeClara ? "30%" : "15%";
+            let refTableWidth = includeClara ? "70mm" : "35mm";
 
-            let loggerRows = loggerData.map(log => `<tr><td>${log.pid}</td><td>${log.sn}</td><td>Elpro Libero CB</td><td>Elpro Buchs AG, CH-Buchs</td><td>CH</td><td>9025.19</td><td style="border-right:none;">CHF</td><td style="border-left:none; text-align:right;">18.50</td></tr>`).join('');
+            let loggerRows = loggerData.map(log => `<tr><td>${log.pid}</td><td>${log.sn}</td><td>Elpro Libero CB</td><td>Elpro Buchs AG, CH-Buchs</td><td>CH</td><td>9025.19</td><td style="border-right:none; width:10mm;">CHF</td><td style="border-left:none; text-align:right;">18.50</td></tr>`).join('');
             let bottomHtml = `
                 <div style="font-size: 7.5pt; margin-bottom: 1mm; margin-top: 5mm;">* Details to Temperature Monitoring devices:</div>
                 <table class="data-table" style="width: 60%; margin-bottom: 4mm;">
