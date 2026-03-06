@@ -32,15 +32,19 @@
             padding: 9mm 18mm 9mm 22mm; 
             box-sizing: border-box; box-shadow: 0 5px 15px rgba(0,0,0,0.5); 
             position: relative; color: #000; overflow: hidden; margin-bottom: 20px;
+            /* Global alles auf 8pt Arial setzen */
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 8pt;
         }
 
-        .vertical-text { position: absolute; left: 6mm; bottom: 35mm; writing-mode: vertical-rl; transform: rotate(180deg); font-size: 7.5pt; color: #888; letter-spacing: 0.5px; }
+        /* Vertikaler Text links an der Papierkante (6mm Abstand vom Rand) */
+        .vertical-text { position: absolute; left: 6mm; bottom: 35mm; writing-mode: vertical-rl; transform: rotate(180deg); font-size: 8pt; color: #888; letter-spacing: 0.5px; }
 
         /* --- KOPFZEILE --- */
         /* Abstand zum Invoice Recipient auf exakt 11mm gesetzt (margin-bottom: 11mm) */
         .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 11mm; margin-top: 2mm;}
         .title-block { width: 45%; }
-        /* Überschrift: Arial, exakt 14pt, Abstand zur Version exakt 2mm (margin: 0 0 2mm 0) */
+        /* Abstand zur Version auf exakt 2mm gesetzt (margin: 0 0 2mm 0) und Zeilenhöhe auf 1 gesetzt für absolute Präzision */
         .title-block h1 { font-family: Arial, Helvetica, sans-serif; font-size: 14pt; margin: 0 0 2mm 0; line-height: 1; font-weight: normal; white-space: nowrap; letter-spacing: -0.2px; } 
         .barcode-block { width: 35%; text-align: left; padding-left: 5mm; margin-top: -1mm;}
         .logo-block { width: 20%; text-align: right; margin-top: -2mm; }
@@ -49,8 +53,12 @@
         /* --- ADRESSEN --- */
         /* Abstand Adressblock zum Datum auf exakt 10mm gesetzt */
         .address-container { display: flex; width: 100%; margin-bottom: 10mm; line-height: 1.2; font-size: 8pt; }
-        .address-box { width: 50%; box-sizing: border-box; padding-right: 15mm; } 
-        .address-title { font-weight: bold; margin-bottom: 2mm; font-size: 8.5pt; }
+        
+        /* EXAKTE BERECHNUNG FÜR CONSIGNEE: Seitenrand 22mm + Box-inv 81mm = Exakt 103mm vom linken Blattrand! */
+        .address-box:first-child { width: 81mm; box-sizing: border-box; padding-right: 15mm; } 
+        .address-box:last-child { flex: 1; box-sizing: border-box; } 
+        
+        .address-title { font-weight: bold; margin-bottom: 2mm; font-size: 8pt; }
         .address-grid { display: grid; grid-template-columns: 14mm auto; margin-top: 2mm; }
 
         /* --- TABELLEN-DESIGN --- */
@@ -58,11 +66,12 @@
         .datum { margin-bottom: 3mm; font-weight: normal; font-size: 8pt; line-height: 1;}
         .section-title { font-size: 8pt; margin-bottom: 1mm; font-weight: normal;}
         
-        .data-table { width: 100%; border-collapse: collapse; margin-bottom: 5mm; font-size: 7pt; table-layout: fixed; }
+        /* Tabelle ist 100% vom verfügbaren Platz (exakt 257mm) */
+        .data-table { width: 100%; border-collapse: collapse; margin-bottom: 5mm; font-size: 8pt; table-layout: fixed; }
         .data-table th, .data-table td { border: 1px solid #000; padding: 2px 3px; text-align: left; vertical-align: top; line-height: 1.15; overflow-wrap: break-word; word-wrap: break-word; }
         .data-table th { font-weight: bold; }
 
-        /* EXAKTE PROZENTWERTE */
+        /* EXAKTE PROZENTWERTE (Summe = 100% von exakt 257mm) */
         .col-1 { width: 13.2%; } .col-2 { width: 12.1%; } .col-3 { width: 12.0%; }
         .col-4 { width: 12.8%; } .col-5 { width: 9.9%; }  .col-6 { width: 11.9%; }
         .col-7 { width: 13.4%; } .col-8 { width: 8.1%; }  .col-9 { width: 6.6%; }
@@ -78,8 +87,8 @@
             padding-bottom: 6px;
         }
 
-        /* --- FUSSZEILE --- */
-        .footer-fixed { position: absolute; bottom: 12mm; left: 15mm; right: 15mm; display: flex; justify-content: space-between; font-size: 7.5pt; line-height: 1.2; }
+        /* --- FUSSZEILE (Bündig mit den neuen Rändern) --- */
+        .footer-fixed { position: absolute; bottom: 12mm; left: 15mm; right: 15mm; display: flex; justify-content: space-between; font-size: 8pt; line-height: 1.2; }
 
         @media print {
             body { background-color: white; padding: 0; }
@@ -232,7 +241,7 @@
                 <div class="header">
                     <div class="title-block">
                         <h1>Packing List to Freight Unit <span class="out-fracht"></span></h1>
-                        <span style="font-size: 8.5pt; display: block; line-height: 1;">(Version Black Week)</span>
+                        <span style="font-size: 8pt; display: block; line-height: 1;">(Version Black Week)</span>
                     </div>
                     <div class="barcode-block"><svg class="barcode-svg"></svg></div>
                     <div class="logo-block"><img src="roche-logo.png" alt="Roche Logo"></div>
@@ -273,7 +282,7 @@
             mainPackages.forEach(main => {
                 mainCount++; sumNet += parseFloat(main.net) || 0; sumGross += parseFloat(main.gross) || 0; sumVol += berechneVolumen(main.dim);
                 let contentString = ""; if(main.inners.length > 0) { contentString = `${main.inners.length} Inner-Packages<br>` + main.inners.map(inner => inner.id).join('<br>'); }
-                let loggerString = loggerData.filter(log => log.pid === main.id).map(log => `<b>${log.nr} ${log.sn}</b><br><span style="font-size:6.5pt">${safeHtml(log.info)}</span>`).join('<br>');
+                let loggerString = loggerData.filter(log => log.pid === main.id).map(log => `<b>${log.nr} ${log.sn}</b><br><span style="font-size:8pt">${safeHtml(log.info)}</span>`).join('<br>');
 
                 addNodesSafe([`<tr><td class="col-1">${main.id}</td><td class="col-2">${main.typ}</td><td class="col-3">${main.dim}</td><td class="col-4">${contentString}</td><td class="col-5">${main.temp}</td><td class="col-6">${loggerString}</td><td class="col-7"></td><td class="col-8">${main.net}</td><td class="col-9">${main.gross}</td></tr>`]);
 
@@ -283,7 +292,7 @@
                         let inhaltArray = inner.inhalt.split('\n'); let inhaltErsteZeile = inhaltArray[0] || ""; let inhaltRest = [...inhaltArray]; inhaltRest.shift(); 
                         
                         let row1 = `<tr class="inner-row-1"><td>${inner.id}</td><td>${inner.typ}</td><td>${inner.dim}</td><td>${inhaltErsteZeile}</td><td>${main.temp}</td><td>-</td><td>${inner.gefahr}</td><td>${inner.net}</td><td>${inner.gross}</td></tr>`;
-                        let row2 = `<tr class="inner-row-2"><td colspan="9"><div style="display: flex; justify-content: space-between;"><div style="width: 45%;">${inhaltRest.join('<br>')}</div><div style="width: 25%;"><table style="border:none; margin:0; font-size: 7pt; width: 100%;"><tr><td style="border:none; padding:0; width:50%;">HS-Code:</td><td style="border:none; padding:0;">${inner.hsCode}</td></tr><tr><td style="border:none; padding:0;">Country of origin:</td><td style="border:none; padding:0;">IT</td></tr><tr><td style="border:none; padding:0;">Preferential origin:</td><td style="border:none; padding:0;">None</td></tr></table></div><div style="width: 15%;">Quantity<br>${inner.qty}</div><div style="width: 15%;">Net weight<br>${inner.net}</div></div></td></tr>`;
+                        let row2 = `<tr class="inner-row-2"><td colspan="9"><div style="display: flex; justify-content: space-between;"><div style="width: 45%;">${inhaltRest.join('<br>')}</div><div style="width: 25%;"><table style="border:none; margin:0; font-size: 8pt; width: 100%;"><tr><td style="border:none; padding:0; width:50%;">HS-Code:</td><td style="border:none; padding:0;">${inner.hsCode}</td></tr><tr><td style="border:none; padding:0;">Country of origin:</td><td style="border:none; padding:0;">IT</td></tr><tr><td style="border:none; padding:0;">Preferential origin:</td><td style="border:none; padding:0;">None</td></tr></table></div><div style="width: 15%;">Quantity<br>${inner.qty}</div><div style="width: 15%;">Net weight<br>${inner.net}</div></div></td></tr>`;
                         
                         addNodesSafe([row1, row2]);
                     });
@@ -297,12 +306,12 @@
 
             let loggerRows = loggerData.map(log => `<tr><td>${log.pid}</td><td>${log.sn}</td><td>Elpro Libero CB</td><td>Elpro Buchs AG, CH-Buchs</td><td>CH</td><td>9025.19</td><td style="border-right:none; width:10mm;">CHF</td><td style="border-left:none; text-align:right;">18.50</td></tr>`).join('');
             let bottomHtml = `
-                <div style="font-size: 7.5pt; margin-bottom: 1mm; margin-top: 5mm;">* Details to Temperature Monitoring devices:</div>
+                <div style="font-size: 8pt; margin-bottom: 1mm; margin-top: 5mm;">* Details to Temperature Monitoring devices:</div>
                 <table class="data-table" style="width: 60%; margin-bottom: 4mm;">
                     <thead><tr><th style="width: 25%;">Package ID</th><th style="width: 15%;">Device S/N</th><th style="width: 15%;">Type</th><th style="width: 20%;">Manufacturer</th><th style="width: 10%;">Origin</th><th style="width: 10%;">HS-Code</th><th colspan="2" style="width: 5%;">Value</th></tr></thead>
                     <tbody>${loggerRows}</tbody>
                 </table>
-                <div style="font-size: 7.5pt; margin-bottom: 1mm;">* Details to Document References</div>
+                <div style="font-size: 8pt; margin-bottom: 1mm;">* Details to Document References</div>
                 <table class="data-table" style="width: ${refTableWidth}; margin-bottom: 4mm;">
                     <thead><tr><th>E2E Order</th>${claraTh}</tr></thead>
                     <tbody><tr><td class="out-e2e"></td>${claraTd}</tr></tbody>
