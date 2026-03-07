@@ -34,7 +34,7 @@
             background-color: white; 
             width: 297mm; 
             height: 210mm; 
-            /* SEITENRÄNDER: Oben 9mm, Rechts 13mm, Unten 9mm, Links 12mm */
+            /* KORRIGIERTE SEITENRÄNDER: Oben 9mm, Rechts 13mm, Unten 9mm, Links 12mm */
             padding: 9mm 13mm 9mm 12mm; 
             box-sizing: border-box; box-shadow: 0 5px 15px rgba(0,0,0,0.5); 
             position: relative; color: #000; overflow: hidden; margin-bottom: 20px;
@@ -71,28 +71,28 @@
         .data-table th, .data-table td { box-sizing: border-box; border: none; padding: 2px 3px; text-align: left; vertical-align: top; line-height: 1.15; overflow-wrap: break-word; word-wrap: break-word; }
         .data-table thead th { border-top: 1.5px solid #000; border-bottom: 1.5px solid #000; font-weight: bold; }
 
-        /* --- TOTALS-TABELLE --- */
+        /* --- TOTALS-TABELLE (Exakte Breiten) --- */
         .totals-table thead th { border-top: 1.5px solid #000; border-bottom: none; vertical-align: top; }
         .totals-table tbody td { border-bottom: 1.5px solid #000; padding-bottom: 4px; vertical-align: top; }
         
         /* 39mm */ .totals-table th:nth-child(1), .totals-table td:nth-child(1) { width: 14.55%; text-align: left; }
-        /* 39mm */ .totals-table th:nth-child(2), .totals-table td:nth-child(2) { width: 14.55%; text-align: center; }
+        /* 39mm - JETZT LINKSBÜNDIG! */ .totals-table th:nth-child(2), .totals-table td:nth-child(2) { width: 14.55%; text-align: left; }
         /* 33mm */ .totals-table th:nth-child(3), .totals-table td:nth-child(3) { width: 12.31%; text-align: center; }
         /* 33mm */ .totals-table th:nth-child(4), .totals-table td:nth-child(4) { width: 12.31%; text-align: center; }
         /* 39mm */ .totals-table th:nth-child(5), .totals-table td:nth-child(5) { width: 14.55%; text-align: center; }
         /* 40mm */ .totals-table th:nth-child(6), .totals-table td:nth-child(6) { width: 14.93%; text-align: center; }
         /* 45mm */ .totals-table th:nth-child(7), .totals-table td:nth-child(7) { width: 16.80%; text-align: center; }
 
-        /* --- DETAILS-TABELLE (Korrektur: Col 7 minus 2mm, Col 9 plus 2mm) --- */
+        /* --- DETAILS-TABELLE (Exakte Breiten) --- */
         .col-1 { width: 13.43%; } /* 36mm */
         .col-2 { width: 11.94%; } /* 32mm */
         .col-3 { width: 11.94%; } /* 32mm */
         .col-4 { width: 13.06%; } /* 35mm */
         .col-5 { width: 9.33%; }  /* 25mm */
         .col-6 { width: 11.94%; } /* 32mm */
-        .col-7 { width: 12.69%; } /* 34mm (Vorher 36mm) */
+        .col-7 { width: 12.69%; } /* 34mm */
         .col-8 { width: 8.21%; }  /* 22mm */
-        .col-9 { width: 7.46%; }  /* 20mm (Vorher 18mm -> Gross Weight ist jetzt in einer Zeile!) */
+        .col-9 { width: 7.46%; }  /* 20mm */
 
         .details-table { border: 2.5px solid #000; } 
         .details-table thead th { border-top: none; border-bottom: 1.5px solid #000; }
@@ -108,7 +108,7 @@
         }
         .indent-left { padding-left: 4mm !important; }
 
-        /* --- NEU: DOKUMENTEN-REFERENZ TABELLE (Exakte Gitter & 4mm Zeilenhöhe) --- */
+        /* --- DOKUMENTEN-REFERENZ TABELLE (Exakte Gitter & 4mm Zeilenhöhe) --- */
         .ref-table { 
             border-collapse: collapse; 
             margin-bottom: 4mm; 
@@ -314,10 +314,10 @@
                 <div class="datum">Date: <span class="out-datum"></span></div>
                 `;
                 
-                // ABSTAND: margin-bottom: 4mm (Genau wie gefordert!)
+                // ABSTAND JETZT AUF EXAKT 1mm REDUZIERT (margin-bottom: 1mm)
                 totalsHtml = `
                 <div class="section-title">Total packing-list:</div>
-                <table class="data-table totals-table" style="margin-bottom: 4mm;">
+                <table class="data-table totals-table" style="margin-bottom: 1mm;">
                     <thead>
                         <tr>
                             <th>Shipping marks</th>
@@ -433,19 +433,21 @@
                 }
             });
 
-            // DIE NEUE, EXAKTE E2E / CLARA TABELLE MIT GITTERLINIEN (35mm Breite, 4mm Höhe)
             let includeClara = document.getElementById("chk-clara").checked;
             let claraTh = includeClara ? `<th>Clara Document</th>` : "";
             let claraTd = includeClara ? `<td class="out-clara"></td>` : "";
+            let refTableWidth = includeClara ? "70mm" : "35mm";
 
             let loggerRows = loggerData.map(log => `<tr><td>${log.pid}</td><td>${log.sn}</td><td>Elpro Libero CB</td><td>Elpro Buchs AG, CH-Buchs</td><td>CH</td><td>9025.19</td><td style="border-right:none; width:10mm;">CHF</td><td style="border-left:none; text-align:right;">18.50</td></tr>`).join('');
+            
+            // FONT-SIZE AUF 5PT GEÄNDERT FÜR DIE STERNCHEN-TEXTE!
             let bottomHtml = `
-                <div style="font-size: 8pt; margin-bottom: 1mm; margin-top: 5mm;">* Details to Temperature Monitoring devices:</div>
+                <div style="font-size: 5pt; margin-bottom: 1mm; margin-top: 5mm;">* Details to Temperature Monitoring devices:</div>
                 <table class="data-table" style="width: 60%; margin-bottom: 4mm;">
                     <thead><tr><th style="width: 25%;">Package ID</th><th style="width: 15%;">Device S/N</th><th style="width: 15%;">Type</th><th style="width: 20%;">Manufacturer</th><th style="width: 10%;">Origin</th><th style="width: 10%;">HS-Code</th><th colspan="2" style="width: 5%;">Value</th></tr></thead>
                     <tbody>${loggerRows}</tbody>
                 </table>
-                <div style="font-size: 8pt; margin-bottom: 1mm;">* Details to Document References</div>
+                <div style="font-size: 5pt; margin-bottom: 1mm;">* Details to Document References</div>
                 <table class="ref-table">
                     <thead><tr><th>E2E Order</th>${claraTh}</tr></thead>
                     <tbody><tr><td class="out-e2e"></td>${claraTd}</tr></tbody>
