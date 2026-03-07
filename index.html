@@ -5,7 +5,7 @@
     <title>Packlisten Generator</title>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
     <style>
-        /* ZWINGT DEN BROWSER, HINTERGRUNDFARBEN ZU DRUCKEN (WICHTIG FÜR DAS GRAU!) */
+        /* ZWINGT DEN BROWSER, HINTERGRUNDFARBEN ZU DRUCKEN */
         * {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
@@ -34,11 +34,10 @@
             background-color: white; 
             width: 297mm; 
             height: 210mm; 
-            /* KORRIGIERTE SEITENRÄNDER: Oben 9mm, Rechts 13mm, Unten 9mm, Links 12mm */
+            /* SEITENRÄNDER: Oben 9mm, Rechts 13mm, Unten 9mm, Links 12mm */
             padding: 9mm 13mm 9mm 12mm; 
             box-sizing: border-box; box-shadow: 0 5px 15px rgba(0,0,0,0.5); 
             position: relative; color: #000; overflow: hidden; margin-bottom: 20px;
-            /* Global alles auf 8pt Arial setzen */
             font-family: Arial, Helvetica, sans-serif;
             font-size: 8pt;
         }
@@ -54,11 +53,8 @@
         .logo-block img { height: 12mm; width: auto; float: right; object-fit: contain; }
 
         .address-container { display: flex; width: 100%; margin-bottom: 10mm; line-height: 1.2; font-size: 8pt; }
-        
-        /* EXAKTE BERECHNUNG FÜR CONSIGNEE: Seitenrand 12mm + Box-inv 91mm = Exakt 103mm vom linken Blattrand! */
         .address-box:first-child { width: 91mm; box-sizing: border-box; padding-right: 15mm; } 
         .address-box:last-child { flex: 1; box-sizing: border-box; } 
-        
         .address-title { font-weight: bold; margin-bottom: 2mm; font-size: 8pt; }
         .address-grid { display: grid; grid-template-columns: 14mm auto; margin-top: 2mm; }
 
@@ -70,20 +66,20 @@
         .data-table th, .data-table td { box-sizing: border-box; border: none; padding: 2px 3px; text-align: left; vertical-align: top; line-height: 1.15; overflow-wrap: break-word; word-wrap: break-word; }
         .data-table thead th { border-top: 1.5px solid #000; border-bottom: 1.5px solid #000; font-weight: bold; }
 
-        /* --- TOTALS-TABELLE (Exakte Breiten & 1mm Abstand unten) --- */
+        /* --- TOTALS-TABELLE --- */
         .totals-table { margin-bottom: 1mm !important; }
         .totals-table thead th { border-top: 1.5px solid #000; border-bottom: none; vertical-align: top; }
         .totals-table tbody td { border-bottom: 1.5px solid #000; padding-bottom: 4px; vertical-align: top; }
         
         .totals-table th:nth-child(1), .totals-table td:nth-child(1) { width: 14.55%; text-align: left; }
-        .totals-table th:nth-child(2), .totals-table td:nth-child(2) { width: 14.55%; text-align: left; } /* Linksbündig! */
+        .totals-table th:nth-child(2), .totals-table td:nth-child(2) { width: 14.55%; text-align: left; }
         .totals-table th:nth-child(3), .totals-table td:nth-child(3) { width: 12.31%; text-align: center; }
         .totals-table th:nth-child(4), .totals-table td:nth-child(4) { width: 12.31%; text-align: center; }
         .totals-table th:nth-child(5), .totals-table td:nth-child(5) { width: 14.55%; text-align: center; }
         .totals-table th:nth-child(6), .totals-table td:nth-child(6) { width: 14.93%; text-align: center; }
         .totals-table th:nth-child(7), .totals-table td:nth-child(7) { width: 16.80%; text-align: center; }
 
-        /* --- DETAILS-TABELLE (Exakte Breiten) --- */
+        /* --- DETAILS-TABELLE --- */
         .col-1 { width: 13.43%; } 
         .col-2 { width: 11.94%; } 
         .col-3 { width: 11.94%; } 
@@ -98,7 +94,6 @@
         .details-table thead th { border-top: none; border-bottom: 1.5px solid #000; }
 
         tr.main-separator td { border-bottom: 1px solid #000 !important; }
-        tr.item-separator td { border-bottom: 1px solid #000 !important; }
         tr.package-separator td { border-bottom: 2.5px solid #000 !important; padding: 0 !important; height: 0 !important; line-height: 0; }
         
         td.group-top, th.group-top { border-top: 2.5px solid #000 !important; }
@@ -106,16 +101,15 @@
         td.edge-left, th.edge-left { border-left: 2.5px solid #000 !important; }
         td.edge-right, th.edge-right { border-right: 2.5px solid #000 !important; }
         
-        /* --- NEU: HORIZONTALER 5mm GRAUER BALKEN (ÜBER der Unterverpackung) --- */
+        /* --- GRAUE BALKEN FÜR UNTERVERPACKUNG (3mm, Farbe #cccccc) --- */
         .gray-bar-row td {
-            background-color: #e6e6e6 !important;
-            height: 5mm;
+            background-color: #cccccc !important;
+            height: 3mm;
             padding: 0 !important;
             border-top: 1.5px solid #000 !important;
             border-bottom: 1.5px solid #000 !important;
         }
 
-        /* Die Unterverpackungs-Titelzeile ist jetzt WEISS (transparent) */
         .sub-header th { 
             background-color: transparent !important; 
             border-bottom: 1.5px solid #000 !important; 
@@ -123,13 +117,26 @@
             vertical-align: middle;
         }
         
-        /* Vertikaler 5mm Balken am linken Rand über CSS-Gradient */
+        /* Vertikaler 3mm Balken am linken Rand über CSS-Gradient */
         .inner-grey-bar { 
-            background: linear-gradient(to right, #e6e6e6 0%, #e6e6e6 5mm, transparent 5mm, transparent 100%) !important;
-            padding-left: 7mm !important; /* Text rutscht exakt neben den Balken */
+            background: linear-gradient(to right, #cccccc 0%, #cccccc 3mm, transparent 3mm, transparent 100%) !important;
+            padding-left: 5mm !important; 
+        }
+        .header-indent { padding-left: 5mm !important; }
+
+        /* --- LINIEN TRICK: LINIEN FANGEN ERST RECHTS VOM BALKEN AN --- */
+        tr.inner-row-1 td { border-bottom: none !important; position: relative; }
+        tr.inner-row-1 td::after {
+            content: ""; position: absolute; bottom: 0; right: 0; left: 0; height: 1px; background-color: #000; z-index: 10;
+        }
+        tr.inner-row-1 td:first-child::after { left: 3mm; /* Spart den grauen Balken aus! */ }
+        
+        tr.item-separator td { border-bottom: none !important; position: relative; }
+        tr.item-separator td::after {
+            content: ""; position: absolute; bottom: 0; left: 3mm; right: 0; height: 1px; background-color: #000; z-index: 10;
         }
 
-        /* --- LOGGER TABELLE (Komplettes Gitter) --- */
+        /* --- LOGGER TABELLE --- */
         .logger-table { 
             border-collapse: collapse; 
             margin-bottom: 4mm; 
@@ -146,14 +153,14 @@
         }
         .logger-table th { font-weight: bold; }
 
-        /* --- DOKUMENTEN-REFERENZ TABELLE (Exakte Gitter & 4mm Zeilenhöhe) --- */
+        /* --- DOKUMENTEN-REFERENZ TABELLE --- */
         .ref-table { border-collapse: collapse; margin-bottom: 4mm; font-size: 8pt; table-layout: fixed; }
         .ref-table th, .ref-table td { 
             border: 1px solid #000; width: 35mm; height: 4mm; padding: 0 3px; text-align: left; vertical-align: middle; box-sizing: border-box;
         }
         .ref-table th { font-weight: bold; }
 
-        /* --- FUSSZEILE EXAKT BÜNDIG --- */
+        /* --- FUSSZEILE --- */
         .footer-fixed { 
             position: absolute; bottom: 9mm; left: 12mm; right: 13mm; 
             display: flex; justify-content: space-between; font-size: 8pt; line-height: 1.2; 
@@ -248,6 +255,8 @@
                 <div class="input-group"><label>Typ (Unterverp.):</label><input type="text" id="in-l2-typ" placeholder="Karton"></div>
                 <div class="input-group"><label>Dimensionen:</label><input type="text" id="in-l2-dim" placeholder="0x0x0 cm"></div>
                 <div class="input-group"><label>Gross weight (Unterverp.):</label><input type="text" id="in-l2-gross" placeholder="z.B. 4.875"></div>
+                
+                <div class="input-group"><label>Content (Kurztext):</label><input type="text" id="in-l2-content" placeholder="Medicament..." style="width: 140px;"></div>
             </div>
 
             <div class="input-row" style="align-items: stretch; margin-top: 10px;">
@@ -424,7 +433,6 @@
                     contentStr = `${main.contents.length} Inner-Packages<br>` + main.contents.map(c => c.innerId).join('<br>'); 
                 }
                 
-                // MARKIERUNG 2: Logger-Nummer nicht dick gedruckt, Zusatz-Info in 5pt!
                 let loggerString = loggerData.filter(log => log.pid === main.id).map(log => `${log.nr} ${log.sn}<br><span style="font-size:5pt">${safeHtml(log.info)}</span>`).join('<br>');
 
                 let bottomClass = (main.contents.length === 0) ? " group-bottom" : "";
@@ -434,22 +442,21 @@
                 addNodesSafe([`<tr class="main-row ${mainSepClass}"><td class="col-1 edge-left ${tClass}">${main.id}</td><td class="col-2 ${tClass}">${main.typ}</td><td class="col-3 ${tClass}">${main.dim}</td><td class="col-4 ${tClass}">${contentStr}</td><td class="col-5 ${tClass}">${main.temp}</td><td class="col-6 ${tClass}">${loggerString}</td><td class="col-7 ${tClass}"></td><td class="col-8 ${tClass}">${main.net}</td><td class="col-9 edge-right ${tClass}">${main.gross}</td></tr>`]);
 
                 if (main.type === "inners" && main.contents.length > 0) {
-                    // MARKIERUNG 4: Der obere 5mm graue Balken, der Titel-Header ist nun weiss!
+                    
                     addNodesSafe([`<tr class="gray-bar-row"><td colspan="9" class="edge-left edge-right"></td></tr>`]);
-                    addNodesSafe([`<tr class="sub-header"><th class="edge-left inner-grey-bar">Inner-Package ID</th><th>Packing type</th><th>Dimensions<br>(LxHxW cm)</th><th>Content</th><th>Temperature<br>conditions</th><th>Temperature<br>monitoring devices *</th><th>Dangerous<br>goods</th><th>Net weight</th><th class="edge-right">Gross weight</th></tr>`]);
+                    addNodesSafe([`<tr class="sub-header"><th class="edge-left header-indent">Inner-Package ID</th><th>Packing type</th><th>Dimensions<br>(LxHxW cm)</th><th>Content</th><th>Temperature<br>conditions</th><th>Temperature<br>monitoring devices *</th><th>Dangerous<br>goods</th><th>Net weight</th><th class="edge-right">Gross weight</th></tr>`]);
                     
                     main.contents.forEach((inner, i) => {
                         let isLast = (i === main.contents.length - 1);
                         let bClass = isLast ? " group-bottom" : " item-separator";
                         
-                        let descLines = inner.item.desc.split('\n'); 
-                        let descFirst = descLines[0] || ""; 
+                        // Das Wort im Content Feld der Basisdaten wird geladen
+                        let contentKurz = inner.innerContent;
+                        // Der KOMPLETTE Text der Box unten
+                        let descLines = inner.item.desc.split('\n').join('<br>');
                         
-                        // MARKIERUNG 3 FIX: `.shift()` WURDE ENTFERNT! KOMPLETTER TEXT WIRD NUN UNTEN ANGEZEIGT!
-                        let descRest = [...descLines]; 
-                        
-                        let row1 = `<tr class="inner-row-1"><td class="edge-left inner-grey-bar">${inner.innerId}</td><td>${inner.innerTyp}</td><td>${inner.innerDim}</td><td>${descFirst}</td><td>${main.temp}</td><td>-</td><td>${inner.item.gefahr}</td><td>${inner.item.net}</td><td class="edge-right">${inner.innerGross}</td></tr>`;
-                        let row2 = `<tr class="inner-row-2"><td colspan="9" class="edge-left inner-grey-bar edge-right ${bClass}"><div style="display: flex; justify-content: space-between;"><div style="width: 45%;">${descRest.join('<br>')}</div><div style="width: 25%;"><table style="border:none; margin:0; font-size: 8pt; width: 100%;"><tr><td style="border:none; padding:0; width:50%;">HS-Code:</td><td style="border:none; padding:0;">${inner.item.hs}</td></tr><tr><td style="border:none; padding:0;">Country of origin:</td><td style="border:none; padding:0;">${inner.item.origin}</td></tr><tr><td style="border:none; padding:0;">Preferential origin:</td><td style="border:none; padding:0;">${inner.item.pref}</td></tr></table></div><div style="width: 15%;">Quantity<br>${inner.item.qty}</div><div style="width: 15%;">Net weight<br>${inner.item.net}</div></div></td></tr>`;
+                        let row1 = `<tr class="inner-row-1"><td class="edge-left inner-grey-bar">${inner.innerId}</td><td>${inner.innerTyp}</td><td>${inner.innerDim}</td><td>${contentKurz}</td><td>${main.temp}</td><td>-</td><td>${inner.item.gefahr}</td><td>${inner.item.net}</td><td class="edge-right">${inner.innerGross}</td></tr>`;
+                        let row2 = `<tr class="inner-row-2"><td colspan="9" class="edge-left inner-grey-bar edge-right ${bClass}"><div style="display: flex; justify-content: space-between;"><div style="width: 58%;">${descLines}</div><div style="width: 22%;"><table style="border:none; margin:0; font-size: 8pt; width: 100%;"><tr><td style="border:none; padding:0; width:50%;">HS-Code:</td><td style="border:none; padding:0;">${inner.item.hs}</td></tr><tr><td style="border:none; padding:0;">Country of origin:</td><td style="border:none; padding:0;">${inner.item.origin}</td></tr><tr><td style="border:none; padding:0;">Preferential origin:</td><td style="border:none; padding:0;">${inner.item.pref}</td></tr></table></div><div style="width: 10%;">Quantity<br>${inner.item.qty}</div><div style="width: 10%;">Net weight<br>${inner.item.net}</div></div></td></tr>`;
                         addNodesSafe([row1, row2]);
                     });
                 } 
@@ -459,7 +466,7 @@
                         let bClass = isLast ? " group-bottom" : " item-separator";
                         let descLines = item.desc.split('\n').join('<br>');
                         
-                        let row = `<tr class="item-row"><td colspan="9" class="edge-left edge-right ${bClass}"><div style="display: flex; justify-content: space-between; padding-top: 4px; padding-bottom: 3px;"><div style="width: 45%;">${descLines}</div><div style="width: 25%;"><table style="border:none; margin:0; font-size: 8pt; width: 100%;"><tr><td style="border:none; padding:0; width:50%;">HS-Code:</td><td style="border:none; padding:0;">${item.hs}</td></tr><tr><td style="border:none; padding:0;">Country of origin:</td><td style="border:none; padding:0;">${item.origin}</td></tr><tr><td style="border:none; padding:0;">Preferential origin:</td><td style="border:none; padding:0;">${item.pref}</td></tr></table></div><div style="width: 15%;">Menge<br>${item.qty}</div><div style="width: 15%;">Net weight<br>${item.net}</div></div></td></tr>`;
+                        let row = `<tr class="item-row"><td colspan="9" class="edge-left edge-right ${bClass}"><div style="display: flex; justify-content: space-between; padding-top: 4px; padding-bottom: 3px;"><div style="width: 58%;">${descLines}</div><div style="width: 22%;"><table style="border:none; margin:0; font-size: 8pt; width: 100%;"><tr><td style="border:none; padding:0; width:50%;">HS-Code:</td><td style="border:none; padding:0;">${item.hs}</td></tr><tr><td style="border:none; padding:0;">Country of origin:</td><td style="border:none; padding:0;">${item.origin}</td></tr><tr><td style="border:none; padding:0;">Preferential origin:</td><td style="border:none; padding:0;">${item.pref}</td></tr></table></div><div style="width: 10%;">Menge<br>${item.qty}</div><div style="width: 10%;">Net weight<br>${item.net}</div></div></td></tr>`;
                         addNodesSafe([row]);
                     });
                 }
@@ -474,15 +481,26 @@
             let claraTd = includeClara ? `<td class="out-clara"></td>` : "";
             let refTableWidth = includeClara ? "70mm" : "35mm";
 
-            let loggerRows = loggerData.map(log => `<tr><td>${log.pid}</td><td>${log.sn}</td><td>${log.type}</td><td>${log.mfg}</td><td>${log.origin}</td><td>${log.hs}</td><td style="border-right:none; width:10mm;">${log.curr}</td><td style="border-left:none; text-align:right;">${log.val}</td></tr>`).join('');
+            let bottomHtml = "";
+
+            // LOGGER TABELLE WIRD NUR ANGEZEIGT, WENN EIN LOGGER VORHANDEN IST!
+            if (loggerData.length > 0) {
+                let loggerRows = loggerData.map(log => `<tr><td>${log.pid}</td><td>${log.sn}</td><td>${log.type}</td><td>${log.mfg}</td><td>${log.origin}</td><td>${log.hs}</td><td style="border-right:none; width:10mm;">${log.curr}</td><td style="border-left:none; text-align:right;">${log.val}</td></tr>`).join('');
+                
+                bottomHtml += `
+                    <div style="font-size: 5pt; margin-bottom: 1mm; margin-top: 5mm;">* Details to Temperature Monitoring devices:</div>
+                    <table class="logger-table">
+                        <thead><tr><th style="width: 25%;">Package ID</th><th style="width: 15%;">Device S/N</th><th style="width: 15%;">Type</th><th style="width: 15%;">Manufacturer</th><th style="width: 10%;">Origin</th><th style="width: 10%;">HS-Code</th><th colspan="2" style="width: 10%;">Value</th></tr></thead>
+                        <tbody>${loggerRows}</tbody>
+                    </table>
+                `;
+            }
+
+            // Margin-Top dynamisch anpassen, je nachdem ob Logger-Tabelle da war oder nicht
+            let refMargin = loggerData.length > 0 ? "0" : "5mm";
             
-            let bottomHtml = `
-                <div style="font-size: 5pt; margin-bottom: 1mm; margin-top: 5mm;">* Details to Temperature Monitoring devices:</div>
-                <table class="logger-table">
-                    <thead><tr><th style="width: 25%;">Package ID</th><th style="width: 15%;">Device S/N</th><th style="width: 15%;">Type</th><th style="width: 20%;">Manufacturer</th><th style="width: 5%;">Origin</th><th style="width: 10%;">HS-Code</th><th colspan="2" style="width: 10%;">Value</th></tr></thead>
-                    <tbody>${loggerRows}</tbody>
-                </table>
-                <div style="font-size: 5pt; margin-bottom: 1mm;">* Details to Document References</div>
+            bottomHtml += `
+                <div style="font-size: 5pt; margin-bottom: 1mm; margin-top: ${refMargin};">* Details to Document References</div>
                 <table class="ref-table">
                     <thead><tr><th>E2E Order</th>${claraTh}</tr></thead>
                     <tbody><tr><td class="out-e2e"></td>${claraTd}</tr></tbody>
@@ -581,12 +599,14 @@
                     innerTyp: document.getElementById("in-l2-typ").value,
                     innerDim: document.getElementById("in-l2-dim").value,
                     innerGross: formatWeight(document.getElementById("in-l2-gross").value),
+                    innerContent: document.getElementById("in-l2-content").value, /* NEUES FELD ABSPEICHERN */
                     item: itemData
                 });
             }
             
             renderDocument(); 
             document.getElementById("in-l2-id").value = "";
+            document.getElementById("in-l2-content").value = "";
             document.getElementById("in-l3-desc").value = "";
         }
 
