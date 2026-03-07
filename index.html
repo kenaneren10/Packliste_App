@@ -34,7 +34,7 @@
             background-color: white; 
             width: 297mm; 
             height: 210mm; 
-            /* KORRIGIERTE SEITENRÄNDER: Oben 9mm, Rechts 13mm, Unten 9mm, Links 12mm */
+            /* SEITENRÄNDER: Oben 9mm, Rechts 13mm, Unten 9mm, Links 12mm */
             padding: 9mm 13mm 9mm 12mm; 
             box-sizing: border-box; box-shadow: 0 5px 15px rgba(0,0,0,0.5); 
             position: relative; color: #000; overflow: hidden; margin-bottom: 20px;
@@ -71,7 +71,7 @@
         .data-table th, .data-table td { box-sizing: border-box; border: none; padding: 2px 3px; text-align: left; vertical-align: top; line-height: 1.15; overflow-wrap: break-word; word-wrap: break-word; }
         .data-table thead th { border-top: 1.5px solid #000; border-bottom: 1.5px solid #000; font-weight: bold; }
 
-        /* --- TOTALS-TABELLE (In exakte % umgerechnet für 100% Symmetrie) --- */
+        /* --- TOTALS-TABELLE --- */
         .totals-table thead th { border-top: 1.5px solid #000; border-bottom: none; vertical-align: top; }
         .totals-table tbody td { border-bottom: 1.5px solid #000; padding-bottom: 4px; vertical-align: top; }
         
@@ -83,16 +83,16 @@
         /* 40mm */ .totals-table th:nth-child(6), .totals-table td:nth-child(6) { width: 14.93%; text-align: center; }
         /* 45mm */ .totals-table th:nth-child(7), .totals-table td:nth-child(7) { width: 16.80%; text-align: center; }
 
-        /* --- DETAILS-TABELLE (In exakte % umgerechnet für 100% Symmetrie) --- */
+        /* --- DETAILS-TABELLE (Korrektur: Col 7 minus 2mm, Col 9 plus 2mm) --- */
         .col-1 { width: 13.43%; } /* 36mm */
         .col-2 { width: 11.94%; } /* 32mm */
         .col-3 { width: 11.94%; } /* 32mm */
         .col-4 { width: 13.06%; } /* 35mm */
         .col-5 { width: 9.33%; }  /* 25mm */
         .col-6 { width: 11.94%; } /* 32mm */
-        .col-7 { width: 13.43%; } /* 36mm */
+        .col-7 { width: 12.69%; } /* 34mm (Vorher 36mm) */
         .col-8 { width: 8.21%; }  /* 22mm */
-        .col-9 { width: 6.72%; }  /* 18mm */
+        .col-9 { width: 7.46%; }  /* 20mm (Vorher 18mm -> Gross Weight ist jetzt in einer Zeile!) */
 
         .details-table { border: 2.5px solid #000; } 
         .details-table thead th { border-top: none; border-bottom: 1.5px solid #000; }
@@ -108,7 +108,25 @@
         }
         .indent-left { padding-left: 4mm !important; }
 
-        /* --- FUSSZEILE EXAKT AN RÄNDER ANGEPASST --- */
+        /* --- NEU: DOKUMENTEN-REFERENZ TABELLE (Exakte Gitter & 4mm Zeilenhöhe) --- */
+        .ref-table { 
+            border-collapse: collapse; 
+            margin-bottom: 4mm; 
+            font-size: 8pt; 
+            table-layout: fixed; 
+        }
+        .ref-table th, .ref-table td { 
+            border: 1px solid #000; 
+            width: 35mm; /* Spaltenbreite exakt 35mm */
+            height: 4mm; /* Zeilenhöhe exakt 4mm */
+            padding: 0 3px; 
+            text-align: left; 
+            vertical-align: middle; /* Text vertikal mittig ausrichten */
+            box-sizing: border-box;
+        }
+        .ref-table th { font-weight: bold; background-color: transparent; border-bottom: 1px solid #000; border-top: 1px solid #000; }
+
+        /* --- FUSSZEILE EXAKT BÜNDIG --- */
         .footer-fixed { 
             position: absolute; 
             bottom: 9mm; 
@@ -296,9 +314,10 @@
                 <div class="datum">Date: <span class="out-datum"></span></div>
                 `;
                 
+                // ABSTAND: margin-bottom: 4mm (Genau wie gefordert!)
                 totalsHtml = `
                 <div class="section-title">Total packing-list:</div>
-                <table class="data-table totals-table" style="margin-bottom: 5mm;">
+                <table class="data-table totals-table" style="margin-bottom: 4mm;">
                     <thead>
                         <tr>
                             <th>Shipping marks</th>
@@ -336,7 +355,7 @@
                     <div class="logo-block"><img src="roche-logo.png" alt="Roche Logo"></div>
                 </div>
                 ${addressHtml} ${totalsHtml}
-                <div class="section-title">Detail packing-list:</div>
+                <div class="section-title" style="margin-top: 0;">Detail packing-list:</div>
                 <table class="data-table details-table">
                     <thead><tr><th class="col-1">Package ID (SSCC)</th><th class="col-2">Packing type</th><th class="col-3">Dimensions<br>(LxHxW cm)</th><th class="col-4">Content</th><th class="col-5">Temperature<br>conditions</th><th class="col-6">Temperature<br>monitoring devices *</th><th class="col-7">Dangerous<br>goods</th><th class="col-8">Net weight</th><th class="col-9">Gross weight</th></tr></thead>
                     <tbody class="details-body"></tbody>
@@ -414,10 +433,10 @@
                 }
             });
 
+            // DIE NEUE, EXAKTE E2E / CLARA TABELLE MIT GITTERLINIEN (35mm Breite, 4mm Höhe)
             let includeClara = document.getElementById("chk-clara").checked;
             let claraTh = includeClara ? `<th>Clara Document</th>` : "";
             let claraTd = includeClara ? `<td class="out-clara"></td>` : "";
-            let refTableWidth = includeClara ? "70mm" : "35mm";
 
             let loggerRows = loggerData.map(log => `<tr><td>${log.pid}</td><td>${log.sn}</td><td>Elpro Libero CB</td><td>Elpro Buchs AG, CH-Buchs</td><td>CH</td><td>9025.19</td><td style="border-right:none; width:10mm;">CHF</td><td style="border-left:none; text-align:right;">18.50</td></tr>`).join('');
             let bottomHtml = `
@@ -427,7 +446,7 @@
                     <tbody>${loggerRows}</tbody>
                 </table>
                 <div style="font-size: 8pt; margin-bottom: 1mm;">* Details to Document References</div>
-                <table class="data-table" style="width: ${refTableWidth}; margin-bottom: 4mm;">
+                <table class="ref-table">
                     <thead><tr><th>E2E Order</th>${claraTh}</tr></thead>
                     <tbody><tr><td class="out-e2e"></td>${claraTd}</tr></tbody>
                 </table>
