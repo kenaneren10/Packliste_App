@@ -72,7 +72,7 @@
         .totals-table tbody td { border-bottom: 1.5px solid #000; padding-bottom: 4px; vertical-align: top; }
         
         .totals-table th:nth-child(1), .totals-table td:nth-child(1) { width: 14.55%; text-align: left; }
-        .totals-table th:nth-child(2), .totals-table td:nth-child(2) { width: 14.55%; text-align: left; }
+        .totals-table th:nth-child(2), .totals-table td:nth-child(2) { width: 14.55%; text-align: left; } 
         .totals-table th:nth-child(3), .totals-table td:nth-child(3) { width: 12.31%; text-align: center; }
         .totals-table th:nth-child(4), .totals-table td:nth-child(4) { width: 12.31%; text-align: center; }
         .totals-table th:nth-child(5), .totals-table td:nth-child(5) { width: 14.55%; text-align: center; }
@@ -101,7 +101,7 @@
         td.edge-left, th.edge-left { border-left: 2.5px solid #000 !important; }
         td.edge-right, th.edge-right { border-right: 2.5px solid #000 !important; }
         
-        /* --- GRAUE BALKEN FÜR UNTERVERPACKUNG (3mm, Farbe #cccccc) --- */
+        /* --- GRAUE BALKEN (3mm, sattes #cccccc) --- */
         .gray-bar-row td {
             background-color: #cccccc !important;
             height: 3mm;
@@ -117,54 +117,24 @@
             vertical-align: middle;
         }
         
-        /* Vertikaler 3mm Balken am linken Rand über CSS-Gradient */
+        /* Vertikaler 3mm Balken - nahtloser Übergang */
         .inner-grey-bar { 
             background: linear-gradient(to right, #cccccc 0%, #cccccc 3mm, transparent 3mm, transparent 100%) !important;
             padding-left: 5mm !important; 
         }
-        .header-indent { padding-left: 5mm !important; }
-
-        /* --- LINIEN TRICK: LINIEN FANGEN ERST RECHTS VOM BALKEN AN --- */
-        tr.inner-row-1 td { border-bottom: none !important; position: relative; }
-        tr.inner-row-1 td::after {
-            content: ""; position: absolute; bottom: 0; right: 0; left: 0; height: 1px; background-color: #000; z-index: 10;
-        }
-        tr.inner-row-1 td:first-child::after { left: 3mm; /* Spart den grauen Balken aus! */ }
-        
-        tr.item-separator td { border-bottom: none !important; position: relative; }
-        tr.item-separator td::after {
-            content: ""; position: absolute; bottom: 0; left: 3mm; right: 0; height: 1px; background-color: #000; z-index: 10;
-        }
 
         /* --- LOGGER TABELLE --- */
-        .logger-table { 
-            border-collapse: collapse; 
-            margin-bottom: 4mm; 
-            font-size: 8pt; 
-            table-layout: fixed; 
-            width: 60%;
-        }
-        .logger-table th, .logger-table td { 
-            border: 1px solid #000; 
-            padding: 2px 3px; 
-            text-align: left; 
-            vertical-align: middle; 
-            box-sizing: border-box;
-        }
+        .logger-table { border-collapse: collapse; margin-bottom: 4mm; font-size: 8pt; table-layout: fixed; width: 60%; }
+        .logger-table th, .logger-table td { border: 1px solid #000; padding: 2px 3px; text-align: left; vertical-align: middle; box-sizing: border-box; }
         .logger-table th { font-weight: bold; }
 
         /* --- DOKUMENTEN-REFERENZ TABELLE --- */
         .ref-table { border-collapse: collapse; margin-bottom: 4mm; font-size: 8pt; table-layout: fixed; }
-        .ref-table th, .ref-table td { 
-            border: 1px solid #000; width: 35mm; height: 4mm; padding: 0 3px; text-align: left; vertical-align: middle; box-sizing: border-box;
-        }
+        .ref-table th, .ref-table td { border: 1px solid #000; width: 35mm; height: 4mm; padding: 0 3px; text-align: left; vertical-align: middle; box-sizing: border-box; }
         .ref-table th { font-weight: bold; }
 
         /* --- FUSSZEILE --- */
-        .footer-fixed { 
-            position: absolute; bottom: 9mm; left: 12mm; right: 13mm; 
-            display: flex; justify-content: space-between; font-size: 8pt; line-height: 1.2; 
-        }
+        .footer-fixed { position: absolute; bottom: 9mm; left: 12mm; right: 13mm; display: flex; justify-content: space-between; font-size: 8pt; line-height: 1.2; }
 
         @media print {
             body { background-color: white; padding: 0; }
@@ -255,7 +225,6 @@
                 <div class="input-group"><label>Typ (Unterverp.):</label><input type="text" id="in-l2-typ" placeholder="Karton"></div>
                 <div class="input-group"><label>Dimensionen:</label><input type="text" id="in-l2-dim" placeholder="0x0x0 cm"></div>
                 <div class="input-group"><label>Gross weight (Unterverp.):</label><input type="text" id="in-l2-gross" placeholder="z.B. 4.875"></div>
-                
                 <div class="input-group"><label>Content (Kurztext):</label><input type="text" id="in-l2-content" placeholder="Medicament..." style="width: 140px;"></div>
             </div>
 
@@ -425,12 +394,17 @@
                 }
             }
 
+            // DER ROBUSTE TRENNLINIEN TRICK (Zeichnet die Linie, lässt aber die ersten 3mm frei für den grauen Balken!)
+            let sepRowGradient = `<tr style="height:1px;"><td colspan="9" class="edge-left edge-right" style="border:none !important; padding:0 !important; margin:0 !important; height:1px; line-height:0; font-size:0;"><div style="height:1px; width:100%; background: linear-gradient(to right, #cccccc 0%, #cccccc 3mm, #000 3mm, #000 100%) !important;"></div></td></tr>`;
+            let sepRowSolid = `<tr style="height:1px;"><td colspan="9" class="edge-left edge-right" style="border:none !important; padding:0 !important; margin:0 !important; height:1px; line-height:0; font-size:0;"><div style="height:1px; width:100%; background-color: #000 !important;"></div></td></tr>`;
+
             mainPackages.forEach((main, index) => {
                 mainCount++; sumNet += parseFloat(main.net) || 0; sumGross += parseFloat(main.gross) || 0; sumVol += berechneVolumen(main.dim);
                 
                 let contentStr = safeHtml(main.inhalt); 
                 if (main.type === "inners" && main.contents.length > 0) { 
-                    contentStr = `${main.contents.length} Inner-Packages<br>` + main.contents.map(c => c.innerId).join('<br>'); 
+                    // MARKIERUNG 1: "X Inner-Packages" mit Trennstrich darunter
+                    contentStr = `<div style="border-bottom: 1px solid #000; padding-bottom: 2px; margin-bottom: 2px;">${main.contents.length} Inner-Packages</div>` + main.contents.map(c => c.innerId).join('<br>'); 
                 }
                 
                 let loggerString = loggerData.filter(log => log.pid === main.id).map(log => `${log.nr} ${log.sn}<br><span style="font-size:5pt">${safeHtml(log.info)}</span>`).join('<br>');
@@ -442,32 +416,43 @@
                 addNodesSafe([`<tr class="main-row ${mainSepClass}"><td class="col-1 edge-left ${tClass}">${main.id}</td><td class="col-2 ${tClass}">${main.typ}</td><td class="col-3 ${tClass}">${main.dim}</td><td class="col-4 ${tClass}">${contentStr}</td><td class="col-5 ${tClass}">${main.temp}</td><td class="col-6 ${tClass}">${loggerString}</td><td class="col-7 ${tClass}"></td><td class="col-8 ${tClass}">${main.net}</td><td class="col-9 edge-right ${tClass}">${main.gross}</td></tr>`]);
 
                 if (main.type === "inners" && main.contents.length > 0) {
-                    
                     addNodesSafe([`<tr class="gray-bar-row"><td colspan="9" class="edge-left edge-right"></td></tr>`]);
-                    addNodesSafe([`<tr class="sub-header"><th class="edge-left header-indent">Inner-Package ID</th><th>Packing type</th><th>Dimensions<br>(LxHxW cm)</th><th>Content</th><th>Temperature<br>conditions</th><th>Temperature<br>monitoring devices *</th><th>Dangerous<br>goods</th><th>Net weight</th><th class="edge-right">Gross weight</th></tr>`]);
+                    // MARKIERUNG 3: Die Header-Zelle hat .inner-grey-bar, dadurch berühren sich beide grauen Balken exakt!
+                    addNodesSafe([`<tr class="sub-header"><th class="edge-left inner-grey-bar">Inner-Package ID</th><th>Packing type</th><th>Dimensions<br>(LxHxW cm)</th><th>Content</th><th>Temperature<br>conditions</th><th>Temperature<br>monitoring devices *</th><th>Dangerous<br>goods</th><th>Net weight</th><th class="edge-right">Gross weight</th></tr>`]);
                     
                     main.contents.forEach((inner, i) => {
                         let isLast = (i === main.contents.length - 1);
-                        let bClass = isLast ? " group-bottom" : " item-separator";
+                        let bClass = isLast ? " group-bottom" : "";
                         
-                        // Das Wort im Content Feld der Basisdaten wird geladen
                         let contentKurz = inner.innerContent;
-                        // Der KOMPLETTE Text der Box unten
                         let descLines = inner.item.desc.split('\n').join('<br>');
                         
                         let row1 = `<tr class="inner-row-1"><td class="edge-left inner-grey-bar">${inner.innerId}</td><td>${inner.innerTyp}</td><td>${inner.innerDim}</td><td>${contentKurz}</td><td>${main.temp}</td><td>-</td><td>${inner.item.gefahr}</td><td>${inner.item.net}</td><td class="edge-right">${inner.innerGross}</td></tr>`;
-                        let row2 = `<tr class="inner-row-2"><td colspan="9" class="edge-left inner-grey-bar edge-right ${bClass}"><div style="display: flex; justify-content: space-between;"><div style="width: 58%;">${descLines}</div><div style="width: 22%;"><table style="border:none; margin:0; font-size: 8pt; width: 100%;"><tr><td style="border:none; padding:0; width:50%;">HS-Code:</td><td style="border:none; padding:0;">${inner.item.hs}</td></tr><tr><td style="border:none; padding:0;">Country of origin:</td><td style="border:none; padding:0;">${inner.item.origin}</td></tr><tr><td style="border:none; padding:0;">Preferential origin:</td><td style="border:none; padding:0;">${inner.item.pref}</td></tr></table></div><div style="width: 10%;">Quantity<br>${inner.item.qty}</div><div style="width: 10%;">Net weight<br>${inner.item.net}</div></div></td></tr>`;
-                        addNodesSafe([row1, row2]);
+                        
+                        // MARKIERUNG 2: padding-top: 10px drückt den HS-Code nach unten auf Höhe der Menge
+                        let row2 = `<tr class="inner-row-2"><td colspan="9" class="edge-left inner-grey-bar edge-right ${bClass}"><div style="display: flex; justify-content: space-between;"><div style="width: 58%;">${descLines}</div><div style="width: 22%; padding-top: 10px;"><table style="border:none; margin:0; font-size: 8pt; width: 100%;"><tr><td style="border:none; padding:0; width:50%;">HS-Code:</td><td style="border:none; padding:0;">${inner.item.hs}</td></tr><tr><td style="border:none; padding:0;">Country of origin:</td><td style="border:none; padding:0;">${inner.item.origin}</td></tr><tr><td style="border:none; padding:0;">Preferential origin:</td><td style="border:none; padding:0;">${inner.item.pref}</td></tr></table></div><div style="width: 10%;">Quantity<br>${inner.item.qty}</div><div style="width: 10%;">Net weight<br>${inner.item.net}</div></div></td></tr>`;
+                        
+                        // MARKIERUNG 4: sepRowGradient zeichnet die perfekte Linie (außer im grauen Balken)
+                        addNodesSafe([row1, sepRowGradient, row2]);
+                        
+                        if (!isLast) {
+                            addNodesSafe([sepRowGradient]);
+                        }
                     });
                 } 
                 else if (main.type === "items" && main.contents.length > 0) {
                     main.contents.forEach((item, i) => {
                         let isLast = (i === main.contents.length - 1);
-                        let bClass = isLast ? " group-bottom" : " item-separator";
+                        let bClass = isLast ? " group-bottom" : "";
                         let descLines = item.desc.split('\n').join('<br>');
                         
-                        let row = `<tr class="item-row"><td colspan="9" class="edge-left edge-right ${bClass}"><div style="display: flex; justify-content: space-between; padding-top: 4px; padding-bottom: 3px;"><div style="width: 58%;">${descLines}</div><div style="width: 22%;"><table style="border:none; margin:0; font-size: 8pt; width: 100%;"><tr><td style="border:none; padding:0; width:50%;">HS-Code:</td><td style="border:none; padding:0;">${item.hs}</td></tr><tr><td style="border:none; padding:0;">Country of origin:</td><td style="border:none; padding:0;">${item.origin}</td></tr><tr><td style="border:none; padding:0;">Preferential origin:</td><td style="border:none; padding:0;">${item.pref}</td></tr></table></div><div style="width: 10%;">Menge<br>${item.qty}</div><div style="width: 10%;">Net weight<br>${item.net}</div></div></td></tr>`;
+                        // MARKIERUNG 2: Auch hier padding-top: 10px hinzugefügt
+                        let row = `<tr class="item-row"><td colspan="9" class="edge-left edge-right ${bClass}"><div style="display: flex; justify-content: space-between; padding-top: 4px; padding-bottom: 3px;"><div style="width: 58%;">${descLines}</div><div style="width: 22%; padding-top: 10px;"><table style="border:none; margin:0; font-size: 8pt; width: 100%;"><tr><td style="border:none; padding:0; width:50%;">HS-Code:</td><td style="border:none; padding:0;">${item.hs}</td></tr><tr><td style="border:none; padding:0;">Country of origin:</td><td style="border:none; padding:0;">${item.origin}</td></tr><tr><td style="border:none; padding:0;">Preferential origin:</td><td style="border:none; padding:0;">${item.pref}</td></tr></table></div><div style="width: 10%;">Menge<br>${item.qty}</div><div style="width: 10%;">Net weight<br>${item.net}</div></div></td></tr>`;
+                        
                         addNodesSafe([row]);
+                        if (!isLast) {
+                            addNodesSafe([sepRowSolid]);
+                        }
                     });
                 }
                 
@@ -483,10 +468,8 @@
 
             let bottomHtml = "";
 
-            // LOGGER TABELLE WIRD NUR ANGEZEIGT, WENN EIN LOGGER VORHANDEN IST!
             if (loggerData.length > 0) {
                 let loggerRows = loggerData.map(log => `<tr><td>${log.pid}</td><td>${log.sn}</td><td>${log.type}</td><td>${log.mfg}</td><td>${log.origin}</td><td>${log.hs}</td><td style="border-right:none; width:10mm;">${log.curr}</td><td style="border-left:none; text-align:right;">${log.val}</td></tr>`).join('');
-                
                 bottomHtml += `
                     <div style="font-size: 5pt; margin-bottom: 1mm; margin-top: 5mm;">* Details to Temperature Monitoring devices:</div>
                     <table class="logger-table">
@@ -496,7 +479,6 @@
                 `;
             }
 
-            // Margin-Top dynamisch anpassen, je nachdem ob Logger-Tabelle da war oder nicht
             let refMargin = loggerData.length > 0 ? "0" : "5mm";
             
             bottomHtml += `
@@ -599,7 +581,7 @@
                     innerTyp: document.getElementById("in-l2-typ").value,
                     innerDim: document.getElementById("in-l2-dim").value,
                     innerGross: formatWeight(document.getElementById("in-l2-gross").value),
-                    innerContent: document.getElementById("in-l2-content").value, /* NEUES FELD ABSPEICHERN */
+                    innerContent: document.getElementById("in-l2-content").value,
                     item: itemData
                 });
             }
