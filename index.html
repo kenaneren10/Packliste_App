@@ -66,32 +66,33 @@
         .section-title { font-size: 8pt; margin-bottom: 1mm; font-weight: normal;}
         
         /* --- TABELLEN-GRUND-DESIGN --- */
-        .data-table { width: 100%; border-collapse: collapse; margin-bottom: 5mm; font-size: 8pt; table-layout: fixed; }
-        .data-table th, .data-table td { border: none; padding: 2px 3px; text-align: left; vertical-align: top; line-height: 1.15; overflow-wrap: break-word; word-wrap: break-word; }
+        /* BOX-SIZING verhindert, dass Ränder die Tabelle breiter machen */
+        .data-table { width: 100%; box-sizing: border-box; border-collapse: collapse; margin-bottom: 5mm; font-size: 8pt; table-layout: fixed; }
+        .data-table th, .data-table td { box-sizing: border-box; border: none; padding: 2px 3px; text-align: left; vertical-align: top; line-height: 1.15; overflow-wrap: break-word; word-wrap: break-word; }
         .data-table thead th { border-top: 1.5px solid #000; border-bottom: 1.5px solid #000; font-weight: bold; }
 
-        /* --- TOTALS-TABELLE (Exakte Breiten) --- */
+        /* --- TOTALS-TABELLE (In exakte % umgerechnet für 100% Symmetrie) --- */
         .totals-table thead th { border-top: 1.5px solid #000; border-bottom: none; vertical-align: top; }
         .totals-table tbody td { border-bottom: 1.5px solid #000; padding-bottom: 4px; vertical-align: top; }
         
-        .totals-table th:nth-child(1), .totals-table td:nth-child(1) { width: 39mm; text-align: left; }
-        .totals-table th:nth-child(2), .totals-table td:nth-child(2) { width: 39mm; text-align: center; }
-        .totals-table th:nth-child(3), .totals-table td:nth-child(3) { width: 33mm; text-align: center; }
-        .totals-table th:nth-child(4), .totals-table td:nth-child(4) { width: 33mm; text-align: center; }
-        .totals-table th:nth-child(5), .totals-table td:nth-child(5) { width: 39mm; text-align: center; }
-        .totals-table th:nth-child(6), .totals-table td:nth-child(6) { width: 40mm; text-align: center; }
-        .totals-table th:nth-child(7), .totals-table td:nth-child(7) { width: 45mm; text-align: center; }
+        /* 39mm */ .totals-table th:nth-child(1), .totals-table td:nth-child(1) { width: 14.55%; text-align: left; }
+        /* 39mm */ .totals-table th:nth-child(2), .totals-table td:nth-child(2) { width: 14.55%; text-align: center; }
+        /* 33mm */ .totals-table th:nth-child(3), .totals-table td:nth-child(3) { width: 12.31%; text-align: center; }
+        /* 33mm */ .totals-table th:nth-child(4), .totals-table td:nth-child(4) { width: 12.31%; text-align: center; }
+        /* 39mm */ .totals-table th:nth-child(5), .totals-table td:nth-child(5) { width: 14.55%; text-align: center; }
+        /* 40mm */ .totals-table th:nth-child(6), .totals-table td:nth-child(6) { width: 14.93%; text-align: center; }
+        /* 45mm */ .totals-table th:nth-child(7), .totals-table td:nth-child(7) { width: 16.80%; text-align: center; }
 
-        /* --- DETAILS-TABELLE (Exakte Breiten) --- */
-        .col-1 { width: 36mm; } 
-        .col-2 { width: 32mm; } 
-        .col-3 { width: 32mm; }
-        .col-4 { width: 35mm; } 
-        .col-5 { width: 25mm; }  
-        .col-6 { width: 32mm; }
-        .col-7 { width: 36mm; } 
-        .col-8 { width: 22mm; }  
-        .col-9 { width: 18mm; }
+        /* --- DETAILS-TABELLE (In exakte % umgerechnet für 100% Symmetrie) --- */
+        .col-1 { width: 13.43%; } /* 36mm */
+        .col-2 { width: 11.94%; } /* 32mm */
+        .col-3 { width: 11.94%; } /* 32mm */
+        .col-4 { width: 13.06%; } /* 35mm */
+        .col-5 { width: 9.33%; }  /* 25mm */
+        .col-6 { width: 11.94%; } /* 32mm */
+        .col-7 { width: 13.43%; } /* 36mm */
+        .col-8 { width: 8.21%; }  /* 22mm */
+        .col-9 { width: 6.72%; }  /* 18mm */
 
         .details-table { border: 2.5px solid #000; } 
         .details-table thead th { border-top: none; border-bottom: 1.5px solid #000; }
@@ -107,12 +108,12 @@
         }
         .indent-left { padding-left: 4mm !important; }
 
-        /* --- FUSSZEILE EXAKT BÜNDIG --- */
+        /* --- FUSSZEILE EXAKT AN RÄNDER ANGEPASST --- */
         .footer-fixed { 
             position: absolute; 
             bottom: 9mm; 
-            left: 12mm;  /* An euren 12mm Rand angepasst! */
-            right: 13mm; /* An euren 13mm Rand angepasst! */
+            left: 12mm;  
+            right: 13mm; 
             display: flex; 
             justify-content: space-between; 
             font-size: 8pt; 
@@ -380,7 +381,7 @@
 
                 let bottomClass = (main.contents.length === 0) ? " group-bottom" : "";
                 let mainSepClass = (main.type === "items" && main.contents.length > 0) ? " main-separator" : "";
-                let tClass = "group-top" + bottomClass + mainSepClass;
+                let tClass = "group-top " + bottomClass + " " + mainSepClass;
                 
                 addNodesSafe([`<tr class="main-row ${mainSepClass}"><td class="col-1 edge-left ${tClass}">${main.id}</td><td class="col-2 ${tClass}">${main.typ}</td><td class="col-3 ${tClass}">${main.dim}</td><td class="col-4 ${tClass}">${contentStr}</td><td class="col-5 ${tClass}">${main.temp}</td><td class="col-6 ${tClass}">${loggerString}</td><td class="col-7 ${tClass}"></td><td class="col-8 ${tClass}">${main.net}</td><td class="col-9 edge-right ${tClass}">${main.gross}</td></tr>`]);
 
@@ -393,7 +394,7 @@
                         let descLines = inner.item.desc.split('\n'); let descFirst = descLines[0] || ""; let descRest = [...descLines]; descRest.shift(); 
                         
                         let row1 = `<tr class="inner-row-1"><td class="edge-left indent-left">${inner.innerId}</td><td>${inner.innerTyp}</td><td>${inner.innerDim}</td><td>${descFirst}</td><td>${main.temp}</td><td>-</td><td>${inner.item.gefahr}</td><td>${inner.item.net}</td><td class="edge-right">${inner.innerGross}</td></tr>`;
-                        let row2 = `<tr class="inner-row-2"><td colspan="9" class="edge-left indent-left edge-right${bClass}"><div style="display: flex; justify-content: space-between;"><div style="width: 45%;">${descRest.join('<br>')}</div><div style="width: 25%;"><table style="border:none; margin:0; font-size: 8pt; width: 100%;"><tr><td style="border:none; padding:0; width:50%;">HS-Code:</td><td style="border:none; padding:0;">${inner.item.hs}</td></tr><tr><td style="border:none; padding:0;">Country of origin:</td><td style="border:none; padding:0;">${inner.item.origin}</td></tr><tr><td style="border:none; padding:0;">Preferential origin:</td><td style="border:none; padding:0;">${inner.item.pref}</td></tr></table></div><div style="width: 15%;">Quantity<br>${inner.item.qty}</div><div style="width: 15%;">Net weight<br>${inner.item.net}</div></div></td></tr>`;
+                        let row2 = `<tr class="inner-row-2"><td colspan="9" class="edge-left indent-left edge-right ${bClass}"><div style="display: flex; justify-content: space-between;"><div style="width: 45%;">${descRest.join('<br>')}</div><div style="width: 25%;"><table style="border:none; margin:0; font-size: 8pt; width: 100%;"><tr><td style="border:none; padding:0; width:50%;">HS-Code:</td><td style="border:none; padding:0;">${inner.item.hs}</td></tr><tr><td style="border:none; padding:0;">Country of origin:</td><td style="border:none; padding:0;">${inner.item.origin}</td></tr><tr><td style="border:none; padding:0;">Preferential origin:</td><td style="border:none; padding:0;">${inner.item.pref}</td></tr></table></div><div style="width: 15%;">Quantity<br>${inner.item.qty}</div><div style="width: 15%;">Net weight<br>${inner.item.net}</div></div></td></tr>`;
                         addNodesSafe([row1, row2]);
                     });
                 } 
@@ -403,7 +404,7 @@
                         let bClass = isLast ? " group-bottom" : " item-separator";
                         let descLines = item.desc.split('\n').join('<br>');
                         
-                        let row = `<tr class="item-row"><td colspan="9" class="edge-left edge-right${bClass}"><div style="display: flex; justify-content: space-between; padding-top: 4px; padding-bottom: 3px;"><div style="width: 45%;">${descLines}</div><div style="width: 25%;"><table style="border:none; margin:0; font-size: 8pt; width: 100%;"><tr><td style="border:none; padding:0; width:50%;">HS-Code:</td><td style="border:none; padding:0;">${item.hs}</td></tr><tr><td style="border:none; padding:0;">Country of origin:</td><td style="border:none; padding:0;">${item.origin}</td></tr><tr><td style="border:none; padding:0;">Preferential origin:</td><td style="border:none; padding:0;">${item.pref}</td></tr></table></div><div style="width: 15%;">Menge<br>${item.qty}</div><div style="width: 15%;">Net weight<br>${item.net}</div></div></td></tr>`;
+                        let row = `<tr class="item-row"><td colspan="9" class="edge-left edge-right ${bClass}"><div style="display: flex; justify-content: space-between; padding-top: 4px; padding-bottom: 3px;"><div style="width: 45%;">${descLines}</div><div style="width: 25%;"><table style="border:none; margin:0; font-size: 8pt; width: 100%;"><tr><td style="border:none; padding:0; width:50%;">HS-Code:</td><td style="border:none; padding:0;">${item.hs}</td></tr><tr><td style="border:none; padding:0;">Country of origin:</td><td style="border:none; padding:0;">${item.origin}</td></tr><tr><td style="border:none; padding:0;">Preferential origin:</td><td style="border:none; padding:0;">${item.pref}</td></tr></table></div><div style="width: 15%;">Menge<br>${item.qty}</div><div style="width: 15%;">Net weight<br>${item.net}</div></div></td></tr>`;
                         addNodesSafe([row]);
                     });
                 }
