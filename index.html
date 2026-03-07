@@ -101,12 +101,25 @@
         tr.item-separator td { border-bottom: 1px solid #000 !important; }
         tr.package-separator td { border-bottom: 2.5px solid #000 !important; padding: 0 !important; height: 0 !important; line-height: 0; }
         
-        /* --- NEU: GRAUE BALKEN FÜR UNTERVERPACKUNG (HORIZONTAL & VERTIKAL 5mm) --- */
+        td.group-top, th.group-top { border-top: 2.5px solid #000 !important; }
+        td.group-bottom, th.group-bottom { border-bottom: 2.5px solid #000 !important; }
+        td.edge-left, th.edge-left { border-left: 2.5px solid #000 !important; }
+        td.edge-right, th.edge-right { border-right: 2.5px solid #000 !important; }
+        
+        /* --- NEU: HORIZONTALER 5mm GRAUER BALKEN (ÜBER der Unterverpackung) --- */
+        .gray-bar-row td {
+            background-color: #e6e6e6 !important;
+            height: 5mm;
+            padding: 0 !important;
+            border-top: 1.5px solid #000 !important;
+            border-bottom: 1.5px solid #000 !important;
+        }
+
+        /* Die Unterverpackungs-Titelzeile ist jetzt WEISS (transparent) */
         .sub-header th { 
-            background-color: #e6e6e6 !important; 
-            border-top: 1.5px solid #000; 
-            border-bottom: 1.5px solid #000; 
-            height: 5mm; /* Horizontaler 5mm Balken */
+            background-color: transparent !important; 
+            border-bottom: 1.5px solid #000 !important; 
+            border-top: none !important;
             vertical-align: middle;
         }
         
@@ -115,9 +128,6 @@
             background: linear-gradient(to right, #e6e6e6 0%, #e6e6e6 5mm, transparent 5mm, transparent 100%) !important;
             padding-left: 7mm !important; /* Text rutscht exakt neben den Balken */
         }
-        
-        /* Der Header ist schon komplett grau, hier brauchen wir nur den Text einrücken */
-        .header-indent { padding-left: 7mm !important; }
 
         /* --- LOGGER TABELLE (Komplettes Gitter) --- */
         .logger-table { 
@@ -262,7 +272,7 @@
         </div>
 
         <div class="form-section box-logger">
-            <h3 style="color: #cc0000;">🌡️ 3. TEMPERATUR-LOGGER (Erweitertes Cockpit)</h3>
+            <h3 style="color: #cc0000;">🌡️ 3. TEMPERATUR-LOGGER</h3>
             <div class="input-row">
                 <div class="input-group"><label>Package ID:</label><input type="text" id="log-pid" placeholder="z.B. 37640135..." style="width: 130px;"></div>
                 <div class="input-group"><label>Laufende Nr. (PDF oben):</label><input type="text" id="log-nr" placeholder="1." style="width: 80px;"></div>
@@ -414,7 +424,8 @@
                     contentStr = `${main.contents.length} Inner-Packages<br>` + main.contents.map(c => c.innerId).join('<br>'); 
                 }
                 
-                let loggerString = loggerData.filter(log => log.pid === main.id).map(log => `<b>${log.nr} ${log.sn}</b><br><span style="font-size:8pt">${safeHtml(log.info)}</span>`).join('<br>');
+                // MARKIERUNG 2: Logger-Nummer nicht dick gedruckt, Zusatz-Info in 5pt!
+                let loggerString = loggerData.filter(log => log.pid === main.id).map(log => `${log.nr} ${log.sn}<br><span style="font-size:5pt">${safeHtml(log.info)}</span>`).join('<br>');
 
                 let bottomClass = (main.contents.length === 0) ? " group-bottom" : "";
                 let mainSepClass = (main.type === "items" && main.contents.length > 0) ? " main-separator" : "";
@@ -423,15 +434,20 @@
                 addNodesSafe([`<tr class="main-row ${mainSepClass}"><td class="col-1 edge-left ${tClass}">${main.id}</td><td class="col-2 ${tClass}">${main.typ}</td><td class="col-3 ${tClass}">${main.dim}</td><td class="col-4 ${tClass}">${contentStr}</td><td class="col-5 ${tClass}">${main.temp}</td><td class="col-6 ${tClass}">${loggerString}</td><td class="col-7 ${tClass}"></td><td class="col-8 ${tClass}">${main.net}</td><td class="col-9 edge-right ${tClass}">${main.gross}</td></tr>`]);
 
                 if (main.type === "inners" && main.contents.length > 0) {
-                    // EBENE 2: Unterverpackungen (mit grauem Header UND header-indent)
-                    addNodesSafe([`<tr class="sub-header"><th class="edge-left header-indent">Inner-Package ID</th><th>Packing type</th><th>Dimensions<br>(LxHxW cm)</th><th>Content</th><th>Temperature<br>conditions</th><th>Temperature<br>monitoring devices *</th><th>Dangerous<br>goods</th><th>Net weight</th><th class="edge-right">Gross weight</th></tr>`]);
+                    // MARKIERUNG 4: Der obere 5mm graue Balken, der Titel-Header ist nun weiss!
+                    addNodesSafe([`<tr class="gray-bar-row"><td colspan="9" class="edge-left edge-right"></td></tr>`]);
+                    addNodesSafe([`<tr class="sub-header"><th class="edge-left inner-grey-bar">Inner-Package ID</th><th>Packing type</th><th>Dimensions<br>(LxHxW cm)</th><th>Content</th><th>Temperature<br>conditions</th><th>Temperature<br>monitoring devices *</th><th>Dangerous<br>goods</th><th>Net weight</th><th class="edge-right">Gross weight</th></tr>`]);
                     
                     main.contents.forEach((inner, i) => {
                         let isLast = (i === main.contents.length - 1);
                         let bClass = isLast ? " group-bottom" : " item-separator";
-                        let descLines = inner.item.desc.split('\n'); let descFirst = descLines[0] || ""; let descRest = [...descLines]; descRest.shift(); 
                         
-                        // Zelle 1 bekommt den 5mm breiten vertikalen, grauen Balken (.inner-grey-bar)
+                        let descLines = inner.item.desc.split('\n'); 
+                        let descFirst = descLines[0] || ""; 
+                        
+                        // MARKIERUNG 3 FIX: `.shift()` WURDE ENTFERNT! KOMPLETTER TEXT WIRD NUN UNTEN ANGEZEIGT!
+                        let descRest = [...descLines]; 
+                        
                         let row1 = `<tr class="inner-row-1"><td class="edge-left inner-grey-bar">${inner.innerId}</td><td>${inner.innerTyp}</td><td>${inner.innerDim}</td><td>${descFirst}</td><td>${main.temp}</td><td>-</td><td>${inner.item.gefahr}</td><td>${inner.item.net}</td><td class="edge-right">${inner.innerGross}</td></tr>`;
                         let row2 = `<tr class="inner-row-2"><td colspan="9" class="edge-left inner-grey-bar edge-right ${bClass}"><div style="display: flex; justify-content: space-between;"><div style="width: 45%;">${descRest.join('<br>')}</div><div style="width: 25%;"><table style="border:none; margin:0; font-size: 8pt; width: 100%;"><tr><td style="border:none; padding:0; width:50%;">HS-Code:</td><td style="border:none; padding:0;">${inner.item.hs}</td></tr><tr><td style="border:none; padding:0;">Country of origin:</td><td style="border:none; padding:0;">${inner.item.origin}</td></tr><tr><td style="border:none; padding:0;">Preferential origin:</td><td style="border:none; padding:0;">${inner.item.pref}</td></tr></table></div><div style="width: 15%;">Quantity<br>${inner.item.qty}</div><div style="width: 15%;">Net weight<br>${inner.item.net}</div></div></td></tr>`;
                         addNodesSafe([row1, row2]);
@@ -458,7 +474,6 @@
             let claraTd = includeClara ? `<td class="out-clara"></td>` : "";
             let refTableWidth = includeClara ? "70mm" : "35mm";
 
-            // NEUE LOGGER-DATEN IN DIE LOGGER-TABELLE LADEN MIT .logger-table KLASSE
             let loggerRows = loggerData.map(log => `<tr><td>${log.pid}</td><td>${log.sn}</td><td>${log.type}</td><td>${log.mfg}</td><td>${log.origin}</td><td>${log.hs}</td><td style="border-right:none; width:10mm;">${log.curr}</td><td style="border-left:none; text-align:right;">${log.val}</td></tr>`).join('');
             
             let bottomHtml = `
@@ -580,7 +595,6 @@
             let sn = document.getElementById("log-sn").value;
             if(pid === "" || sn === "") { alert("Bitte Package ID und Device S/N eingeben!"); return; }
             
-            // NEUE FELDER MIT ABSPEICHERN
             loggerData.push({ 
                 pid: pid, 
                 nr: document.getElementById("log-nr").value, 
