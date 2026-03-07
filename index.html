@@ -34,8 +34,8 @@
             background-color: white; 
             width: 297mm; 
             height: 210mm; 
-            /* EXAKTE SEITENRÄNDER (Unantastbar) */
-            padding: 9mm 18mm 9mm 22mm; 
+            /* ANGEPASSTE SEITENRÄNDER: Rechts 7mm, damit die exakt 268mm breite Tabelle auf das Blatt passt! */
+            padding: 9mm 7mm 9mm 22mm; 
             box-sizing: border-box; box-shadow: 0 5px 15px rgba(0,0,0,0.5); 
             position: relative; color: #000; overflow: hidden; margin-bottom: 20px;
             /* Global alles auf 8pt Arial setzen */
@@ -63,29 +63,34 @@
         .section-title { font-size: 8pt; margin-bottom: 1mm; font-weight: normal;}
         
         /* --- TABELLEN-GRUND-DESIGN --- */
-        .data-table { width: 100%; border-collapse: collapse; margin-bottom: 5mm; font-size: 8pt; table-layout: fixed; }
+        /* EXAKTE TABELLENBREITE AUF 268mm FIXIERT */
+        .data-table { width: 268mm; border-collapse: collapse; margin-bottom: 5mm; font-size: 8pt; table-layout: fixed; }
         .data-table th, .data-table td { border: none; padding: 2px 3px; text-align: left; vertical-align: top; line-height: 1.15; overflow-wrap: break-word; word-wrap: break-word; }
         .data-table thead th { border-top: 1.5px solid #000; border-bottom: 1.5px solid #000; font-weight: bold; }
 
-        /* --- NEU: TOTALS-TABELLE KORREKTUR --- */
+        /* --- TOTALS-TABELLE (Exakte Breiten) --- */
         .totals-table thead th { border-top: 1.5px solid #000; border-bottom: none; vertical-align: top; }
         .totals-table tbody td { border-bottom: 1.5px solid #000; padding-bottom: 4px; vertical-align: top; }
         
-        /* Zentrierung und Breiten exakt nach Original für die Totals-Tabelle */
-        .totals-table th:nth-child(1), .totals-table td:nth-child(1) { width: 17%; text-align: left; }
-        .totals-table th:nth-child(2), .totals-table td:nth-child(2) { width: 23%; text-align: center; }
-        .totals-table th:nth-child(3), .totals-table td:nth-child(3) { width: 12%; text-align: center; }
-        .totals-table th:nth-child(4), .totals-table td:nth-child(4) { width: 13%; text-align: center; }
-        .totals-table th:nth-child(5), .totals-table td:nth-child(5) { width: 12%; text-align: center; }
-        .totals-table th:nth-child(6), .totals-table td:nth-child(6) { width: 10%; text-align: center; }
-        .totals-table th:nth-child(7), .totals-table td:nth-child(7) { width: 13%; text-align: center; }
+        .totals-table th:nth-child(1), .totals-table td:nth-child(1) { width: 39mm; text-align: left; }
+        .totals-table th:nth-child(2), .totals-table td:nth-child(2) { width: 39mm; text-align: center; }
+        .totals-table th:nth-child(3), .totals-table td:nth-child(3) { width: 33mm; text-align: center; }
+        .totals-table th:nth-child(4), .totals-table td:nth-child(4) { width: 33mm; text-align: center; }
+        .totals-table th:nth-child(5), .totals-table td:nth-child(5) { width: 39mm; text-align: center; }
+        .totals-table th:nth-child(6), .totals-table td:nth-child(6) { width: 40mm; text-align: center; }
+        .totals-table th:nth-child(7), .totals-table td:nth-child(7) { width: 45mm; text-align: center; }
 
-        /* EXAKTE PROZENTWERTE FÜR DETAILS-SPALTEN (100% von 257mm Druckbereich) */
-        .col-1 { width: 13.2%; } .col-2 { width: 12.1%; } .col-3 { width: 12.0%; }
-        .col-4 { width: 12.8%; } .col-5 { width: 9.9%; }  .col-6 { width: 11.9%; }
-        .col-7 { width: 13.4%; } .col-8 { width: 8.1%; }  .col-9 { width: 6.6%; }
+        /* --- DETAILS-TABELLE (Exakte Breiten) --- */
+        .col-1 { width: 36mm; } 
+        .col-2 { width: 32mm; } 
+        .col-3 { width: 32mm; }
+        .col-4 { width: 35mm; } 
+        .col-5 { width: 25mm; }  
+        .col-6 { width: 32mm; }
+        .col-7 { width: 36mm; } 
+        .col-8 { width: 22mm; }  
+        .col-9 { width: 18mm; }
 
-        /* --- 2. DETAILS-TABELLE KORREKTUR (Header in der Box!) --- */
         .details-table { border: 2.5px solid #000; } 
         .details-table thead th { border-top: none; border-bottom: 1.5px solid #000; }
 
@@ -100,12 +105,12 @@
         }
         .indent-left { padding-left: 4mm !important; }
 
-        /* --- NEU: FUSSZEILE EXAKT BÜNDIG --- */
+        /* --- FUSSZEILE EXAKT BÜNDIG --- */
         .footer-fixed { 
             position: absolute; 
             bottom: 9mm; 
-            left: 22mm;  /* Passt jetzt 1:1 zum Seitenrand! */
-            right: 18mm; /* Passt jetzt 1:1 zum Seitenrand! */
+            left: 22mm;  
+            right: 7mm; /* An den neuen 7mm-Rand angepasst, damit es perfekt abschließt! */
             display: flex; 
             justify-content: space-between; 
             font-size: 8pt; 
@@ -288,7 +293,6 @@
                 <div class="datum">Date: <span class="out-datum"></span></div>
                 `;
                 
-                // TEXT UND ZENTRIERUNG EXAKT WIE IM ORIGINAL ANGEPASST
                 totalsHtml = `
                 <div class="section-title">Total packing-list:</div>
                 <table class="data-table totals-table" style="margin-bottom: 5mm;">
@@ -372,30 +376,32 @@
                 
                 let loggerString = loggerData.filter(log => log.pid === main.id).map(log => `<b>${log.nr} ${log.sn}</b><br><span style="font-size:8pt">${safeHtml(log.info)}</span>`).join('<br>');
 
-                let mainSepClass = (main.type === "items" && main.contents.length > 0) ? "main-separator" : "";
+                let bottomClass = (main.contents.length === 0) ? " group-bottom" : "";
+                let mainSepClass = (main.type === "items" && main.contents.length > 0) ? " main-separator" : "";
+                let tClass = "group-top" + bottomClass + mainSepClass;
                 
-                addNodesSafe([`<tr class="main-row ${mainSepClass}"><td class="col-1">${main.id}</td><td class="col-2">${main.typ}</td><td class="col-3">${main.dim}</td><td class="col-4">${contentStr}</td><td class="col-5">${main.temp}</td><td class="col-6">${loggerString}</td><td class="col-7"></td><td class="col-8">${main.net}</td><td class="col-9">${main.gross}</td></tr>`]);
+                addNodesSafe([`<tr class="main-row ${mainSepClass}"><td class="col-1 edge-left ${tClass}">${main.id}</td><td class="col-2 ${tClass}">${main.typ}</td><td class="col-3 ${tClass}">${main.dim}</td><td class="col-4 ${tClass}">${contentStr}</td><td class="col-5 ${tClass}">${main.temp}</td><td class="col-6 ${tClass}">${loggerString}</td><td class="col-7 ${tClass}"></td><td class="col-8 ${tClass}">${main.net}</td><td class="col-9 edge-right ${tClass}">${main.gross}</td></tr>`]);
 
                 if (main.type === "inners" && main.contents.length > 0) {
-                    addNodesSafe([`<tr class="sub-header"><th class="indent-left">Inner-Package ID</th><th>Packing type</th><th>Dimensions<br>(LxHxW cm)</th><th>Content</th><th>Temperature<br>conditions</th><th>Temperature<br>monitoring devices *</th><th>Dangerous<br>goods</th><th>Net weight</th><th>Gross weight</th></tr>`]);
+                    addNodesSafe([`<tr class="sub-header"><th class="edge-left indent-left">Inner-Package ID</th><th>Packing type</th><th>Dimensions<br>(LxHxW cm)</th><th>Content</th><th>Temperature<br>conditions</th><th>Temperature<br>monitoring devices *</th><th>Dangerous<br>goods</th><th>Net weight</th><th class="edge-right">Gross weight</th></tr>`]);
                     
                     main.contents.forEach((inner, i) => {
                         let isLast = (i === main.contents.length - 1);
-                        let bClass = isLast ? "" : "item-separator";
+                        let bClass = isLast ? " group-bottom" : " item-separator";
                         let descLines = inner.item.desc.split('\n'); let descFirst = descLines[0] || ""; let descRest = [...descLines]; descRest.shift(); 
                         
-                        let row1 = `<tr class="inner-row-1"><td class="indent-left">${inner.innerId}</td><td>${inner.innerTyp}</td><td>${inner.innerDim}</td><td>${descFirst}</td><td>${main.temp}</td><td>-</td><td>${inner.item.gefahr}</td><td>${inner.item.net}</td><td>${inner.innerGross}</td></tr>`;
-                        let row2 = `<tr class="inner-row-2 ${bClass}"><td colspan="9" class="indent-left"><div style="display: flex; justify-content: space-between;"><div style="width: 45%;">${descRest.join('<br>')}</div><div style="width: 25%;"><table style="border:none; margin:0; font-size: 8pt; width: 100%;"><tr><td style="border:none; padding:0; width:50%;">HS-Code:</td><td style="border:none; padding:0;">${inner.item.hs}</td></tr><tr><td style="border:none; padding:0;">Country of origin:</td><td style="border:none; padding:0;">${inner.item.origin}</td></tr><tr><td style="border:none; padding:0;">Preferential origin:</td><td style="border:none; padding:0;">${inner.item.pref}</td></tr></table></div><div style="width: 15%;">Quantity<br>${inner.item.qty}</div><div style="width: 15%;">Net weight<br>${inner.item.net}</div></div></td></tr>`;
+                        let row1 = `<tr class="inner-row-1"><td class="edge-left indent-left">${inner.innerId}</td><td>${inner.innerTyp}</td><td>${inner.innerDim}</td><td>${descFirst}</td><td>${main.temp}</td><td>-</td><td>${inner.item.gefahr}</td><td>${inner.item.net}</td><td class="edge-right">${inner.innerGross}</td></tr>`;
+                        let row2 = `<tr class="inner-row-2"><td colspan="9" class="edge-left indent-left edge-right${bClass}"><div style="display: flex; justify-content: space-between;"><div style="width: 45%;">${descRest.join('<br>')}</div><div style="width: 25%;"><table style="border:none; margin:0; font-size: 8pt; width: 100%;"><tr><td style="border:none; padding:0; width:50%;">HS-Code:</td><td style="border:none; padding:0;">${inner.item.hs}</td></tr><tr><td style="border:none; padding:0;">Country of origin:</td><td style="border:none; padding:0;">${inner.item.origin}</td></tr><tr><td style="border:none; padding:0;">Preferential origin:</td><td style="border:none; padding:0;">${inner.item.pref}</td></tr></table></div><div style="width: 15%;">Quantity<br>${inner.item.qty}</div><div style="width: 15%;">Net weight<br>${inner.item.net}</div></div></td></tr>`;
                         addNodesSafe([row1, row2]);
                     });
                 } 
                 else if (main.type === "items" && main.contents.length > 0) {
                     main.contents.forEach((item, i) => {
                         let isLast = (i === main.contents.length - 1);
-                        let bClass = isLast ? "" : "item-separator";
+                        let bClass = isLast ? " group-bottom" : " item-separator";
                         let descLines = item.desc.split('\n').join('<br>');
                         
-                        let row = `<tr class="item-row ${bClass}"><td colspan="9"><div style="display: flex; justify-content: space-between; padding-top: 4px; padding-bottom: 3px;"><div style="width: 45%;">${descLines}</div><div style="width: 25%;"><table style="border:none; margin:0; font-size: 8pt; width: 100%;"><tr><td style="border:none; padding:0; width:50%;">HS-Code:</td><td style="border:none; padding:0;">${item.hs}</td></tr><tr><td style="border:none; padding:0;">Country of origin:</td><td style="border:none; padding:0;">${item.origin}</td></tr><tr><td style="border:none; padding:0;">Preferential origin:</td><td style="border:none; padding:0;">${item.pref}</td></tr></table></div><div style="width: 15%;">Menge<br>${item.qty}</div><div style="width: 15%;">Net weight<br>${item.net}</div></div></td></tr>`;
+                        let row = `<tr class="item-row"><td colspan="9" class="edge-left edge-right${bClass}"><div style="display: flex; justify-content: space-between; padding-top: 4px; padding-bottom: 3px;"><div style="width: 45%;">${descLines}</div><div style="width: 25%;"><table style="border:none; margin:0; font-size: 8pt; width: 100%;"><tr><td style="border:none; padding:0; width:50%;">HS-Code:</td><td style="border:none; padding:0;">${item.hs}</td></tr><tr><td style="border:none; padding:0;">Country of origin:</td><td style="border:none; padding:0;">${item.origin}</td></tr><tr><td style="border:none; padding:0;">Preferential origin:</td><td style="border:none; padding:0;">${item.pref}</td></tr></table></div><div style="width: 15%;">Menge<br>${item.qty}</div><div style="width: 15%;">Net weight<br>${item.net}</div></div></td></tr>`;
                         addNodesSafe([row]);
                     });
                 }
