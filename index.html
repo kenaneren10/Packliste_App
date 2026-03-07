@@ -62,13 +62,9 @@
         .datum { margin-bottom: 3mm; font-weight: normal; font-size: 8pt; line-height: 1;}
         .section-title { font-size: 8pt; margin-bottom: 1mm; font-weight: normal;}
         
-        /* --- TABELLEN-DESIGN & DICKER RAHMEN --- */
+        /* --- TABELLEN-GRUND-DESIGN --- */
         .data-table { width: 100%; border-collapse: collapse; margin-bottom: 5mm; font-size: 8pt; table-layout: fixed; }
-        
-        /* Grundregel: Keine Ränder für Zellen! (Verhindert innere vertikale Linien) */
         .data-table th, .data-table td { border: none; padding: 2px 3px; text-align: left; vertical-align: top; line-height: 1.15; overflow-wrap: break-word; word-wrap: break-word; }
-        
-        /* Kopfzeilen (Header) bekommen horizontale Linien */
         .data-table thead th { border-top: 1.5px solid #000; border-bottom: 1.5px solid #000; font-weight: bold; }
 
         /* EXAKTE PROZENTWERTE FÜR SPALTEN (100% von 257mm Druckbereich) */
@@ -76,17 +72,20 @@
         .col-4 { width: 12.8%; } .col-5 { width: 9.9%; }  .col-6 { width: 11.9%; }
         .col-7 { width: 13.4%; } .col-8 { width: 8.1%; }  .col-9 { width: 6.6%; }
 
-        /* --- DIE NEUEN DICKEN RAHMEN-KLASSEN --- */
-        td.group-top, th.group-top { border-top: 2.5px solid #000 !important; }
-        td.group-bottom, th.group-bottom { border-bottom: 2.5px solid #000 !important; }
-        td.edge-left, th.edge-left { border-left: 2.5px solid #000 !important; }
-        td.edge-right, th.edge-right { border-right: 2.5px solid #000 !important; }
+        /* --- 1. TOTALS-TABELLE KORREKTUR (wie markiert!) --- */
+        .totals-table thead th { border-top: 1.5px solid #000; border-bottom: none; } /* Keine Mittellinie! */
+        .totals-table tbody td { border-bottom: 1.5px solid #000; padding-bottom: 4px; } /* Rote Linie ganz unten! */
+
+        /* --- 2. DETAILS-TABELLE KORREKTUR (Header in der Box!) --- */
+        .details-table { border: 2.5px solid #000; } /* Dicker Rahmen um das GESAMTE Element! */
+        .details-table thead th { border-top: none; border-bottom: 1.5px solid #000; } /* Trennt Header von Daten */
+
+        /* Feine Trennlinien innerhalb der dicken Box */
+        tr.main-separator td { border-bottom: 1px solid #000 !important; }
+        tr.item-separator td { border-bottom: 1px solid #000 !important; }
         
-        /* Feine Trennlinie zwischen Hauptverpackung und Direkt-Artikeln */
-        td.main-separator { border-bottom: 1px solid #000 !important; }
-        
-        /* Feine Trennlinie zwischen mehreren Artikeln oder Unterverpackungen */
-        td.item-separator { border-bottom: 1px solid #000 !important; }
+        /* Falls man 2 Hauptverpackungen anlegt, zieht das einen sauberen dicken Strich dazwischen */
+        tr.package-separator td { border-bottom: 2.5px solid #000 !important; padding: 0 !important; height: 0 !important; line-height: 0; }
         
         /* DAS GRAUE FELD FÜR DIE UNTERVERPACKUNG */
         .sub-header th { 
@@ -275,14 +274,16 @@
                 </div>
                 <div class="datum">Date: <span class="out-datum"></span></div>
                 `;
+                // KLASSE .totals-table HINZUGEFÜGT (Für die neuen Linien-Regeln)
                 totalsHtml = `
                 <div class="section-title">Total packing-list:</div>
-                <table class="data-table" style="margin-bottom: 5mm;">
+                <table class="data-table totals-table" style="margin-bottom: 5mm;">
                     <thead><tr><th style="width: 22%">Shipping marks</th><th style="width: 22%">UCR No. (GSIN)</th><th style="width: 10%">Total no. of<br>packages</th><th style="width: 12%">Total gross weight</th><th style="width: 12%">Total net weight</th><th style="width: 12%">Total volume</th><th style="width: 10%">Total no. of temperature<br>monitoring devices *</th></tr></thead>
                     <tbody><tr><td>Address of consignee,<br><span class="out-fracht-table"></span></td><td>(402) 7640135 790167438 4</td><td class="out-total-packages">0</td><td class="out-total-gross">0.000 kg</td><td class="out-total-net">0.000 kg</td><td class="out-total-vol">0.00 m3</td><td class="out-total-logger">0</td></tr></tbody>
                 </table>
                 `;
             }
+            // KLASSE .details-table HINZUGEFÜGT (Für den dicken Rahmen um ALLES)
             return `
             <div class="a4-page" id="page-${pageNum}">
                 <div class="vertical-text">7840135792109TEC0165147V4</div>
@@ -296,7 +297,7 @@
                 </div>
                 ${addressHtml} ${totalsHtml}
                 <div class="section-title">Detail packing-list:</div>
-                <table class="data-table">
+                <table class="data-table details-table">
                     <thead><tr><th class="col-1">Package ID (SSCC)</th><th class="col-2">Packing type</th><th class="col-3">Dimensions<br>(LxHxW cm)</th><th class="col-4">Content</th><th class="col-5">Temperature<br>conditions</th><th class="col-6">Temperature<br>monitoring devices *</th><th class="col-7">Dangerous<br>goods</th><th class="col-8">Net weight</th><th class="col-9">Gross weight</th></tr></thead>
                     <tbody class="details-body"></tbody>
                 </table>
@@ -337,40 +338,37 @@
                 
                 let loggerString = loggerData.filter(log => log.pid === main.id).map(log => `<b>${log.nr} ${log.sn}</b><br><span style="font-size:8pt">${safeHtml(log.info)}</span>`).join('<br>');
 
-                let bottomClass = (main.contents.length === 0) ? " group-bottom" : "";
-                let mainSepClass = (main.type === "items" && main.contents.length > 0) ? " main-separator" : "";
-                let tClass = "group-top" + bottomClass + mainSepClass;
+                let mainSepClass = (main.type === "items" && main.contents.length > 0) ? "main-separator" : "";
                 
-                addNodesSafe([`<tr class="main-row"><td class="col-1 edge-left ${tClass}">${main.id}</td><td class="col-2 ${tClass}">${main.typ}</td><td class="col-3 ${tClass}">${main.dim}</td><td class="col-4 ${tClass}">${contentStr}</td><td class="col-5 ${tClass}">${main.temp}</td><td class="col-6 ${tClass}">${loggerString}</td><td class="col-7 ${tClass}"></td><td class="col-8 ${tClass}">${main.net}</td><td class="col-9 edge-right ${tClass}">${main.gross}</td></tr>`]);
+                addNodesSafe([`<tr class="main-row ${mainSepClass}"><td class="col-1">${main.id}</td><td class="col-2">${main.typ}</td><td class="col-3">${main.dim}</td><td class="col-4">${contentStr}</td><td class="col-5">${main.temp}</td><td class="col-6">${loggerString}</td><td class="col-7"></td><td class="col-8">${main.net}</td><td class="col-9">${main.gross}</td></tr>`]);
 
                 if (main.type === "inners" && main.contents.length > 0) {
-                    addNodesSafe([`<tr class="sub-header"><th class="edge-left indent-left">Inner-Package ID</th><th>Packing type</th><th>Dimensions<br>(LxHxW cm)</th><th>Content</th><th>Temperature<br>conditions</th><th>Temperature<br>monitoring devices *</th><th>Dangerous<br>goods</th><th>Net weight</th><th class="edge-right">Gross weight</th></tr>`]);
+                    addNodesSafe([`<tr class="sub-header"><th class="indent-left">Inner-Package ID</th><th>Packing type</th><th>Dimensions<br>(LxHxW cm)</th><th>Content</th><th>Temperature<br>conditions</th><th>Temperature<br>monitoring devices *</th><th>Dangerous<br>goods</th><th>Net weight</th><th>Gross weight</th></tr>`]);
                     
                     main.contents.forEach((inner, i) => {
                         let isLast = (i === main.contents.length - 1);
-                        let bClass = isLast ? " group-bottom" : " item-separator";
+                        let bClass = isLast ? "" : "item-separator";
                         let descLines = inner.item.desc.split('\n'); let descFirst = descLines[0] || ""; let descRest = [...descLines]; descRest.shift(); 
                         
-                        let row1 = `<tr class="inner-row-1"><td class="edge-left indent-left">${inner.innerId}</td><td>${inner.innerTyp}</td><td>${inner.innerDim}</td><td>${descFirst}</td><td>${main.temp}</td><td>-</td><td>${inner.item.gefahr}</td><td>${inner.item.net}</td><td class="edge-right">${inner.innerGross}</td></tr>`;
-                        // Dynamisch Origin und Preferential Origin eingebaut:
-                        let row2 = `<tr class="inner-row-2"><td colspan="9" class="edge-left indent-left edge-right${bClass}"><div style="display: flex; justify-content: space-between;"><div style="width: 45%;">${descRest.join('<br>')}</div><div style="width: 25%;"><table style="border:none; margin:0; font-size: 8pt; width: 100%;"><tr><td style="border:none; padding:0; width:50%;">HS-Code:</td><td style="border:none; padding:0;">${inner.item.hs}</td></tr><tr><td style="border:none; padding:0;">Country of origin:</td><td style="border:none; padding:0;">${inner.item.origin}</td></tr><tr><td style="border:none; padding:0;">Preferential origin:</td><td style="border:none; padding:0;">${inner.item.pref}</td></tr></table></div><div style="width: 15%;">Quantity<br>${inner.item.qty}</div><div style="width: 15%;">Net weight<br>${inner.item.net}</div></div></td></tr>`;
+                        let row1 = `<tr class="inner-row-1"><td class="indent-left">${inner.innerId}</td><td>${inner.innerTyp}</td><td>${inner.innerDim}</td><td>${descFirst}</td><td>${main.temp}</td><td>-</td><td>${inner.item.gefahr}</td><td>${inner.item.net}</td><td>${inner.innerGross}</td></tr>`;
+                        let row2 = `<tr class="inner-row-2 ${bClass}"><td colspan="9" class="indent-left"><div style="display: flex; justify-content: space-between;"><div style="width: 45%;">${descRest.join('<br>')}</div><div style="width: 25%;"><table style="border:none; margin:0; font-size: 8pt; width: 100%;"><tr><td style="border:none; padding:0; width:50%;">HS-Code:</td><td style="border:none; padding:0;">${inner.item.hs}</td></tr><tr><td style="border:none; padding:0;">Country of origin:</td><td style="border:none; padding:0;">${inner.item.origin}</td></tr><tr><td style="border:none; padding:0;">Preferential origin:</td><td style="border:none; padding:0;">${inner.item.pref}</td></tr></table></div><div style="width: 15%;">Quantity<br>${inner.item.qty}</div><div style="width: 15%;">Net weight<br>${inner.item.net}</div></div></td></tr>`;
                         addNodesSafe([row1, row2]);
                     });
                 } 
                 else if (main.type === "items" && main.contents.length > 0) {
                     main.contents.forEach((item, i) => {
                         let isLast = (i === main.contents.length - 1);
-                        let bClass = isLast ? " group-bottom" : " item-separator";
+                        let bClass = isLast ? "" : "item-separator";
                         let descLines = item.desc.split('\n').join('<br>');
                         
-                        // Dynamisch Origin und Preferential Origin eingebaut:
-                        let row = `<tr class="item-row"><td colspan="9" class="edge-left edge-right${bClass}"><div style="display: flex; justify-content: space-between; padding-top: 4px; padding-bottom: 3px;"><div style="width: 45%;">${descLines}</div><div style="width: 25%;"><table style="border:none; margin:0; font-size: 8pt; width: 100%;"><tr><td style="border:none; padding:0; width:50%;">HS-Code:</td><td style="border:none; padding:0;">${item.hs}</td></tr><tr><td style="border:none; padding:0;">Country of origin:</td><td style="border:none; padding:0;">${item.origin}</td></tr><tr><td style="border:none; padding:0;">Preferential origin:</td><td style="border:none; padding:0;">${item.pref}</td></tr></table></div><div style="width: 15%;">Menge<br>${item.qty}</div><div style="width: 15%;">Net weight<br>${item.net}</div></div></td></tr>`;
+                        let row = `<tr class="item-row ${bClass}"><td colspan="9"><div style="display: flex; justify-content: space-between; padding-top: 4px; padding-bottom: 3px;"><div style="width: 45%;">${descLines}</div><div style="width: 25%;"><table style="border:none; margin:0; font-size: 8pt; width: 100%;"><tr><td style="border:none; padding:0; width:50%;">HS-Code:</td><td style="border:none; padding:0;">${item.hs}</td></tr><tr><td style="border:none; padding:0;">Country of origin:</td><td style="border:none; padding:0;">${item.origin}</td></tr><tr><td style="border:none; padding:0;">Preferential origin:</td><td style="border:none; padding:0;">${item.pref}</td></tr></table></div><div style="width: 15%;">Menge<br>${item.qty}</div><div style="width: 15%;">Net weight<br>${item.net}</div></div></td></tr>`;
                         addNodesSafe([row]);
                     });
                 }
                 
                 if(index < mainPackages.length - 1) {
-                    addNodesSafe([`<tr style="height: 3mm;"><td colspan="9" style="border:none;"></td></tr>`]);
+                    // Dicker Strich, falls mehrere Hauptverpackungen auf dem PDF sind
+                    addNodesSafe([`<tr class="package-separator"><td colspan="9"></td></tr>`]);
                 }
             });
 
@@ -464,7 +462,6 @@
             
             pkg.type = ctype;
             
-            // NEU: Werte für Origin und Pref Origin auslesen
             let itemData = {
                 desc: document.getElementById("in-l3-desc").value,
                 hs: document.getElementById("in-l3-hs").value,
