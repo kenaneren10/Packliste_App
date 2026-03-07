@@ -34,8 +34,8 @@
             background-color: white; 
             width: 297mm; 
             height: 210mm; 
-            /* ANGEPASSTE SEITENRÄNDER: Rechts 7mm, damit die exakt 268mm breite Tabelle auf das Blatt passt! */
-            padding: 9mm 7mm 9mm 22mm; 
+            /* KORRIGIERTE SEITENRÄNDER: Oben 9mm, Rechts 13mm, Unten 9mm, Links 12mm */
+            padding: 9mm 13mm 9mm 12mm; 
             box-sizing: border-box; box-shadow: 0 5px 15px rgba(0,0,0,0.5); 
             position: relative; color: #000; overflow: hidden; margin-bottom: 20px;
             /* Global alles auf 8pt Arial setzen */
@@ -54,8 +54,11 @@
         .logo-block img { height: 12mm; width: auto; float: right; object-fit: contain; }
 
         .address-container { display: flex; width: 100%; margin-bottom: 10mm; line-height: 1.2; font-size: 8pt; }
-        .address-box:first-child { width: 81mm; box-sizing: border-box; padding-right: 15mm; } 
+        
+        /* EXAKTE BERECHNUNG FÜR CONSIGNEE: Seitenrand 12mm + Box-inv 91mm = Exakt 103mm vom linken Blattrand! */
+        .address-box:first-child { width: 91mm; box-sizing: border-box; padding-right: 15mm; } 
         .address-box:last-child { flex: 1; box-sizing: border-box; } 
+        
         .address-title { font-weight: bold; margin-bottom: 2mm; font-size: 8pt; }
         .address-grid { display: grid; grid-template-columns: 14mm auto; margin-top: 2mm; }
 
@@ -63,8 +66,7 @@
         .section-title { font-size: 8pt; margin-bottom: 1mm; font-weight: normal;}
         
         /* --- TABELLEN-GRUND-DESIGN --- */
-        /* EXAKTE TABELLENBREITE AUF 268mm FIXIERT */
-        .data-table { width: 268mm; border-collapse: collapse; margin-bottom: 5mm; font-size: 8pt; table-layout: fixed; }
+        .data-table { width: 100%; border-collapse: collapse; margin-bottom: 5mm; font-size: 8pt; table-layout: fixed; }
         .data-table th, .data-table td { border: none; padding: 2px 3px; text-align: left; vertical-align: top; line-height: 1.15; overflow-wrap: break-word; word-wrap: break-word; }
         .data-table thead th { border-top: 1.5px solid #000; border-bottom: 1.5px solid #000; font-weight: bold; }
 
@@ -109,8 +111,8 @@
         .footer-fixed { 
             position: absolute; 
             bottom: 9mm; 
-            left: 22mm;  
-            right: 7mm; /* An den neuen 7mm-Rand angepasst, damit es perfekt abschließt! */
+            left: 12mm;  /* An euren 12mm Rand angepasst! */
+            right: 13mm; /* An euren 13mm Rand angepasst! */
             display: flex; 
             justify-content: space-between; 
             font-size: 8pt; 
