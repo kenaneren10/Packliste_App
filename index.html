@@ -192,15 +192,19 @@
             </div>
 
             <div class="input-row" style="align-items: stretch; margin-top: 10px;">
-                <div class="input-group" style="width: 350px;">
+                <div class="input-group" style="width: 280px;">
                     <label>Artikel-Beschreibung (Ebene 3, Mehrzeilig):</label>
                     <textarea id="in-l3-desc" placeholder="Medicament&#10;Batch: ..." style="height: 100px; font-family: monospace;"></textarea>
                 </div>
-                <div style="display: flex; flex-direction: column; gap: 10px; width: 140px; justify-content: flex-end;">
+                <div style="display: flex; flex-direction: column; gap: 10px; width: 120px; justify-content: flex-end;">
                     <div class="input-group"><label>Dangerous goods:</label><input type="text" id="in-l3-gefahr" placeholder="-"></div>
                     <div class="input-group"><label>HS-Code:</label><input type="text" id="in-l3-hs" placeholder="3004.39"></div>
                 </div>
-                <div style="display: flex; flex-direction: column; gap: 10px; width: 140px; justify-content: flex-end;">
+                <div style="display: flex; flex-direction: column; gap: 10px; width: 120px; justify-content: flex-end;">
+                    <div class="input-group"><label>Country of origin:</label><input type="text" id="in-l3-origin" placeholder="IT"></div>
+                    <div class="input-group"><label>Preferential origin:</label><input type="text" id="in-l3-pref" placeholder="None"></div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 10px; width: 120px; justify-content: flex-end;">
                     <div class="input-group"><label>Menge (Quantity):</label><input type="text" id="in-l3-qty" placeholder="30.00 st"></div>
                     <div class="input-group"><label>Net weight (Artikel):</label><input type="text" id="in-l3-net" placeholder="z.B. 3.000"></div>
                     <button class="btn-inner" onclick="addContent()">+ Inhalt hinzufügen</button>
@@ -333,7 +337,6 @@
                 
                 let loggerString = loggerData.filter(log => log.pid === main.id).map(log => `<b>${log.nr} ${log.sn}</b><br><span style="font-size:8pt">${safeHtml(log.info)}</span>`).join('<br>');
 
-                // LOGIK: Hat die Hauptverpackung "Direkte Artikel"? Dann bekommt sie unten einen feinen Strich zur Trennung!
                 let bottomClass = (main.contents.length === 0) ? " group-bottom" : "";
                 let mainSepClass = (main.type === "items" && main.contents.length > 0) ? " main-separator" : "";
                 let tClass = "group-top" + bottomClass + mainSepClass;
@@ -341,7 +344,6 @@
                 addNodesSafe([`<tr class="main-row"><td class="col-1 edge-left ${tClass}">${main.id}</td><td class="col-2 ${tClass}">${main.typ}</td><td class="col-3 ${tClass}">${main.dim}</td><td class="col-4 ${tClass}">${contentStr}</td><td class="col-5 ${tClass}">${main.temp}</td><td class="col-6 ${tClass}">${loggerString}</td><td class="col-7 ${tClass}"></td><td class="col-8 ${tClass}">${main.net}</td><td class="col-9 edge-right ${tClass}">${main.gross}</td></tr>`]);
 
                 if (main.type === "inners" && main.contents.length > 0) {
-                    // EBENE 2: Unterverpackungen
                     addNodesSafe([`<tr class="sub-header"><th class="edge-left indent-left">Inner-Package ID</th><th>Packing type</th><th>Dimensions<br>(LxHxW cm)</th><th>Content</th><th>Temperature<br>conditions</th><th>Temperature<br>monitoring devices *</th><th>Dangerous<br>goods</th><th>Net weight</th><th class="edge-right">Gross weight</th></tr>`]);
                     
                     main.contents.forEach((inner, i) => {
@@ -350,18 +352,19 @@
                         let descLines = inner.item.desc.split('\n'); let descFirst = descLines[0] || ""; let descRest = [...descLines]; descRest.shift(); 
                         
                         let row1 = `<tr class="inner-row-1"><td class="edge-left indent-left">${inner.innerId}</td><td>${inner.innerTyp}</td><td>${inner.innerDim}</td><td>${descFirst}</td><td>${main.temp}</td><td>-</td><td>${inner.item.gefahr}</td><td>${inner.item.net}</td><td class="edge-right">${inner.innerGross}</td></tr>`;
-                        let row2 = `<tr class="inner-row-2"><td colspan="9" class="edge-left indent-left edge-right${bClass}"><div style="display: flex; justify-content: space-between;"><div style="width: 45%;">${descRest.join('<br>')}</div><div style="width: 25%;"><table style="border:none; margin:0; font-size: 8pt; width: 100%;"><tr><td style="border:none; padding:0; width:50%;">HS-Code:</td><td style="border:none; padding:0;">${inner.item.hs}</td></tr><tr><td style="border:none; padding:0;">Country of origin:</td><td style="border:none; padding:0;">IT</td></tr><tr><td style="border:none; padding:0;">Preferential origin:</td><td style="border:none; padding:0;">None</td></tr></table></div><div style="width: 15%;">Quantity<br>${inner.item.qty}</div><div style="width: 15%;">Net weight<br>${inner.item.net}</div></div></td></tr>`;
+                        // Dynamisch Origin und Preferential Origin eingebaut:
+                        let row2 = `<tr class="inner-row-2"><td colspan="9" class="edge-left indent-left edge-right${bClass}"><div style="display: flex; justify-content: space-between;"><div style="width: 45%;">${descRest.join('<br>')}</div><div style="width: 25%;"><table style="border:none; margin:0; font-size: 8pt; width: 100%;"><tr><td style="border:none; padding:0; width:50%;">HS-Code:</td><td style="border:none; padding:0;">${inner.item.hs}</td></tr><tr><td style="border:none; padding:0;">Country of origin:</td><td style="border:none; padding:0;">${inner.item.origin}</td></tr><tr><td style="border:none; padding:0;">Preferential origin:</td><td style="border:none; padding:0;">${inner.item.pref}</td></tr></table></div><div style="width: 15%;">Quantity<br>${inner.item.qty}</div><div style="width: 15%;">Net weight<br>${inner.item.net}</div></div></td></tr>`;
                         addNodesSafe([row1, row2]);
                     });
                 } 
                 else if (main.type === "items" && main.contents.length > 0) {
-                    // EBENE 3: Direkte Artikel
                     main.contents.forEach((item, i) => {
                         let isLast = (i === main.contents.length - 1);
                         let bClass = isLast ? " group-bottom" : " item-separator";
                         let descLines = item.desc.split('\n').join('<br>');
                         
-                        let row = `<tr class="item-row"><td colspan="9" class="edge-left edge-right${bClass}"><div style="display: flex; justify-content: space-between; padding-top: 4px; padding-bottom: 3px;"><div style="width: 45%;">${descLines}</div><div style="width: 25%;"><table style="border:none; margin:0; font-size: 8pt; width: 100%;"><tr><td style="border:none; padding:0; width:50%;">HS-Code:</td><td style="border:none; padding:0;">${item.hs}</td></tr><tr><td style="border:none; padding:0;">Country of origin:</td><td style="border:none; padding:0;">IT</td></tr><tr><td style="border:none; padding:0;">Preferential origin:</td><td style="border:none; padding:0;">None</td></tr></table></div><div style="width: 15%;">Menge<br>${item.qty}</div><div style="width: 15%;">Net weight<br>${item.net}</div></div></td></tr>`;
+                        // Dynamisch Origin und Preferential Origin eingebaut:
+                        let row = `<tr class="item-row"><td colspan="9" class="edge-left edge-right${bClass}"><div style="display: flex; justify-content: space-between; padding-top: 4px; padding-bottom: 3px;"><div style="width: 45%;">${descLines}</div><div style="width: 25%;"><table style="border:none; margin:0; font-size: 8pt; width: 100%;"><tr><td style="border:none; padding:0; width:50%;">HS-Code:</td><td style="border:none; padding:0;">${item.hs}</td></tr><tr><td style="border:none; padding:0;">Country of origin:</td><td style="border:none; padding:0;">${item.origin}</td></tr><tr><td style="border:none; padding:0;">Preferential origin:</td><td style="border:none; padding:0;">${item.pref}</td></tr></table></div><div style="width: 15%;">Menge<br>${item.qty}</div><div style="width: 15%;">Net weight<br>${item.net}</div></div></td></tr>`;
                         addNodesSafe([row]);
                     });
                 }
@@ -461,9 +464,12 @@
             
             pkg.type = ctype;
             
+            // NEU: Werte für Origin und Pref Origin auslesen
             let itemData = {
                 desc: document.getElementById("in-l3-desc").value,
                 hs: document.getElementById("in-l3-hs").value,
+                origin: document.getElementById("in-l3-origin").value,
+                pref: document.getElementById("in-l3-pref").value,
                 qty: document.getElementById("in-l3-qty").value,
                 net: formatWeight(document.getElementById("in-l3-net").value),
                 gefahr: document.getElementById("in-l3-gefahr").value || "-"
