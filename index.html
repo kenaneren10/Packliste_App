@@ -67,37 +67,50 @@
         .data-table th, .data-table td { border: none; padding: 2px 3px; text-align: left; vertical-align: top; line-height: 1.15; overflow-wrap: break-word; word-wrap: break-word; }
         .data-table thead th { border-top: 1.5px solid #000; border-bottom: 1.5px solid #000; font-weight: bold; }
 
-        /* EXAKTE PROZENTWERTE FÜR SPALTEN (100% von 257mm Druckbereich) */
+        /* --- NEU: TOTALS-TABELLE KORREKTUR --- */
+        .totals-table thead th { border-top: 1.5px solid #000; border-bottom: none; vertical-align: top; }
+        .totals-table tbody td { border-bottom: 1.5px solid #000; padding-bottom: 4px; vertical-align: top; }
+        
+        /* Zentrierung und Breiten exakt nach Original für die Totals-Tabelle */
+        .totals-table th:nth-child(1), .totals-table td:nth-child(1) { width: 17%; text-align: left; }
+        .totals-table th:nth-child(2), .totals-table td:nth-child(2) { width: 23%; text-align: center; }
+        .totals-table th:nth-child(3), .totals-table td:nth-child(3) { width: 12%; text-align: center; }
+        .totals-table th:nth-child(4), .totals-table td:nth-child(4) { width: 13%; text-align: center; }
+        .totals-table th:nth-child(5), .totals-table td:nth-child(5) { width: 12%; text-align: center; }
+        .totals-table th:nth-child(6), .totals-table td:nth-child(6) { width: 10%; text-align: center; }
+        .totals-table th:nth-child(7), .totals-table td:nth-child(7) { width: 13%; text-align: center; }
+
+        /* EXAKTE PROZENTWERTE FÜR DETAILS-SPALTEN (100% von 257mm Druckbereich) */
         .col-1 { width: 13.2%; } .col-2 { width: 12.1%; } .col-3 { width: 12.0%; }
         .col-4 { width: 12.8%; } .col-5 { width: 9.9%; }  .col-6 { width: 11.9%; }
         .col-7 { width: 13.4%; } .col-8 { width: 8.1%; }  .col-9 { width: 6.6%; }
 
-        /* --- 1. TOTALS-TABELLE KORREKTUR (wie markiert!) --- */
-        .totals-table thead th { border-top: 1.5px solid #000; border-bottom: none; } /* Keine Mittellinie! */
-        .totals-table tbody td { border-bottom: 1.5px solid #000; padding-bottom: 4px; } /* Rote Linie ganz unten! */
-
         /* --- 2. DETAILS-TABELLE KORREKTUR (Header in der Box!) --- */
-        .details-table { border: 2.5px solid #000; } /* Dicker Rahmen um das GESAMTE Element! */
-        .details-table thead th { border-top: none; border-bottom: 1.5px solid #000; } /* Trennt Header von Daten */
+        .details-table { border: 2.5px solid #000; } 
+        .details-table thead th { border-top: none; border-bottom: 1.5px solid #000; }
 
-        /* Feine Trennlinien innerhalb der dicken Box */
         tr.main-separator td { border-bottom: 1px solid #000 !important; }
         tr.item-separator td { border-bottom: 1px solid #000 !important; }
-        
-        /* Falls man 2 Hauptverpackungen anlegt, zieht das einen sauberen dicken Strich dazwischen */
         tr.package-separator td { border-bottom: 2.5px solid #000 !important; padding: 0 !important; height: 0 !important; line-height: 0; }
         
-        /* DAS GRAUE FELD FÜR DIE UNTERVERPACKUNG */
         .sub-header th { 
             background-color: #e6e6e6 !important; 
             border-top: 1.5px solid #000; 
             border-bottom: 1.5px solid #000; 
         }
-
-        /* DIE OPTISCHE EINRÜCKUNG FÜR UNTERVERPACKUNGEN (4mm) */
         .indent-left { padding-left: 4mm !important; }
 
-        .footer-fixed { position: absolute; bottom: 12mm; left: 15mm; right: 15mm; display: flex; justify-content: space-between; font-size: 8pt; line-height: 1.2; }
+        /* --- NEU: FUSSZEILE EXAKT BÜNDIG --- */
+        .footer-fixed { 
+            position: absolute; 
+            bottom: 9mm; 
+            left: 22mm;  /* Passt jetzt 1:1 zum Seitenrand! */
+            right: 18mm; /* Passt jetzt 1:1 zum Seitenrand! */
+            display: flex; 
+            justify-content: space-between; 
+            font-size: 8pt; 
+            line-height: 1.2; 
+        }
 
         @media print {
             body { background-color: white; padding: 0; }
@@ -274,16 +287,36 @@
                 </div>
                 <div class="datum">Date: <span class="out-datum"></span></div>
                 `;
-                // KLASSE .totals-table HINZUGEFÜGT (Für die neuen Linien-Regeln)
+                
+                // TEXT UND ZENTRIERUNG EXAKT WIE IM ORIGINAL ANGEPASST
                 totalsHtml = `
                 <div class="section-title">Total packing-list:</div>
                 <table class="data-table totals-table" style="margin-bottom: 5mm;">
-                    <thead><tr><th style="width: 22%">Shipping marks</th><th style="width: 22%">UCR No. (GSIN)</th><th style="width: 10%">Total no. of<br>packages</th><th style="width: 12%">Total gross weight</th><th style="width: 12%">Total net weight</th><th style="width: 12%">Total volume</th><th style="width: 10%">Total no. of temperature<br>monitoring devices *</th></tr></thead>
-                    <tbody><tr><td>Address of consignee,<br><span class="out-fracht-table"></span></td><td>(402) 7640135 790167438 4</td><td class="out-total-packages">0</td><td class="out-total-gross">0.000 kg</td><td class="out-total-net">0.000 kg</td><td class="out-total-vol">0.00 m3</td><td class="out-total-logger">0</td></tr></tbody>
+                    <thead>
+                        <tr>
+                            <th>Shipping marks</th>
+                            <th>UCR No. (GSIN)</th>
+                            <th>Total no. of packages</th>
+                            <th>Total gross weight</th>
+                            <th>Total net weight</th>
+                            <th>Total volume</th>
+                            <th>Total no. of temperature<br>monitoring devices *</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Address of consignee,<br><span class="out-fracht-table"></span></td>
+                            <td>(402) 7640135 790167438 4</td>
+                            <td class="out-total-packages">0</td>
+                            <td class="out-total-gross">0.000 kg</td>
+                            <td class="out-total-net">0.000 kg</td>
+                            <td class="out-total-vol">0.00 m3</td>
+                            <td class="out-total-logger">0</td>
+                        </tr>
+                    </tbody>
                 </table>
                 `;
             }
-            // KLASSE .details-table HINZUGEFÜGT (Für den dicken Rahmen um ALLES)
             return `
             <div class="a4-page" id="page-${pageNum}">
                 <div class="vertical-text">7840135792109TEC0165147V4</div>
@@ -302,11 +335,12 @@
                     <tbody class="details-body"></tbody>
                 </table>
                 <div class="bottom-info-container"></div>
+                
                 <div class="footer-fixed">
-                    <div><b>F. Hoffmann-La Roche Ltd</b><br>Site Logistics<br>Grenzacherstrasse 124<br>4070 Basel / Switzerland</div>
-                    <div style="margin-left: -50px;">Bldg. 041 / 3.005</div>
-                    <div>Tel. +41 61 688 72 27<br>Fax. +41 61 688 69 02<br>E-Mail: basel.site-logistics@roche.com</div>
-                    <div style="text-align: right; margin-top: auto;" class="page-number">Page ${pageNum} / {TOTAL_PAGES}</div>
+                    <div style="width: 25%;"><b>F. Hoffmann-La Roche Ltd</b><br>Site Logistics<br>Grenzacherstrasse 124<br>4070 Basel / Switzerland</div>
+                    <div style="width: 20%;">Bldg. 041 / 3.005</div>
+                    <div style="width: 35%;">Tel. +41 61 688 72 27<br>Fax. +41 61 688 69 02<br>E-Mail: basel.site-logistics@roche.com</div>
+                    <div style="width: 20%; text-align: right; display: flex; flex-direction: column; justify-content: flex-end;">Page ${pageNum} / {TOTAL_PAGES}</div>
                 </div>
             </div>`;
         }
@@ -367,7 +401,6 @@
                 }
                 
                 if(index < mainPackages.length - 1) {
-                    // Dicker Strich, falls mehrere Hauptverpackungen auf dem PDF sind
                     addNodesSafe([`<tr class="package-separator"><td colspan="9"></td></tr>`]);
                 }
             });
